@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Centro de Control - Mis Herramientas</title>
+    
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --accent-color: #2563eb;
+            --accent-hover: #1d4ed8;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: max(2rem, env(safe-area-inset-top)) 1rem max(2rem, env(safe-area-inset-bottom)) 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        header p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-content h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .card-content p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            text-align: center;
+            padding: 0.85rem 1rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            user-select: none;
+        }
+
+        .btn:active {
+            background-color: var(--accent-hover);
+            transform: scale(0.98);
+        }
+
+        .card-luz { border-top: 4px solid #eab308; }
+        .card-agua { border-top: 4px solid #3b82f6; }
+        .card-luz-especial { border-top: 4px solid #f97316; }
+        .card-control-luz { border-top: 4px solid #14b8a6; }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>CÁLCULOS DE RECIBO LUZ Y AGUA</h1>
+            <p>Seleccione la herramienta de cálculo que desea utilizar</p>
+        </header>
+
+        <main class="grid">
+            <div class="card card-luz">
+                <div class="card-content">
+                    <h2>CÁLCULO RECIBO LUZ RUBEN</h2>
+                    <p>Calcula el recibo de luz de 5 inquilinos con medidor interno</p>
+                </div>
+                <a href="./luz_ruben.html" class="btn">Abrir Aplicación</a>
+            </div>
+
+            <div class="card card-agua">
+                <div class="card-content">
+                    <h2>CÁLCULO RECIBO INQUILINO - AGUA CAYRAN</h2>
+                    <p>CALCULA RECIBO DE MAXIMO 4 INQUILINOS CON MEDIDOR Y UNO SIN MEDIDOR</p>
+                </div>
+                <a href="./agua_cayran.html" class="btn">Abrir Aplicación</a>
+            </div>
+
+            <div class="card card-luz-especial">
+                <div class="card-content">
+                    <h2>CÁLCULO RECIBO INQUILINO - LUZ CAYRAN</h2>
+                    <p>- Calcula el monto de los 4 inquilinos con medidor interno. Para el inquilino restante, el monto a pagar es el total del recibo menos la suma de los otros cuatro.<br>
+                    - Permite calcular el consumo de un inquilino nuevo con días personalizados.</p>
+                </div>
+                <a href="./luz_cayran.html" class="btn">Abrir Aplicación</a>
+            </div>
+
+            <div class="card card-control-luz">
+                <div class="card-content">
+                    <h2>CÁLCULO RECIBO - LUZ EDGAR</h2>
+                    <p>Cálculo individual y notificación directa por correo electrónico</p>
+                </div>
+                <a href="./luz_edgar.html" class="btn">Abrir Aplicación</a>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Centro de Control. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(reg => reg.update());
+        }
+    </script>
+</body>
+</html>

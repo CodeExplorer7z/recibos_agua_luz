@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CALCULO RECIBO DE LUZ CINCO INQUILINOS</title>
+    <link rel="icon" type="image/x-icon" href="recibo_luz.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --enel-blue: #005fb8;
+            --input-fill: #fff9c4;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        @media (min-width: 900px) { .container { grid-template-columns: 1fr 1fr; } }
+        
+        .nav-back-bar {
+            max-width: 1200px;
+            margin: 0 auto 10px auto;
+            padding: 0 5px;
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #334155;
+            color: white !important;
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+        .section-title {
+            background: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .titulo-fijo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            width: 100%;
+            padding: 10px 0;
+            margin: 0;
+            border: none;
+        }
+
+        .titulo-editable {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary);
+            border: 1px dashed #cbd5e1;
+            padding: 8px;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        .header-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .btn-group { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
+
+        .info-box {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            color: #854d0e;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        input:not(.readonly), select:not(.readonly) {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px; 
+            width: 100%;
+            background-color: var(--input-fill);
+        }
+
+        .readonly { 
+            background: #f8fafc; 
+            font-weight: bold; 
+            color: var(--primary); 
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .grid-2 { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+        }
+
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .btn {
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+            min-width: 80px;
+        }
+        .btn-limpiar { background: #ef4444; color: white; }
+        .btn-pdf { background: #10b981; color: white; }
+        .btn-calculos { background: #f59e0b; color: white; }
+
+        #pdf-template-container { 
+            position: absolute; 
+            left: -9999px; 
+            top: 0; 
+            width: 750px; 
+        }
+
+        .modo-recibo { font-family: Arial, sans-serif !important; padding: 40px !important; color: #000 !important; background: white !important; }
+        .modo-recibo .header-pdf { display: flex; justify-content: space-between; border-bottom: 3px solid var(--enel-blue); padding-bottom: 10px; margin-bottom: 20px; }
+        .modo-recibo .total-box-pdf { background: var(--enel-blue); color: white; padding: 10px; border-radius: 5px; text-align: center; min-width: 150px; }
+        .modo-recibo .tabla-pdf { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .modo-recibo .tabla-pdf th { text-align: left; background: #f1f5f9; padding: 10px; border-bottom: 2px solid #cbd5e1; }
+        .modo-recibo .tabla-pdf td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+        
+        .pdf-calculos { 
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif !important; 
+            padding: 25px !important; 
+            color: #1e293b !important; 
+            background: #f8fafc !important; 
+        }
+        .pdf-calculos .main-header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .pdf-calculos .main-header h2 { margin: 0; font-size: 1.2rem; font-weight: 800; }
+        .pdf-calculos .main-header p { margin: 3px 0 0 0; font-size: 0.9rem; opacity: 0.9; }
+        
+        .pdf-calculos .bloque-paso {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            page-break-inside: avoid;
+        }
+        .pdf-calculos .paso-titulo { 
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 700; 
+            font-size: 0.75rem; 
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .pdf-calculos .pregunta { 
+            font-weight: 700; 
+            color: #1e293b; 
+            font-size: 0.9rem;
+            margin-bottom: 6px; 
+        }
+        .pdf-calculos .desarrollo { 
+            background: #f1f5f9; 
+            border-left: 3px solid #0284c7; 
+            padding: 8px 12px; 
+            font-size: 0.85rem; 
+            line-height: 1.4; 
+            color: #334155;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .pdf-calculos .lista-valores {
+            display: table;
+            width: 100%;
+            margin: 4px 0;
+        }
+        .pdf-calculos .fila-valor {
+            display: table-row;
+        }
+        .pdf-calculos .celda-label {
+            display: table-cell;
+            font-weight: 600;
+            padding: 2px 5px 2px 0;
+            color: #475569;
+            width: 45%;
+        }
+        .pdf-calculos .celda-operacion {
+            display: table-cell;
+            padding: 2px 5px;
+            color: #334155;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .pdf-calculos .formula-box {
+            font-style: italic;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            background: #f8fafc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .pdf-calculos .linea-operacion {
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px solid #cbd5e1;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        
+        .pdf-calculos .bloque-total {
+            background: #ffffff;
+            border: 2px solid #1e3a8a;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+        }
+        .pdf-calculos .bloque-total .paso-titulo {
+            background: #fef08a;
+            color: #854d0e;
+        }
+        .pdf-calculos .bloque-total .desarrollo {
+            background: #fafafa;
+            border-left-color: #f59e0b;
+            color: #1e293b;
+        }
+        .pdf-calculos .bloque-total .celda-label {
+            color: #334155;
+        }
+        .pdf-calculos .bloque-total .celda-operacion {
+            color: #0f172a;
+        }
+        .pdf-calculos .bloque-total .linea-operacion {
+            border-top: 2px solid #1e3a8a;
+            color: #d97706;
+            font-size: 1.05rem;
+            padding-top: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="nav-back-bar">
+    <a href="./index.html" class="btn-back">&#8592; Menú Principal</a>
+</div>
+
+<div id="pdf-template-container"></div> 
+
+<div class="container">
+    <div class="card" id="main-receipt">
+        <div class="header-card">
+            <div id="titulo_principal" class="titulo-fijo">RECIBO PRINCIPAL DE LUZ</div>
+            <button class="btn btn-limpiar" onclick="limpiarPrincipal()">Limpiar Datos</button>
+        </div>
+
+        <div class="info-box">
+            <b>FACTOR APORTE DE LEY (UIT 2026 - S/. 5500):</b> <span id="detalle_factor" style="font-weight:bold; color:var(--primary)">-</span>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>MES:</label>
+                <select id="mes_principal" onchange="calculate()">
+                    <option>ENERO</option><option>FEBRERO</option><option selected>MARZO</option><option>ABRIL</option>
+                    <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option>AGOSTO</option>
+                    <option>SETIEMBRE</option><option>OCTUBRE</option><option>NOVIEMBRE</option><option>DICIEMBRE</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>N° Inquilinos:</label>
+                <input type="number" id="num_inquilinos" value="4" inputmode="numeric" oninput="calculate()">
+            </div>
+        </div>
+
+        <div class="section-title">LLENAR DATOS DEL RECIBO PRINCIPAL</div>
+        <div class="grid-2">
+            <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
+            <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
+        </div>
+
+        <div class="section-title">Importes del Recibo (S/.)</div>
+        <div class="grid-2">
+            <div class="form-group"><label>Tarifa kWh:</label><input type="number" id="tarifa" value="0" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Reposición y Mantenimiento:</label><input type="number" id="rep_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Cargo Fijo:</label><input type="number" id="cargo_fijo_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Alumbrado Público:</label><input type="number" id="alum_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Interés compensatorio:</label><input type="number" id="int_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Redondeo anterior:</label><input type="number" id="red_ant_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Redondeo actual:</label><input type="number" id="red_act_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Aporte Ley N°28749:</label><input type="text" id="aporte_ley_m" class="readonly" readonly></div>
+        </div>
+
+        <div class="form-group" style="margin-top:15px">
+            <label>TOTAL A PAGAR (S/.):</label>
+            <input type="text" id="total_pagar_m" class="readonly" style="font-size:1.3rem; border:none; background:transparent" readonly>
+        </div>
+    </div>
+
+    <div id="inquilinos-container"></div>
+</div>
+
+<script>
+    const UIT_VIGENTE = 5500;
+    const container = document.getElementById('inquilinos-container');
+    for (let i = 1; i <= 5; i++) {
+        container.innerHTML += `
+        <div class="card" id="recibo_i${i}" style="margin-bottom:20px">
+            <div class="header-card">
+                <input type="text" id="titulo_i${i}" class="titulo-editable" value="Inquilino ${i}">
+                <div class="btn-group">
+                    <button class="btn btn-limpiar" onclick="limpiarInquilino(${i})">Borrar</button>
+                    <button class="btn btn-pdf" onclick="descargarPDF(${i})">Descargar PDF</button>
+                    <button class="btn btn-calculos" onclick="descargarCalculosPDF(${i})">CALCULOS</button>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_i${i}" inputmode="decimal" oninput="calculate()"></div>
+                <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_i${i}" inputmode="decimal" oninput="calculate()"></div>
+                <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_i${i}" onchange="calculate()"></div>
+                <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_i${i}" onchange="calculate()"></div>
+            </div>
+            <div class="section-title">DETALLE DE IMPORTES (S/.)</div>
+            <div class="grid-2">
+                <div class="form-group"><label>Cargo energía:</label><input id="ener_i${i}" class="readonly" readonly></div>
+                <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i${i}" class="readonly" readonly></div>
+                <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i${i}" class="readonly" readonly></div>
+                <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i${i}" class="readonly" readonly></div>
+                <div class="form-group"><label>Interés compensatorio:</label><input id="int_i${i}" class="readonly" readonly></div>
+                <div class="form-group"><label>IGV (18%):</label><input id="igv_i${i}" class="readonly" readonly></div>
+                <div class="form-group"><label>Ley N° 28749:</label><input id="aporte_i${i}" class="readonly" readonly></div>
+                <div class="form-group"><label>Redondeo anterior:</label><input id="red_ant_i${i}" class="readonly" readonly></div>
+                <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i${i}" class="readonly" readonly></div>
+            </div>
+            <div class="form-group" style="margin-top:10px">
+                <label>TOTAL A PAGAR:</label>
+                <input type="text" id="total_pagar_i${i}" class="readonly" style="font-size:1.3rem; border:none; background:transparent" readonly>
+            </div>
+        </div>`;
+    }
+
+    function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+    function setVal(id, val, decimals = 2) { 
+        const el = document.getElementById(id); if(el) el.value = val.toFixed(decimals);
+    }
+
+    function formatearFechaLatina(stringFecha) {
+        if(!stringFecha) return '--/--/----';
+        const partes = stringFecha.split('-');
+        return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : stringFecha;
+    }
+
+    async function guardarOCompartirPDF(nombreArchivo, pdfBase64Uri) {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+            try {
+                const { Filesystem, Share } = window.Capacitor.Plugins;
+                const base64Data = pdfBase64Uri.split(',')[1] || pdfBase64Uri;
+                const savedFile = await Filesystem.writeFile({
+                    path: nombreArchivo,
+                    data: base64Data,
+                    directory: 'CACHE'
+                });
+                await Share.share({
+                    title: nombreArchivo,
+                    url: savedFile.uri,
+                    dialogTitle: 'Abrir o Guardar Recibo PDF'
+                });
+                return;
+            } catch (err) {
+                console.error('Error con Capacitor Share:', err);
+            }
+        }
+        const link = document.createElement('a');
+        link.href = pdfBase64Uri;
+        link.download = nombreArchivo;
+        link.click();
+    }
+
+    function calculate() {
+        const factorLey = (2 * UIT_VIGENTE) / 1000000;
+        document.getElementById('detalle_factor').innerText = factorLey.toFixed(6);
+
+        const n = getVal('num_inquilinos') || 1;
+        const t = getVal('tarifa');
+
+        const f1m = document.getElementById('fec_act_m').value;
+        const f2m = document.getElementById('fec_ant_m').value;
+        const dm = (f1m && f2m) ? Math.max(1, Math.floor((new Date(f1m+'T00:00:00') - new Date(f2m+'T00:00:00')) / 864e5) + 1) : 0;
+
+        const km = Math.max(0, getVal('lec_act_m') - getVal('lec_ant_m'));
+        const aporteLeyPrincipal = km * factorLey;
+        setVal('aporte_ley_m', aporteLeyPrincipal, 2);
+
+        const sm = getVal('rep_m') + getVal('cargo_fijo_m') + (km * t) + getVal('alum_m') + getVal('int_m');
+        const totalPagarM = sm + (sm * 0.18) + aporteLeyPrincipal + getVal('red_ant_m') + getVal('red_act_m');
+        setVal('total_pagar_m', totalPagarM);
+
+        for (let i = 1; i <= 5; i++) {
+            const f1i = document.getElementById(`fec_act_i${i}`).value;
+            const f2i = document.getElementById(`fec_ant_i${i}`).value;
+            const di = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
+            
+            const ki = Math.max(0, getVal(`lec_act_i${i}`) - getVal(`lec_ant_i${i}`));
+            const kd = di > 0 ? (ki / di) : 0;
+
+            const en_i = (di > 0 && dm > 0) ? (t * dm * kd) : 0;
+            const ap_i = (di > 0 && dm > 0) ? (factorLey * dm * kd) : 0;
+            const sub_i = en_i + (getVal('rep_m')/n) + (getVal('cargo_fijo_m')/n) + (getVal('alum_m')/n) + (getVal('int_m')/n);
+
+            setVal(`ener_i${i}`, en_i); 
+            setVal(`rep_i${i}`, getVal('rep_m')/n); 
+            setVal(`cf_i${i}`, getVal('cargo_fijo_m')/n); 
+            setVal(`alum_i${i}`, getVal('alum_m')/n); 
+            setVal(`int_i${i}`, getVal('int_m')/n); 
+            setVal(`igv_i${i}`, sub_i * 0.18);
+            setVal(`aporte_i${i}`, ap_i); 
+            setVal(`red_ant_i${i}`, getVal('red_ant_m')/n); 
+            setVal(`red_act_i${i}`, getVal('red_act_m')/n);
+
+            const total_i = sub_i + (sub_i * 0.18) + ap_i + (getVal('red_ant_m')/n) + (getVal('red_act_m')/n);
+            setVal(`total_pagar_i${i}`, total_i);
+        }
+    }
+
+    function descargarPDF(id) {
+        const tempCont = document.getElementById('pdf-template-container');
+        const mes = document.getElementById('mes_principal').value;
+        const nombreInq = document.getElementById(`titulo_i${id}`).value;
+        const l_ant = getVal(`lec_ant_i${id}`);
+        const l_act = getVal(`lec_act_i${id}`);
+
+        tempCont.innerHTML = `
+            <div class="modo-recibo" id="recibo-captura">
+                <div class="header-pdf">
+                    <div><b style="color:var(--enel-blue); font-size:1.6rem">RECIBO DE LUZ</b><br>MES: ${mes}</div>
+                    <div class="total-box-pdf"><small>TOTAL A PAGAR</small><br><b style="font-size:1.5rem">S/. ${document.getElementById(`total_pagar_i${id}`).value}</b></div>
+                </div>
+                <div style="margin-bottom:15px">
+                    <b>NOMBRE:</b> ${nombreInq}<br>
+                    <b>LECTURAS:</b> ${l_ant} (ANTERIOR); ${l_act} (ACTUAL)
+                </div>
+                <table class="tabla-pdf">
+                    <thead><tr><th>DETALLE DE IMPORTES</th><th style="text-align:right">S/.</th></tr></thead>
+                    <tbody>
+                        <tr><td>Cargo por energía</td><td style="text-align:right">${document.getElementById(`ener_i${id}`).value}</td></tr>
+                        <tr><td>Reposición y Mantenimiento</td><td style="text-align:right">${document.getElementById(`rep_i${id}`).value}</td></tr>
+                        <tr><td>Cargo Fijo</td><td style="text-align:right">${document.getElementById(`cf_i${id}`).value}</td></tr>
+                        <tr><td>Alumbrado Público</td><td style="text-align:right">${document.getElementById(`alum_i${id}`).value}</td></tr>
+                        <tr><td>Interés compensatorio</td><td style="text-align:right">${document.getElementById(`int_i${id}`).value}</td></tr>
+                        <tr><td>IGV (18%)</td><td style="text-align:right">${document.getElementById(`igv_i${id}`).value}</td></tr>
+                        <tr><td>Aporte de Ley N° 28749</td><td style="text-align:right">${document.getElementById(`aporte_i${id}`).value}</td></tr>
+                        <tr><td>Redondeo Anterior</td><td style="text-align:right">${document.getElementById(`red_ant_i${id}`).value}</td></tr>
+                        <tr><td>Redondeo Actual</td><td style="text-align:right">${document.getElementById(`red_act_i${id}`).value}</td></tr>
+                    </tbody>
+                </table>
+            </div>`;
+
+        html2pdf().set({
+            margin: [10, 10],
+            filename: `Recibo_${nombreInq}.pdf`,
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(document.getElementById('recibo-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
+            tempCont.innerHTML = '';
+            await guardarOCompartirPDF(`Recibo_${nombreInq}.pdf`, pdfBase64);
+        });
+    }
+
+    function descargarCalculosPDF(id) {
+        const tempCont = document.getElementById('pdf-template-container');
+        const nombreInq = document.getElementById(`titulo_i${id}`).value;
+        const mes = document.getElementById('mes_principal').value;
+        
+        const l_ant = getVal(`lec_ant_i${id}`);
+        const l_act = getVal(`lec_act_i${id}`);
+        const f_ant_i = formatearFechaLatina(document.getElementById(`fec_ant_i${id}`).value);
+        const f_act_i = formatearFechaLatina(document.getElementById(`fec_act_i${id}`).value);
+        
+        const f1i = document.getElementById(`fec_act_i${id}`).value;
+        const f2i = document.getElementById(`fec_ant_i${id}`).value;
+        const di = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
+        
+        const f1m = document.getElementById('fec_act_m').value;
+        const f2m = document.getElementById('fec_ant_m').value;
+        const dm = (f1m && f2m) ? Math.max(1, Math.floor((new Date(f1m+'T00:00:00') - new Date(f2m+'T00:00:00')) / 864e5) + 1) : 0;
+        
+        const n = getVal('num_inquilinos') || 1;
+        const tarifa = getVal('tarifa');
+        const factorLey = (2 * UIT_VIGENTE) / 1000000;
+        
+        const diferencia_lecturas = parseFloat((l_act - l_ant).toFixed(2));
+        const consumo_diario = di > 0 ? (diferencia_lecturas / di) : 0;
+        
+        const val_ener = document.getElementById(`ener_i${id}`).value;
+        const val_rep = document.getElementById(`rep_i${id}`).value;
+        const val_cf = document.getElementById(`cf_i${id}`).value;
+        const val_alum = document.getElementById(`alum_i${id}`).value;
+        const val_int = document.getElementById(`int_i${id}`).value;
+        const val_igv = document.getElementById(`igv_i${id}`).value;
+        const val_aporte = document.getElementById(`aporte_i${id}`).value;
+        const val_red_ant = document.getElementById(`red_ant_i${id}`).value;
+        const val_red_act = document.getElementById(`red_act_i${id}`).value;
+        const val_total = document.getElementById(`total_pagar_i${id}`).value;
+        
+        const main_rep = getVal('rep_m');
+        const main_cf = getVal('cargo_fijo_m');
+        const main_alum = getVal('alum_m');
+        const main_int = getVal('int_m');
+        const main_red_ant = getVal('red_ant_m');
+        const main_red_act = getVal('red_act_m');
+
+        tempCont.innerHTML = `
+            <div class="pdf-calculos" id="calculos-captura">
+                <div class="main-header">
+                    <h2>CÁLCULOS MATEMÁTICOS</h2>
+                    <p>Inquilino: ${nombreInq.toUpperCase()} | Mes: ${mes}</p>
+                </div>
+                
+                <div class="bloque-paso">
+                    <div class="paso-titulo">Paso 1: Tiempo</div>
+                    <div class="pregunta">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</div>
+                    <div class="desarrollo">
+                        <div class="formula-box">Fórmula: (Fecha Actual - Fecha Anterior) + 1 día</div>
+                        <div class="linea-operacion">Operación: (${f_act_i} - ${f_ant_i}) + 1 = <b>${di} días</b>.</div>
+                    </div>
+                </div>
+                
+                <div class="bloque-paso">
+                    <div class="paso-titulo">Paso 2: Consumo Diario</div>
+                    <div class="pregunta">¿Cuánto consumió el inquilino en promedio por cada día?</div>
+                    <div class="desarrollo">
+                        <div class="formula-box">Fórmula: (Lectura Actual - Lectura Anterior) ÷ Número de días</div>
+                        <div class="linea-operacion">Operación: (${l_act} - ${l_ant}) ÷ ${di} días = <b>${consumo_diario.toFixed(4)} kWh/día</b>.</div>
+                    </div>
+                </div>
+                
+                <div class="bloque-paso">
+                    <div class="paso-titulo">Paso 3: Cargo Energía</div>
+                    <div class="pregunta">¿A cuánto dinero equivale ese consumo en el recibo completo?</div>
+                    <div class="desarrollo">
+                        <div class="formula-box">Fórmula: Consumo Diario × Días Totales Recibo × Tarifa</div>
+                        <div class="linea-operacion">Operación: ${consumo_diario.toFixed(4)} × ${dm} días × S/. ${tarifa.toFixed(4)} = <b>S/. ${val_ener} soles</b>.</div>
+                    </div>
+                </div>
+                
+                <div class="bloque-paso">
+                    <div class="paso-titulo">Paso 4: Servicios Compartidos</div>
+                    <div class="pregunta">Los montos fijos del recibo se dividen en partes iguales entre los ${n} inquilinos.</div>
+                    <div class="desarrollo">
+                        <div class="formula-box">Fórmula: Monto fijos del Recibo ÷ ${n} Inquilinos</div>
+                        <div class="lista-valores">
+                            <div class="fila-valor"><div class="celda-label">• Reposición y Mant.:</div><div class="celda-operacion">S/. ${main_rep.toFixed(2)} ÷ ${n} = S/. ${val_rep}</div></div>
+                            <div class="fila-valor"><div class="celda-label">• Cargo Fijo:</div><div class="celda-operacion">S/. ${main_cf.toFixed(2)} ÷ ${n} = S/. ${val_cf}</div></div>
+                            <div class="fila-valor"><div class="celda-label">• Alumbrado Público:</div><div class="celda-operacion">S/. ${main_alum.toFixed(2)} ÷ ${n} = S/. ${val_alum}</div></div>
+                            <div class="fila-valor"><div class="celda-label">• Interés Compensatorio:</div><div class="celda-operacion">S/. ${main_int.toFixed(2)} ÷ ${n} = S/. ${val_int}</div></div>
+                            <div class="fila-valor"><div class="celda-label">• Redondeo Anterior:</div><div class="celda-operacion">S/. ${main_red_ant.toFixed(2)} ÷ ${n} = S/. ${val_red_ant}</div></div>
+                            <div class="fila-valor"><div class="celda-label">• Redondeo Actual:</div><div class="celda-operacion">S/. ${main_red_act.toFixed(2)} ÷ ${n} = S/. ${val_red_act}</div></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bloque-paso">
+                    <div class="paso-titulo">Paso 5: Aporte de Ley</div>
+                    <div class="desarrollo">
+                        <div class="formula-box">Fórmula: Factor (${factorLey.toFixed(6)}) × Consumo Diario × Días Totales Recibo</div>
+                        <div class="linea-operacion">Operación: ${factorLey.toFixed(6)} × ${consumo_diario.toFixed(4)} × ${dm} = <b>S/. ${val_aporte} soles</b>.</div>
+                    </div>
+                </div>
+                
+                <div class="bloque-paso">
+                    <div class="paso-titulo">Paso 6: IGV (18%)</div>
+                    <div class="desarrollo">
+                        <div class="formula-box">Fórmula: 18% × (Energía + Reposición + Cargo Fijo + Alumbrado + Interés)</div>
+                        <div class="linea-operacion">Operación: S/. ${(parseFloat(val_ener)+parseFloat(val_rep)+parseFloat(val_cf)+parseFloat(val_alum)+parseFloat(val_int)).toFixed(2)} × 0.18 = <b>S/. ${val_igv} soles</b>.</div>
+                    </div>
+                </div>
+                
+                <div class="bloque-paso bloque-total">
+                    <div class="paso-titulo">Paso 7: Cuenta Final</div>
+                    <div class="pregunta">Suma total de conceptos calculados:</div>
+                    <div class="desarrollo">
+                        <div class="linea-operacion">TOTAL A PAGAR POR EL INQUILINO: S/. ${val_total} soles.</div>
+                    </div>
+                </div>
+            </div>`;
+
+        html2pdf().set({
+            margin: [8, 8],
+            filename: `Calculos_${nombreInq}.pdf`,
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(document.getElementById('calculos-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
+            tempCont.innerHTML = '';
+            await guardarOCompartirPDF(`Calculos_${nombreInq}.pdf`, pdfBase64);
+        });
+    }
+
+    function limpiarPrincipal() {
+        ['lec_ant_m','lec_act_m','fec_ant_m','fec_act_m','rep_m','cargo_fijo_m','alum_m','int_m','red_ant_m','red_act_m'].forEach(id => {
+            const el = document.getElementById(id); if(el) el.value = (el.type === 'number') ? '0' : '';
+        });
+        calculate();
+    }
+
+    function limpiarInquilino(i) {
+        [`lec_ant_i${i}`, `lec_act_i${i}`, `fec_ant_i${i}`, `fec_act_i${i}`].forEach(id => {
+            const el = document.getElementById(id); if(el) el.value = (el.type === 'number') ? '0' : '';
+        });
+        calculate();
+    }
+    calculate();
+</script>
+</body>
+</html>
