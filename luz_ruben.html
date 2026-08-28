@@ -27,6 +27,17 @@
             margin: 0;
             padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px;
         }
+        
+        /* Ocultar flechas de aumento/disminución en inputs numéricos */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -348,13 +359,13 @@
 
         <div class="section-title">Importes del Recibo (S/.)</div>
         <div class="grid-2">
-            <div class="form-group"><label>Tarifa kWh:</label><input type="number" id="tarifa" value="0" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Reposición y Mantenimiento:</label><input type="number" id="rep_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Cargo Fijo:</label><input type="number" id="cargo_fijo_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Alumbrado Público:</label><input type="number" id="alum_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Interés compensatorio:</label><input type="number" id="int_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Redondeo anterior:</label><input type="number" id="red_ant_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Redondeo actual:</label><input type="number" id="red_act_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Tarifa kWh:</label><input type="number" id="tarifa" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Reposición y Mantenimiento:</label><input type="number" id="rep_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Cargo Fijo:</label><input type="number" id="cargo_fijo_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Alumbrado Público:</label><input type="number" id="alum_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Interés compensatorio:</label><input type="number" id="int_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Redondeo anterior:</label><input type="number" id="red_ant_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Redondeo actual:</label><input type="number" id="red_act_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
             <div class="form-group"><label>Aporte Ley N°28749:</label><input type="text" id="aporte_ley_m" class="readonly" readonly></div>
         </div>
 
@@ -368,6 +379,13 @@
 </div>
 
 <script>
+    // Bloquear scroll dentro de celdas numéricas para evitar cambios no deseados
+    document.addEventListener('wheel', function(e) {
+        if (document.activeElement.type === 'number') {
+            document.activeElement.blur();
+        }
+    });
+
     const UIT_VIGENTE = 5500;
     const container = document.getElementById('inquilinos-container');
     for (let i = 1; i <= 5; i++) {
@@ -491,8 +509,10 @@
 
     function descargarPDF(id) {
         const tempCont = document.getElementById('pdf-template-container');
-        const mes = document.getElementById('mes_principal').value;
-        const nombreInq = document.getElementById(`titulo_i${id}`).value;
+        const mes = document.getElementById('mes_principal').value.toUpperCase();
+        const nombreInq = document.getElementById(`titulo_i${id}`).value.toUpperCase();
+        const filename = `RECIBO LUZ ${mes} - ${nombreInq}.pdf`;
+        
         const l_ant = getVal(`lec_ant_i${id}`);
         const l_act = getVal(`lec_act_i${id}`);
 
@@ -524,19 +544,20 @@
 
         html2pdf().set({
             margin: [10, 10],
-            filename: `Recibo_${nombreInq}.pdf`,
+            filename: filename,
             html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(document.getElementById('recibo-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
             tempCont.innerHTML = '';
-            await guardarOCompartirPDF(`Recibo_${nombreInq}.pdf`, pdfBase64);
+            await guardarOCompartirPDF(filename, pdfBase64);
         });
     }
 
     function descargarCalculosPDF(id) {
         const tempCont = document.getElementById('pdf-template-container');
-        const nombreInq = document.getElementById(`titulo_i${id}`).value;
-        const mes = document.getElementById('mes_principal').value;
+        const mes = document.getElementById('mes_principal').value.toUpperCase();
+        const nombreInq = document.getElementById(`titulo_i${id}`).value.toUpperCase();
+        const filename = `CALCULO LUZ ${mes} - ${nombreInq}.pdf`;
         
         const l_ant = getVal(`lec_ant_i${id}`);
         const l_act = getVal(`lec_act_i${id}`);
@@ -580,7 +601,7 @@
             <div class="pdf-calculos" id="calculos-captura">
                 <div class="main-header">
                     <h2>CÁLCULOS MATEMÁTICOS</h2>
-                    <p>Inquilino: ${nombreInq.toUpperCase()} | Mes: ${mes}</p>
+                    <p>Inquilino: ${nombreInq} | Mes: ${mes}</p>
                 </div>
                 
                 <div class="bloque-paso">
@@ -653,25 +674,27 @@
 
         html2pdf().set({
             margin: [8, 8],
-            filename: `Calculos_${nombreInq}.pdf`,
+            filename: filename,
             html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(document.getElementById('calculos-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
             tempCont.innerHTML = '';
-            await guardarOCompartirPDF(`Calculos_${nombreInq}.pdf`, pdfBase64);
+            await guardarOCompartirPDF(filename, pdfBase64);
         });
     }
 
     function limpiarPrincipal() {
         ['lec_ant_m','lec_act_m','fec_ant_m','fec_act_m','rep_m','cargo_fijo_m','alum_m','int_m','red_ant_m','red_act_m'].forEach(id => {
-            const el = document.getElementById(id); if(el) el.value = (el.type === 'number') ? '0' : '';
+            const el = document.getElementById(id); 
+            if(el) el.value = ''; // Modificado para dejar vacío en vez de "0"
         });
         calculate();
     }
 
     function limpiarInquilino(i) {
         [`lec_ant_i${i}`, `lec_act_i${i}`, `fec_ant_i${i}`, `fec_act_i${i}`].forEach(id => {
-            const el = document.getElementById(id); if(el) el.value = (el.type === 'number') ? '0' : '';
+            const el = document.getElementById(id); 
+            if(el) el.value = ''; // Modificado para dejar vacío en vez de "0"
         });
         calculate();
     }
