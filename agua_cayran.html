@@ -113,6 +113,14 @@
     <div class="card main-card mb-5">
         <div class="card-body">
             <div class="row g-2 align-items-end">
+                <div class="col-6 col-md-2">
+                    <label class="small-label">Mes</label>
+                    <select id="m_mes" class="form-select form-select-sm input-editable" onchange="calc()">
+                        <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option>
+                        <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option selected>AGOSTO</option>
+                        <option>SEPTIEMBRE</option><option>OCTUBRE</option><option>NOVIEMBRE</option><option>DICIEMBRE</option>
+                    </select>
+                </div>
                 <div class="col-6 col-md-2"><label class="small-label">Lectura Anterior</label><input type="number" id="m_prev_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                 <div class="col-6 col-md-2"><label class="small-label">Lectura Actual</label><input type="number" id="m_curr_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                 <div class="col-6 col-md-2"><label class="small-label">Fecha Anterior</label><input type="date" id="m_prev_d" class="form-control form-control-sm input-editable" oninput="calc()"></div>
@@ -153,18 +161,21 @@
         }
     }, { passive: false });
 
-    const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
-
-    function toggleMode(id) {
+    function toggleMode(id, fromUser = false) {
         const mode = document.getElementById(`i${id}_calc_mode`).value;
         const input = document.getElementById(`i${id}_manual_days`);
         if (mode === 'manual') {
             input.disabled = false;
             input.style.setProperty('background-color', '#fffde7', 'important');
+            if (fromUser) {
+                input.value = ''; 
+                input.focus();
+            }
         } else {
             input.disabled = true;
             input.style.setProperty('background-color', '#e9ecef', 'important');
         }
+        if (fromUser) calc();
     }
 
     async function guardarOCompartirPDF(nombreArchivo, pdfBase64Uri) {
@@ -197,7 +208,7 @@
         const getVal = (id) => parseFloat(document.getElementById(id)?.value) || 0;
         const mainDateVal = document.getElementById('m_curr_d').value;
         const mainPrevDateVal = document.getElementById('m_prev_d').value;
-        let mesTexto = mainDateVal ? meses[new Date(mainDateVal + "T00:00:00").getMonth()] : "---";
+        const mesTexto = document.getElementById('m_mes').value || "---";
 
         const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 1;
         const hasNoMeter = document.getElementById('has_nometer').checked;
@@ -251,6 +262,8 @@
             if (calcMode === 'manual') {
                 const manualDaysInput = document.getElementById(`i${i}_manual_days`).value;
                 billedDays = manualDaysInput !== "" ? parseFloat(manualDaysInput) : 0;
+            } else {
+                document.getElementById(`i${i}_manual_days`).value = totalDays;
             }
             if (billedDays < 0) billedDays = 0;
 
@@ -279,6 +292,7 @@
             if(document.getElementById(`pdf_mes_${i}`)) document.getElementById(`pdf_mes_${i}`).innerText = mesTexto;
             if(document.getElementById(`pdf_lec_txt_${i}`)) document.getElementById(`pdf_lec_txt_${i}`).innerText = `${iPrevR.toFixed(2)} (ANT) - ${iCurrR.toFixed(2)} (ACT)`;
             if(document.getElementById(`pdf_tenant_name_${i}`)) document.getElementById(`pdf_tenant_name_${i}`).innerText = document.getElementById(`i${i}_name`).value;
+            if(document.getElementById(`pdf_dias_${i}`)) document.getElementById(`pdf_dias_${i}`).innerText = `Días facturados: ${billedDays}`;
             
             if(document.getElementById(`i${i}_pdf_total_val`)) {
                 document.getElementById(`i${i}_pdf_total_val`).innerText = total.toFixed(2);
@@ -312,6 +326,7 @@
 
             if(document.getElementById(`pdf_mes_nometer`)) document.getElementById(`pdf_mes_nometer`).innerText = mesTexto;
             if(document.getElementById(`pdf_tenant_name_nometer`)) document.getElementById(`pdf_tenant_name_nometer`).innerText = document.getElementById(`inometer_name`).value;
+            if(document.getElementById(`pdf_dias_nometer`)) document.getElementById(`pdf_dias_nometer`).innerText = `Días facturados: ${totalDays}`;
             if(document.getElementById(`inometer_pdf_total_val`)) document.getElementById(`inometer_pdf_total_val`).innerText = cTotal.toFixed(2);
 
             const safeSet = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val.toFixed(2); };
@@ -347,6 +362,7 @@
                             <h2 class="fw-bold m-0" style="color:#2c3e50; font-size: 1.5rem;">RECIBO DE AGUA</h2>
                             <p class="fw-bold mb-0">MES: <span id="pdf_mes_${i}">---</span></p>
                             <p class="pdf-tenant-title" id="pdf_tenant_name_${i}">Inquilino #${i}</p>
+                            <p class="fw-bold mb-0" style="font-size: 0.9rem; color: #555;" id="pdf_dias_${i}">Días facturados: 0</p>
                         </div>
 
                         <div id="pdf_lecturas_${i}" class="pdf-only-section border-bottom pb-2 mb-3">
@@ -366,14 +382,14 @@
                             
                             <div class="col-6 mt-2 mb-2">
                                 <label class="small-label text-primary">Modo de cálculo:</label>
-                                <select id="i${i}_calc_mode" class="form-select form-select-sm" style="background-color: #e8f8f5; border: 1px solid #1abc9c; font-weight: bold;" onchange="toggleMode(${i}); calc()">
-                                    <option value="auto">Asumir días del recibo</option>
+                                <select id="i${i}_calc_mode" class="form-select form-select-sm" style="background-color: #e8f8f5; border: 1px solid #1abc9c; font-weight: bold;" onchange="toggleMode(${i}, true)">
+                                    <option value="auto" selected>Asumir días del recibo</option>
                                     <option value="manual">Escribir días manualmente</option>
                                 </select>
                             </div>
                             <div class="col-6 mt-2 mb-2">
                                 <label class="small-label text-primary">Días a Facturar (Control):</label>
-                                <input type="number" id="i${i}_manual_days" class="form-control form-control-sm input-editable" value="0" disabled style="background-color: #e9ecef !important;" oninput="calc()">
+                                <input type="number" id="i${i}_manual_days" class="form-control form-control-sm input-editable" value="" disabled style="background-color: #e9ecef !important;" oninput="calc()">
                             </div>
                         </div>
 
@@ -408,6 +424,7 @@
                             <h2 class="fw-bold m-0" style="color:#2c3e50; font-size: 1.5rem;">RECIBO DE AGUA</h2>
                             <p class="fw-bold mb-0">MES: <span id="pdf_mes_nometer">---</span></p>
                             <p class="pdf-tenant-title" id="pdf_tenant_name_nometer">Inquilino Sin Medidor</p>
+                            <p class="fw-bold mb-0" style="font-size: 0.9rem; color: #555;" id="pdf_dias_nometer">Días facturados: 0</p>
                         </div>
 
                         <div id="pdf_lecturas_nometer" class="pdf-only-section border-bottom pb-2 mb-3">
@@ -456,7 +473,7 @@
         
         for(let i = 1; i <= nMetered; i++) {
             if(document.getElementById(`i${i}_calc_mode`)) {
-                toggleMode(i);
+                toggleMode(i, false);
             }
         }
         
@@ -485,12 +502,14 @@
         if (iWeb) iWeb.style.setProperty('display', 'none', 'important');
         if (tWeb) tWeb.style.setProperty('display', 'none', 'important');
 
+        const mes = document.getElementById('m_mes').value;
         const tenantNameInput = document.getElementById(`i${id}_name`) || document.getElementById(`inometer_name`);
         const fileName = tenantNameInput ? tenantNameInput.value : 'Inquilino';
+        const exportFileName = `RECIBO AGUA ${mes} - ${fileName}.pdf`;
 
         const opt = {
             margin: [5, 5, 5, 5], 
-            filename: `Recibo_${fileName}.pdf`,
+            filename: exportFileName,
             image: { type: 'jpeg', quality: 1 },
             html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -498,7 +517,7 @@
 
         try {
             const pdfBase64 = await html2pdf().set(opt).from(element).outputPdf('datauristring');
-            await guardarOCompartirPDF(`Recibo_${fileName}.pdf`, pdfBase64);
+            await guardarOCompartirPDF(exportFileName, pdfBase64);
         } finally {
             hPdf.style.display = 'none';
             lPdf.style.display = 'none';
