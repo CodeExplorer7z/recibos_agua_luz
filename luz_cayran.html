@@ -566,12 +566,28 @@
             const consumo_diario = di_lectura > 0 ? (parseFloat((l_act - l_ant).toFixed(2)) / di_lectura) : 0;
             
             const main_rep = getVal('rep_m'); const main_cf = getVal('cargo_fijo_m');
-            const main_alum = getVal('alum_m');
+            const main_alum = getVal('alum_m'); const main_int = getVal('int_m');
+            const main_red_ant = getVal('red_ant_m'); const main_red_act = getVal('red_act_m');
+            
+            const fmtF1 = formatearFechaLatina(f1i);
+            const fmtF2 = formatearFechaLatina(f2i);
 
             const desc_paso4 = (modo === 'manual') ? 
                 `Se divide entre ${dm} días, luego entre los ${n} inquilinos actuales, y se multiplica por sus ${dias_facturar} días a cobrar.` : 
-                `Se asumen los ${dm} días del mes, dividiéndose directamente entre los ${n} inquilinos activos.`;
-            const texto_op_fijo = (modo === 'manual') ? `÷ ${dm}d ÷ ${n}inq × ${dias_facturar}d` : `÷ ${n}inq`;
+                `Los montos fijos del recibo se dividen en partes iguales entre las ${n} divisiones ingresadas.`;
+            const texto_op_fijo = (modo === 'manual') ? `÷ ${dm}d ÷ ${n}inq × ${dias_facturar}d` : `÷ ${n}`;
+            
+            const ener_val = document.getElementById(`ener_i${id}`).value;
+            const rep_val = document.getElementById(`rep_i${id}`).value;
+            const cf_val = document.getElementById(`cf_i${id}`).value;
+            const alum_val = document.getElementById(`alum_i${id}`).value;
+            const int_val = document.getElementById(`int_i${id}`).value;
+            const red_ant_val = document.getElementById(`red_ant_i${id}`).value;
+            const red_act_val = document.getElementById(`red_act_i${id}`).value;
+            const aporte_val = document.getElementById(`aporte_i${id}`).value;
+            const igv_val = document.getElementById(`igv_i${id}`).value;
+            
+            const sub_sin_igv = (parseFloat(ener_val || 0) + parseFloat(rep_val || 0) + parseFloat(cf_val || 0) + parseFloat(alum_val || 0) + parseFloat(int_val || 0)).toFixed(2);
 
             tempCont.innerHTML = `
                 <div class="pdf-calculos" id="calculos-captura">
@@ -579,33 +595,73 @@
                         <h2>CÁLCULOS MATEMÁTICOS</h2>
                         <p>Inquilino: ${nombreInq.toUpperCase()} | Mes: ${mes}</p>
                     </div>
+                    
                     <div class="bloque-paso">
-                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">Paso 1: Consumo Diario</div>
+                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 1: TIEMPO</div>
+                        <div class="pregunta">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</div>
                         <div class="desarrollo" style="border-left-color:${colorFondo};">
-                            <div class="linea-operacion">(${l_act} - ${l_ant}) ÷ ${di_lectura} días = <b>${consumo_diario.toFixed(4)} kWh/día</b>.</div>
+                            <div class="formula-box">Fórmula: (Fecha Actual - Fecha Anterior) + 1 día</div>
+                            <div class="linea-operacion">Operación: (${fmtF1} - ${fmtF2}) + 1 = <b>${di_lectura} días.</b></div>
                         </div>
                     </div>
+
                     <div class="bloque-paso">
-                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">Paso 2: Cargo Energía</div>
+                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 2: CONSUMO DIARIO</div>
+                        <div class="pregunta">¿Cuánto consumió el inquilino en promedio por cada día?</div>
                         <div class="desarrollo" style="border-left-color:${colorFondo};">
-                            <div class="linea-operacion">${consumo_diario.toFixed(4)} × ${dias_facturar} d. × S/. ${tarifa.toFixed(4)} = <b>S/. ${document.getElementById(`ener_i${id}`).value}</b>.</div>
+                            <div class="formula-box">Fórmula: (Lectura Actual - Lectura Anterior) ÷ Número de días</div>
+                            <div class="linea-operacion">Operación: (${l_act} - ${l_ant}) ÷ ${di_lectura} días = <b>${consumo_diario.toFixed(4)} kWh/día.</b></div>
                         </div>
                     </div>
+
                     <div class="bloque-paso">
-                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">Paso 3: Servicios Compartidos</div>
+                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 3: CARGO ENERGÍA</div>
+                        <div class="pregunta">¿A cuánto dinero equivale ese consumo en el recibo completo?</div>
+                        <div class="desarrollo" style="border-left-color:${colorFondo};">
+                            <div class="formula-box">Fórmula: Consumo Diario × Días a Cobrar × Tarifa</div>
+                            <div class="linea-operacion">Operación: ${consumo_diario.toFixed(4)} × ${dias_facturar} d. × S/. ${tarifa.toFixed(4)} = <b>S/. ${ener_val} soles.</b></div>
+                        </div>
+                    </div>
+
+                    <div class="bloque-paso">
+                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 4: SERVICIOS COMPARTIDOS</div>
                         <div class="pregunta">${desc_paso4}</div>
                         <div class="desarrollo" style="border-left-color:${colorFondo};">
+                            <div class="formula-box">Fórmula: Montos fijos del Recibo ${texto_op_fijo}</div>
                             <div class="lista-valores">
-                                <div class="fila-valor"><div class="celda-label">• Reposición/Mant.:</div><div class="celda-operacion">S/. ${main_rep.toFixed(2)} ${texto_op_fijo} = S/. ${document.getElementById(`rep_i${id}`).value}</div></div>
-                                <div class="fila-valor"><div class="celda-label">• Cargo Fijo:</div><div class="celda-operacion">S/. ${main_cf.toFixed(2)} ${texto_op_fijo} = S/. ${document.getElementById(`cf_i${id}`).value}</div></div>
-                                <div class="fila-valor"><div class="celda-label">• Alumbrado Púb.:</div><div class="celda-operacion">S/. ${main_alum.toFixed(2)} ${texto_op_fijo} = S/. ${document.getElementById(`alum_i${id}`).value}</div></div>
+                                <div class="fila-valor"><div class="celda-label">• Reposición y Mant.:</div><div class="celda-operacion">S/. ${main_rep.toFixed(2)} ${texto_op_fijo} = S/. ${rep_val}</div></div>
+                                <div class="fila-valor"><div class="celda-label">• Cargo Fijo:</div><div class="celda-operacion">S/. ${main_cf.toFixed(2)} ${texto_op_fijo} = S/. ${cf_val}</div></div>
+                                <div class="fila-valor"><div class="celda-label">• Alumbrado Público:</div><div class="celda-operacion">S/. ${main_alum.toFixed(2)} ${texto_op_fijo} = S/. ${alum_val}</div></div>
+                                <div class="fila-valor"><div class="celda-label">• Interés Compensat.:</div><div class="celda-operacion">S/. ${main_int.toFixed(2)} ${texto_op_fijo} = S/. ${int_val}</div></div>
+                                <div class="fila-valor"><div class="celda-label">• Redondeo Anterior:</div><div class="celda-operacion">S/. ${main_red_ant.toFixed(2)} ${texto_op_fijo} = S/. ${red_ant_val}</div></div>
+                                <div class="fila-valor"><div class="celda-label">• Redondeo Actual:</div><div class="celda-operacion">S/. ${main_red_act.toFixed(2)} ${texto_op_fijo} = S/. ${red_act_val}</div></div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="bloque-paso">
+                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 5: APORTE DE LEY</div>
+                        <div class="desarrollo" style="border-left-color:${colorFondo};">
+                            <div class="formula-box">Fórmula: Factor (${factorLey.toFixed(6)}) × Consumo Diario × Días a Cobrar</div>
+                            <div class="linea-operacion">Operación: ${factorLey.toFixed(6)} × ${consumo_diario.toFixed(4)} × ${dias_facturar} = <b>S/. ${aporte_val} soles.</b></div>
+                        </div>
+                    </div>
+
+                    <div class="bloque-paso">
+                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 6: IGV (18%)</div>
+                        <div class="desarrollo" style="border-left-color:${colorFondo};">
+                            <div class="formula-box">Fórmula: 18% × (Energía + Reposición + Cargo Fijo + Alumbrado + Interés)</div>
+                            <div class="linea-operacion">Operación: S/. ${sub_sin_igv} × 0.18 = <b>S/. ${igv_val} soles.</b></div>
+                        </div>
+                    </div>
+
                     <div class="bloque-paso bloque-total" style="border-color:${colorFondo};">
-                        <div class="paso-titulo">Paso Final</div>
-                        <div class="desarrollo">
-                            <div class="linea-operacion" style="border-top-color:${colorFondo};">TOTAL A PAGAR: S/. ${total_pagar} soles.</div>
+                        <div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 7: CUENTA FINAL</div>
+                        <div class="desarrollo" style="background:#fafafa;">
+                            <div class="pregunta">Suma total de conceptos calculados:</div>
+                            <div class="linea-operacion" style="border-top-color:${colorFondo}; font-size:1.1rem; color:${colorFondo};">
+                                TOTAL A PAGAR POR EL INQUILINO: S/. ${total_pagar} soles.
+                            </div>
                         </div>
                     </div>
                 </div>`;
