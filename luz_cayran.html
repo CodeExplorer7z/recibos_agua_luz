@@ -149,13 +149,13 @@
 
         <div class="section-title">Importes del Recibo (S/.)</div>
         <div class="grid-2">
-            <div class="form-group"><label>Tarifa kWh:</label><input type="number" id="tarifa" value="0" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Reposición y Mantenimiento:</label><input type="number" id="rep_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Cargo Fijo:</label><input type="number" id="cargo_fijo_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Alumbrado Público:</label><input type="number" id="alum_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Interés compensatorio:</label><input type="number" id="int_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Redondeo anterior:</label><input type="number" id="red_ant_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Redondeo actual:</label><input type="number" id="red_act_m" value="0" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Tarifa kWh:</label><input type="number" id="tarifa" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Reposición y Mantenimiento:</label><input type="number" id="rep_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Cargo Fijo:</label><input type="number" id="cargo_fijo_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Alumbrado Público:</label><input type="number" id="alum_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Interés compensatorio:</label><input type="number" id="int_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Redondeo anterior:</label><input type="number" id="red_ant_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>Redondeo actual:</label><input type="number" id="red_act_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
             <div class="form-group"><label>Aporte Ley N°28749:</label><input type="text" id="aporte_ley_m" class="readonly" readonly></div>
         </div>
 
@@ -225,14 +225,14 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label>Modo de cálculo:</label>
-                    <select id="modo_dias_i${id}" onchange="toggleModoDias(${id}, false); calculate();" style="background-color: ${alertBg}; border-color: ${colorBorde}; font-weight:bold;">
+                    <select id="modo_dias_i${id}" onchange="toggleModoDias(${id}, true); calculate();" style="background-color: ${alertBg}; border-color: ${colorBorde}; font-weight:bold;">
                         <option value="recibo" ${modoDefault === 'recibo' ? 'selected' : ''}>Asumir días del recibo</option>
                         <option value="manual" ${modoDefault === 'manual' ? 'selected' : ''}>Escribir días manualmente</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Días a Facturar (Control):</label>
-                    <input type="number" id="dias_vividos_i${id}" value="0" disabled oninput="calculate()">
+                    <input type="number" id="dias_vividos_i${id}" disabled oninput="calculate()">
                 </div>
             </div>
             
@@ -255,7 +255,7 @@
         </div>`;
     }
 
-    container.innerHTML += generarTarjetaInquilino(2, "Inquilino 1", "#059669", "manual", "#d1fae5");
+    container.innerHTML += generarTarjetaInquilino(2, "Inquilino 1", "#059669", "recibo", "#d1fae5");
     container.innerHTML += generarTarjetaInquilino(3, "Inquilino 2", "#2563eb", "recibo", "#dbeafe");
     container.innerHTML += generarTarjetaInquilino(4, "Inquilino 3", "#9333ea", "recibo", "#f3e8ff");
     container.innerHTML += generarTarjetaInquilino(5, "Inquilino 4", "#ea580c", "recibo", "#ffedd5");
@@ -297,7 +297,10 @@
         if (modo === 'manual') {
             inputDias.disabled = false;
             inputDias.style.backgroundColor = 'var(--input-fill)';
-            if (enfocar) inputDias.focus();
+            if (enfocar) {
+                inputDias.value = ''; // Limpia el valor al cambiar a manual
+                inputDias.focus();
+            }
         } else {
             inputDias.disabled = true;
             inputDias.style.backgroundColor = '#e2e8f0';
@@ -485,13 +488,16 @@
                     </table>
                 </div>`;
         }
+        
+        const nombreArchivo = `RECIBO LUZ ${mes} - ${nombreInq}.pdf`;
+        
         html2pdf().set({
-            margin: [10, 10], filename: `Recibo_${nombreInq}.pdf`,
+            margin: [10, 10], filename: nombreArchivo,
             html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(document.getElementById('recibo-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
             tempCont.innerHTML = '';
-            await guardarOCompartirPDF(`Recibo_${nombreInq}.pdf`, pdfBase64);
+            await guardarOCompartirPDF(nombreArchivo, pdfBase64);
         });
     }
 
@@ -667,19 +673,21 @@
                 </div>`;
         }
 
+        const nombreArchivoCalc = `CALCULOS LUZ ${mes} - ${nombreInq}.pdf`;
+
         html2pdf().set({
-            margin: [8, 8], filename: `Calculos_${nombreInq}.pdf`,
+            margin: [8, 8], filename: nombreArchivoCalc,
             html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(document.getElementById('calculos-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
             tempCont.innerHTML = '';
-            await guardarOCompartirPDF(`Calculos_${nombreInq}.pdf`, pdfBase64);
+            await guardarOCompartirPDF(nombreArchivoCalc, pdfBase64);
         });
     }
 
     function limpiarPrincipal() {
-        ['lec_ant_m','lec_act_m','fec_ant_m','fec_act_m','rep_m','cargo_fijo_m','alum_m','int_m','red_ant_m','red_act_m'].forEach(id => {
-            const el = document.getElementById(id); if(el) el.value = (el.type === 'number') ? '0' : '';
+        ['lec_ant_m','lec_act_m','fec_ant_m','fec_act_m','tarifa','rep_m','cargo_fijo_m','alum_m','int_m','red_ant_m','red_act_m'].forEach(id => {
+            const el = document.getElementById(id); if(el) el.value = '';
         });
         calculate();
     }
@@ -687,10 +695,10 @@
     function limpiarInquilino(i) {
         if(i === 1) return;
         [`lec_ant_i${i}`, `lec_act_i${i}`, `fec_ant_i${i}`, `fec_act_i${i}`].forEach(id => {
-            const el = document.getElementById(id); if(el) el.value = (el.type === 'number') ? '0' : '';
+            const el = document.getElementById(id); if(el) el.value = '';
         });
         const selectModo = document.getElementById(`modo_dias_i${i}`);
-        if(selectModo) { selectModo.value = (i === 2) ? 'manual' : 'recibo'; toggleModoDias(i); }
+        if(selectModo) { selectModo.value = 'recibo'; toggleModoDias(i); }
         calculate();
     }
     
