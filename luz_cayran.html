@@ -669,7 +669,6 @@
                 return null;
             };
 
-            // Ajuste regex: [^0-9]*? fuerza a atrapar el primer número después de la palabra clave sin saltar de línea inútilmente
             const v_rep = buscarNumero(/reposic.*?mant[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
             const v_fijo = buscarNumero(/cargo\s*fijo[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
             const v_alum = buscarNumero(/alumbrado[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
@@ -678,7 +677,6 @@
             const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
             const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*[^0-9]*?(-?\d+\s*[.,]\s*\d+)/i, text); 
             
-            // Limitamos a 30 caracteres máximo de salto para que no busque fechas de otras secciones
             const f_act = buscarFecha(/lectura\s*actual[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
             const f_ant = buscarFecha(/lectura\s*anterior[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
 
@@ -686,15 +684,18 @@
             const v_lec_act = buscarNumero(/lectura\s*actual[^0-9]*?(\d+)/i, textWithoutDates); 
             const v_lec_ant = buscarNumero(/lectura\s*anterior[^0-9]*?(\d+)/i, textWithoutDates);
 
-            if (v_rep !== null) document.getElementById('rep_m').value = v_rep;
-            if (v_fijo !== null) document.getElementById('cargo_fijo_m').value = v_fijo;
-            if (v_alum !== null) document.getElementById('alum_m').value = v_alum;
-            if (v_int !== null) document.getElementById('int_m').value = v_int;
-            if (v_red_ant !== null) document.getElementById('red_ant_m').value = v_red_ant;
-            if (v_red_act !== null) document.getElementById('red_act_m').value = v_red_act;
-            if (v_tarifa !== null) document.getElementById('tarifa').value = v_tarifa;
-            if (v_lec_act !== null) document.getElementById('lec_act_m').value = v_lec_act;
-            if (v_lec_ant !== null) document.getElementById('lec_ant_m').value = v_lec_ant;
+            // Asignación de valores numéricos (0 si no se encuentra)
+            document.getElementById('rep_m').value = v_rep !== null ? v_rep : 0;
+            document.getElementById('cargo_fijo_m').value = v_fijo !== null ? v_fijo : 0;
+            document.getElementById('alum_m').value = v_alum !== null ? v_alum : 0;
+            document.getElementById('int_m').value = v_int !== null ? v_int : 0;
+            document.getElementById('red_ant_m').value = v_red_ant !== null ? v_red_ant : 0;
+            document.getElementById('red_act_m').value = v_red_act !== null ? v_red_act : 0;
+            document.getElementById('tarifa').value = v_tarifa !== null ? v_tarifa : 0;
+            document.getElementById('lec_act_m').value = v_lec_act !== null ? v_lec_act : 0;
+            document.getElementById('lec_ant_m').value = v_lec_ant !== null ? v_lec_ant : 0;
+
+            // Las fechas solo se sobreescriben si se encuentran
             if (f_act !== null) document.getElementById('fec_act_m').value = f_act;
             if (f_ant !== null) document.getElementById('fec_ant_m').value = f_ant;
 
