@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         :root { --primary: #4338ca; --bg: #eef2ff; --card: #ffffff; --text: #1e293b; --border: #c7d2fe; --enel-blue: #4338ca; --input-fill: #fef9c3; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -93,20 +92,20 @@
         </div>
 
         <div class="photo-gallery-wrapper">
-            <div style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📄 SUBE EL PDF O FOTOS DEL RECIBO (Max 5 fotos):</div>
+            <div style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📷 TOMA O SUBE FOTOS DEL RECIBO (Max 5):</div>
             
             <div class="gallery-container" id="gallery-ui"></div>
             
-            <input type="file" id="input_pdf" accept="application/pdf" style="display:none;" onchange="manejarSeleccionPDF(event)">
+            <input type="file" id="input_camara" accept="image/*" capture="environment" style="display:none;" onchange="manejarSeleccionFotos(event)">
             <input type="file" id="input_subir" accept="image/*" multiple style="display:none;" onchange="manejarSeleccionFotos(event)">
             
             <div class="btn-group" style="margin-top: 10px;">
-                <button class="btn" style="background: #ef4444; color: white;" onclick="document.getElementById('input_pdf').click()">📄 Subir PDF</button>
-                <button class="btn" style="background: #0ea5e9; color: white;" onclick="document.getElementById('input_subir').click()">📁 Subir Fotos</button>
+                <button class="btn" style="background: #8b5cf6; color: white;" onclick="document.getElementById('input_camara').click()">📸 Tomar Foto</button>
+                <button class="btn" style="background: #0ea5e9; color: white;" onclick="document.getElementById('input_subir').click()">📁 Subir de Galería</button>
             </div>
 
             <button id="btn-procesar-ocr" class="btn" style="background: #10b981; color: white; width: 100%; margin-top: 10px; display: none;" onclick="procesarFotosConOCR()">
-                ✨ Extraer Datos de Fotos
+                ✨ Extraer Datos del Recibo
             </button>
             <div id="ocr_status" style="display:none; background: #ede9fe; color: #6d28d9; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; text-align: center; margin-top: 10px;"></div>
         </div>
@@ -560,110 +559,6 @@
     toggleModoDias(2, false); toggleModoDias(3, false); toggleModoDias(4, false); toggleModoDias(5, false); actualizarVista(); 
     document.addEventListener('wheel', function(event) { if (document.activeElement.type === 'number') event.preventDefault(); }, { passive: false });
 
-    // --- LOGICA DE LECTURA DE TEXTO CENTRALIZADA ---
-    function procesarTextoExtraido(text) {
-        const buscarNumero = (regex, texto) => {
-            const coincidencia = texto.match(regex);
-            if (coincidencia) {
-                const limpio = coincidencia[1].replace(/\s+/g, '').replace(',', '.');
-                return parseFloat(limpio);
-            }
-            return null;
-        };
-
-        const buscarFecha = (regex, texto) => {
-            const coincidencia = texto.match(regex);
-            if (coincidencia) {
-                const limpio = coincidencia[1].replace(/\s+/g, '');
-                const partes = limpio.split(/[-/]/);
-                if (partes.length === 3) {
-                    return partes[0].length === 4 
-                        ? `${partes[2].padStart(2,'0')}/${partes[1].padStart(2,'0')}/${partes[0]}`
-                        : `${partes[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
-                }
-            }
-            return null;
-        };
-
-        const v_rep = buscarNumero(/reposic.*?mant[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-        const v_fijo = buscarNumero(/cargo\s*fijo[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-        const v_alum = buscarNumero(/alumbrado[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-        const v_int = buscarNumero(/inter[eé]s[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-        const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-        const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-        const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*[^0-9]*?(-?\d+\s*[.,]\s*\d+)/i, text); 
-        
-        const f_act = buscarFecha(/lectura\s*actual[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
-        const f_ant = buscarFecha(/lectura\s*anterior[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
-
-        const textWithoutDates = text.replace(/\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4}/g, '');
-        const v_lec_act = buscarNumero(/lectura\s*actual[^0-9]*?(\d+)/i, textWithoutDates); 
-        const v_lec_ant = buscarNumero(/lectura\s*anterior[^0-9]*?(\d+)/i, textWithoutDates);
-
-        // Asignación de valores numéricos (0 si no se encuentra)
-        document.getElementById('rep_m').value = v_rep !== null ? v_rep : 0;
-        document.getElementById('cargo_fijo_m').value = v_fijo !== null ? v_fijo : 0;
-        document.getElementById('alum_m').value = v_alum !== null ? v_alum : 0;
-        document.getElementById('int_m').value = v_int !== null ? v_int : 0;
-        document.getElementById('red_ant_m').value = v_red_ant !== null ? v_red_ant : 0;
-        document.getElementById('red_act_m').value = v_red_act !== null ? v_red_act : 0;
-        document.getElementById('tarifa').value = v_tarifa !== null ? v_tarifa : 0;
-        document.getElementById('lec_act_m').value = v_lec_act !== null ? v_lec_act : 0;
-        document.getElementById('lec_ant_m').value = v_lec_ant !== null ? v_lec_ant : 0;
-
-        // Las fechas solo se sobreescriben si se encuentran
-        if (f_act !== null) document.getElementById('fec_act_m').value = f_act;
-        if (f_ant !== null) document.getElementById('fec_ant_m').value = f_ant;
-
-        calculate();
-    }
-
-
-    // --- LÓGICA DE PDF NATIVA ---
-    async function manejarSeleccionPDF(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const statusLabel = document.getElementById('ocr_status');
-        statusLabel.style.display = 'block';
-        statusLabel.innerText = '📄 Leyendo documento PDF...';
-
-        try {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdfjsLib = window['pdfjs-dist/build/pdf'];
-            // Configurar el worker de PDF.js
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            let combinedText = "";
-
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join(' ');
-                combinedText += " " + pageText;
-            }
-
-            console.log("Texto extraído del PDF:\n", combinedText);
-            statusLabel.innerText = '⚙️ Extrayendo valores al formulario...';
-            
-            procesarTextoExtraido(combinedText.toLowerCase());
-
-            statusLabel.style.background = '#d1fae5'; statusLabel.style.color = '#065f46';
-            statusLabel.innerText = '✅ ¡Lectura Exitosa del PDF! Revisa los datos en el formulario.';
-            
-            setTimeout(() => { statusLabel.style.display = 'none'; statusLabel.style.background = '#ede9fe'; statusLabel.style.color = '#6d28d9'; }, 5000);
-
-        } catch (error) {
-            console.error("Error leyendo PDF:", error);
-            statusLabel.style.background = '#fee2e2'; statusLabel.style.color = '#991b1b';
-            statusLabel.innerText = '❌ Error al procesar el PDF.';
-            setTimeout(() => { statusLabel.style.display = 'none'; }, 4000);
-        }
-        
-        event.target.value = ''; 
-    }
-
 
     // --- LÓGICA DE GALERÍA NATIVA ESTILO APP MÓVIL ---
     let arrayFotos = [];
@@ -713,6 +608,14 @@
             galleryUI.appendChild(thumbWrap);
         });
 
+        if (arrayFotos.length < MAX_FOTOS) {
+            const addBtn = document.createElement('div');
+            addBtn.className = 'btn-add-photo';
+            addBtn.innerHTML = '+';
+            addBtn.onclick = () => document.getElementById('input_camara').click();
+            galleryUI.appendChild(addBtn);
+        }
+
         if (arrayFotos.length > 0) {
             btnProcesar.style.display = 'block';
         } else {
@@ -727,7 +630,7 @@
 
         const statusLabel = document.getElementById('ocr_status');
         statusLabel.style.display = 'block';
-        statusLabel.innerText = '⏳ Iniciando el motor de lectura (OCR)...';
+        statusLabel.innerText = '⏳ Iniciando el motor de lectura...';
 
         try {
             const worker = await Tesseract.createWorker('spa');
@@ -739,13 +642,67 @@
                 combinedText += " " + ret.data.text.toLowerCase();
             }
             
-            console.log("Texto combinado detectado (OCR):\n", combinedText);
+            console.log("Texto combinado detectado:\n", combinedText);
             statusLabel.innerText = '⚙️ Extrayendo valores al formulario...';
+            const text = combinedText;
+
+            const buscarNumero = (regex, texto) => {
+                const coincidencia = texto.match(regex);
+                if (coincidencia) {
+                    const limpio = coincidencia[1].replace(/\s+/g, '').replace(',', '.');
+                    return parseFloat(limpio);
+                }
+                return null;
+            };
+
+            const buscarFecha = (regex, texto) => {
+                const coincidencia = texto.match(regex);
+                if (coincidencia) {
+                    const limpio = coincidencia[1].replace(/\s+/g, '');
+                    const partes = limpio.split(/[-/]/);
+                    if (partes.length === 3) {
+                        return partes[0].length === 4 
+                            ? `${partes[2].padStart(2,'0')}/${partes[1].padStart(2,'0')}/${partes[0]}`
+                            : `${partes[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
+                    }
+                }
+                return null;
+            };
+
+            const v_rep = buscarNumero(/reposic.*?mant[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_fijo = buscarNumero(/cargo\s*fijo[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_alum = buscarNumero(/alumbrado[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_int = buscarNumero(/inter[eé]s[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*[^0-9]*?(-?\d+\s*[.,]\s*\d+)/i, text); 
             
-            procesarTextoExtraido(combinedText);
+            const f_act = buscarFecha(/lectura\s*actual[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
+            const f_ant = buscarFecha(/lectura\s*anterior[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
+
+            const textWithoutDates = text.replace(/\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4}/g, '');
+            const v_lec_act = buscarNumero(/lectura\s*actual[^0-9]*?(\d+)/i, textWithoutDates); 
+            const v_lec_ant = buscarNumero(/lectura\s*anterior[^0-9]*?(\d+)/i, textWithoutDates);
+
+            // Asignación de valores numéricos (0 si no se encuentra)
+            document.getElementById('rep_m').value = v_rep !== null ? v_rep : 0;
+            document.getElementById('cargo_fijo_m').value = v_fijo !== null ? v_fijo : 0;
+            document.getElementById('alum_m').value = v_alum !== null ? v_alum : 0;
+            document.getElementById('int_m').value = v_int !== null ? v_int : 0;
+            document.getElementById('red_ant_m').value = v_red_ant !== null ? v_red_ant : 0;
+            document.getElementById('red_act_m').value = v_red_act !== null ? v_red_act : 0;
+            document.getElementById('tarifa').value = v_tarifa !== null ? v_tarifa : 0;
+            document.getElementById('lec_act_m').value = v_lec_act !== null ? v_lec_act : 0;
+            document.getElementById('lec_ant_m').value = v_lec_ant !== null ? v_lec_ant : 0;
+
+            // Las fechas solo se sobreescriben si se encuentran
+            if (f_act !== null) document.getElementById('fec_act_m').value = f_act;
+            if (f_ant !== null) document.getElementById('fec_ant_m').value = f_ant;
+
+            calculate();
 
             statusLabel.style.background = '#d1fae5'; statusLabel.style.color = '#065f46';
-            statusLabel.innerText = '✅ ¡Lectura Exitosa (OCR)! Revisa los datos en el formulario.';
+            statusLabel.innerText = '✅ ¡Lectura Exitosa! Revisa los datos en el formulario.';
             
             setTimeout(() => { statusLabel.style.display = 'none'; statusLabel.style.background = '#ede9fe'; statusLabel.style.color = '#6d28d9'; }, 5000);
             
