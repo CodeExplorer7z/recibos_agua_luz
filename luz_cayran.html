@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Librería OCR para leer el recibo con la cámara -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root { --primary: #4338ca; --bg: #eef2ff; --card: #ffffff; --text: #1e293b; --border: #c7d2fe; --enel-blue: #4338ca; --input-fill: #fef9c3; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -102,8 +104,17 @@
     <div class="card" id="main-receipt">
         <div class="header-card">
             <div id="titulo_principal" class="titulo-fijo">DATOS DEL RECIBO PRINCIPAL (EMPRESA LUZ)</div>
-            <button class="btn btn-limpiar" onclick="limpiarPrincipal()">Limpiar Datos</button>
+            <div class="btn-group">
+                <button class="btn btn-limpiar" onclick="limpiarPrincipal()">Limpiar Datos</button>
+                <!-- Botón de Escaneo OCR -->
+                <button class="btn" style="background: #8b5cf6; color: white;" onclick="document.getElementById('input_camara').click()">📷 Escanear Recibo</button>
+                <!-- Input oculto que invoca la cámara del celular -->
+                <input type="file" id="input_camara" accept="image/*" capture="environment" style="display:none;" onchange="procesarOCR(event)">
+            </div>
         </div>
+
+        <!-- Mensaje de estado del OCR -->
+        <div id="ocr_status" style="display:none; background: #ede9fe; color: #6d28d9; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; text-align: center; margin-bottom: 15px;"></div>
 
         <div class="info-box">
             <b>FACTOR APORTE DE LEY (UIT 2026 - S/. 5500):</b> <span id="detalle_factor" style="font-weight:bold; color:var(--primary)">-</span>
@@ -711,6 +722,91 @@
     document.addEventListener('wheel', function(event) {
         if (document.activeElement.type === 'number') event.preventDefault();
     }, { passive: false });
+
+    // --- SISTEMA DE ESCANEO OCR ---
+    async function procesarOCR(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const statusLabel = document.getElementById('ocr_status');
+        statusLabel.style.display = 'block';
+        statusLabel.innerText = '⏳ Cargando motor de lectura (esto puede tardar unos segundos)...';
+
+        try {
+            // Inicializamos Tesseract en idioma español
+            const worker = await Tesseract.createWorker('spa');
+            
+            statusLabel.innerText = '🔍 Analizando la foto del recibo...';
+            const ret = await worker.recognize(file);
+            const text = ret.data.text.toLowerCase();
+            
+            console.log("Texto detectado por OCR:\n", text);
+            
+            statusLabel.innerText = '⚙️ Extrayendo valores...';
+
+            const buscarNumero = (regex, texto) => {
+                const coincidencia = texto.match(regex);
+                if (coincidencia) {
+                    return parseFloat(coincidencia[1].replace(',', '.'));
+                }
+                return null;
+            };
+
+            const buscarFecha = (regex, texto) => {
+                const coincidencia = texto.match(regex);
+                if (coincidencia) {
+                    const partes = coincidencia[1].split(/[-/]/);
+                    if (partes.length === 3) return `${partes[2]}-${partes[1]}-${partes[0]}`;
+                }
+                return null;
+            };
+
+            const v_rep = buscarNumero(/reposici[oó]n.*?(\d+[.,]\d{2})/i, text);
+            const v_fijo = buscarNumero(/cargo\s*fijo.*?(\d+[.,]\d{2})/i, text);
+            const v_alum = buscarNumero(/alumbrado.*?(\d+[.,]\d{2})/i, text);
+            const v_int = buscarNumero(/inter[eé]s.*?(\d+[.,]\d{2})/i, text);
+            const v_red_ant = buscarNumero(/redondeo\s*anterior.*?(\d+[.,]\d{2})/i, text);
+            const v_red_act = buscarNumero(/redondeo\s*actual.*?(\d+[.,]\d{2})/i, text);
+            
+            const v_tarifa = buscarNumero(/tarifa.*?(\d+[.,]\d{4})/i, text); 
+            const v_lec_act = buscarNumero(/lectura\s*actual.*?(\d+)/i, text); 
+            const v_lec_ant = buscarNumero(/lectura\s*anterior.*?(\d+)/i, text);
+            
+            const f_act = buscarFecha(/fecha\s*actual.*?(\d{2}[-/]\d{2}[-/]\d{4})/i, text);
+            const f_ant = buscarFecha(/fecha\s*anterior.*?(\d{2}[-/]\d{2}[-/]\d{4})/i, text);
+
+            if (v_rep) document.getElementById('rep_m').value = v_rep;
+            if (v_fijo) document.getElementById('cargo_fijo_m').value = v_fijo;
+            if (v_alum) document.getElementById('alum_m').value = v_alum;
+            if (v_int) document.getElementById('int_m').value = v_int;
+            if (v_red_ant) document.getElementById('red_ant_m').value = v_red_ant;
+            if (v_red_act) document.getElementById('red_act_m').value = v_red_act;
+            if (v_tarifa) document.getElementById('tarifa').value = v_tarifa;
+            if (v_lec_act) document.getElementById('lec_act_m').value = v_lec_act;
+            if (v_lec_ant) document.getElementById('lec_ant_m').value = v_lec_ant;
+            if (f_act) document.getElementById('fec_act_m').value = f_act;
+            if (f_ant) document.getElementById('fec_ant_m').value = f_ant;
+
+            calculate();
+
+            statusLabel.style.background = '#d1fae5';
+            statusLabel.style.color = '#065f46';
+            statusLabel.innerText = '✅ ¡Lectura terminada! Revisa y corrige si es necesario.';
+            
+            setTimeout(() => { statusLabel.style.display = 'none'; statusLabel.style.background = '#ede9fe'; statusLabel.style.color = '#6d28d9'; }, 4000);
+            
+            await worker.terminate();
+
+        } catch (error) {
+            console.error("Error en OCR:", error);
+            statusLabel.style.background = '#fee2e2';
+            statusLabel.style.color = '#991b1b';
+            statusLabel.innerText = '❌ Error al leer la imagen. Intenta con una foto más clara.';
+            setTimeout(() => { statusLabel.style.display = 'none'; }, 4000);
+        }
+        
+        event.target.value = '';
+    }
 </script>
 </body>
 </html>
