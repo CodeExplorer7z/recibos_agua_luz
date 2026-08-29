@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Librería OCR para leer el recibo -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root { --primary: #4338ca; --bg: #eef2ff; --card: #ffffff; --text: #1e293b; --border: #c7d2fe; --enel-blue: #4338ca; --input-fill: #fef9c3; }
@@ -73,7 +74,7 @@
             background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 15px;
         }
         .gallery-container {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; align-items: center;
         }
         .thumb-wrapper {
             position: relative; width: 75px; height: 75px; flex-shrink: 0;
@@ -117,10 +118,18 @@
                 <!-- El botón dinámico "+" y las miniaturas se generarán aquí mediante JS -->
             </div>
             
-            <!-- Input nativo oculto que abre la cámara o el explorador de archivos -->
-            <input type="file" id="input_camara" accept="image/*" multiple style="display:none;" onchange="manejarSeleccionFotos(event)">
+            <!-- INPUT PARA CÁMARA DIRECTA (Sin "multiple", usando "capture") -->
+            <input type="file" id="input_camara" accept="image/*" capture="environment" style="display:none;" onchange="manejarSeleccionFotos(event)">
             
-            <button id="btn-procesar-ocr" class="btn" style="background: #8b5cf6; color: white; width: 100%; margin-top: 10px; display: none;" onclick="procesarFotosConOCR()">
+            <!-- INPUT PARA GALERÍA (Con "multiple", sin "capture") -->
+            <input type="file" id="input_subir" accept="image/*" multiple style="display:none;" onchange="manejarSeleccionFotos(event)">
+            
+            <div class="btn-group" style="margin-top: 10px;">
+                <button class="btn" style="background: #8b5cf6; color: white;" onclick="document.getElementById('input_camara').click()">📸 Tomar Foto</button>
+                <button class="btn" style="background: #0ea5e9; color: white;" onclick="document.getElementById('input_subir').click()">📁 Subir de Galería</button>
+            </div>
+
+            <button id="btn-procesar-ocr" class="btn" style="background: #10b981; color: white; width: 100%; margin-top: 10px; display: none;" onclick="procesarFotosConOCR()">
                 ✨ Extraer Datos del Recibo
             </button>
             <div id="ocr_status" style="display:none; background: #ede9fe; color: #6d28d9; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; text-align: center; margin-top: 10px;"></div>
@@ -580,11 +589,6 @@
     let arrayFotos = [];
     const MAX_FOTOS = 5;
 
-    // Al hacer click en Escanear, se abre el input oculto
-    function abrirCamara() {
-        document.getElementById('input_camara').click();
-    }
-
     // Procesa las fotos que el usuario eligió de su cámara o galería
     function manejarSeleccionFotos(event) {
         const files = Array.from(event.target.files);
@@ -639,7 +643,8 @@
             const addBtn = document.createElement('div');
             addBtn.className = 'btn-add-photo';
             addBtn.innerHTML = '+';
-            addBtn.onclick = abrirCamara;
+            // Al presionar el +, abrimos la cámara directa (input_camara)
+            addBtn.onclick = () => document.getElementById('input_camara').click();
             galleryUI.appendChild(addBtn);
         }
 
@@ -727,10 +732,6 @@
             statusLabel.style.background = '#d1fae5'; statusLabel.style.color = '#065f46';
             statusLabel.innerText = '✅ ¡Lectura Exitosa! Revisa los datos en el formulario.';
             
-            // Opcional: vaciar la galería después del procesamiento exitoso
-            // arrayFotos = [];
-            // dibujarGaleria();
-
             setTimeout(() => { statusLabel.style.display = 'none'; statusLabel.style.background = '#ede9fe'; statusLabel.style.color = '#6d28d9'; }, 5000);
             
             await worker.terminate();
