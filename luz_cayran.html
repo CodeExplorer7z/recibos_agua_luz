@@ -106,14 +106,11 @@
             <div id="titulo_principal" class="titulo-fijo">DATOS DEL RECIBO PRINCIPAL (EMPRESA LUZ)</div>
             <div class="btn-group">
                 <button class="btn btn-limpiar" onclick="limpiarPrincipal()">Limpiar Datos</button>
-                <!-- Botón de Escaneo OCR -->
                 <button class="btn" style="background: #8b5cf6; color: white;" onclick="document.getElementById('input_camara').click()">📷 Escanear Recibo (Max 5)</button>
-                <!-- Input que permite múltiples archivos -->
                 <input type="file" id="input_camara" accept="image/*" multiple style="display:none;" onchange="procesarOCR(event)">
             </div>
         </div>
 
-        <!-- Mensaje de estado del OCR -->
         <div id="ocr_status" style="display:none; background: #ede9fe; color: #6d28d9; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; text-align: center; margin-bottom: 15px;"></div>
 
         <div class="info-box">
@@ -154,7 +151,6 @@
         <div class="grid-2">
             <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()" autofocus></div>
             <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
-            <!-- Cambiados a texto para permitir formato DD/MM/YYYY -->
             <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="text" id="fec_ant_m" placeholder="DD/MM/YYYY" oninput="calculate()"></div>
             <div class="form-group"><label>Fecha Lectura Actual:</label><input type="text" id="fec_act_m" placeholder="DD/MM/YYYY" oninput="calculate()"></div>
         </div>
@@ -184,7 +180,6 @@
     const UIT_VIGENTE = 5500;
     const container = document.getElementById('inquilinos-container');
     
-    // Función de ayuda para interpretar fechas escritas como texto
     function parseDDMMYYYY(dStr) {
         if(!dStr) return null;
         const parts = dStr.trim().split(/[-/]/);
@@ -321,7 +316,7 @@
             inputDias.disabled = false;
             inputDias.style.backgroundColor = 'var(--input-fill)';
             if (enfocar) {
-                inputDias.value = ''; // Limpia el valor al cambiar a manual
+                inputDias.value = ''; 
                 inputDias.focus();
             }
         } else {
@@ -743,7 +738,6 @@
 
     // --- SISTEMA DE ESCANEO OCR MULTIPLE ---
     async function procesarOCR(event) {
-        // Limitar a un máximo de 5 archivos
         const files = Array.from(event.target.files).slice(0, 5);
         if (files.length === 0) return;
 
@@ -780,7 +774,7 @@
                     const limpio = coincidencia[1].replace(/\s+/g, '');
                     const partes = limpio.split(/[-/]/);
                     if (partes.length === 3) {
-                        if (partes[0].length === 4) { // Si detectó YYYY/MM/DD
+                        if (partes[0].length === 4) { 
                             return `${partes[2].padStart(2,'0')}/${partes[1].padStart(2,'0')}/${partes[0]}`;
                         }
                         return `${partes[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
@@ -789,38 +783,43 @@
                 return null;
             };
 
-            const v_rep = buscarNumero(/reposici[oó]n.*?(\d+[.,]\d{2})/i, text);
-            const v_fijo = buscarNumero(/cargo\s*fijo.*?(\d+[.,]\d{2})/i, text);
-            const v_alum = buscarNumero(/alumbrado.*?(\d+[.,]\d{2})/i, text);
-            const v_int = buscarNumero(/inter[eé]s.*?(\d+[.,]\d{2})/i, text);
-            const v_red_ant = buscarNumero(/redondeo\s*anterior.*?(\d+[.,]\d{2})/i, text);
-            const v_red_act = buscarNumero(/redondeo\s*actual.*?(\d+[.,]\d{2})/i, text);
+            // Ajustes de palabras clave basados en el recibo proporcionado y captura de signos negativos (-)
+            const v_rep = buscarNumero(/reposic\.?\s*y\s*mant.*?(-?\d+[.,]\d{2})/i, text);
+            const v_fijo = buscarNumero(/cargo\s*fijo.*?(-?\d+[.,]\d{2})/i, text);
+            const v_alum = buscarNumero(/alumbrado.*?(-?\d+[.,]\d{2})/i, text);
+            const v_int = buscarNumero(/inter[eé]s.*?(-?\d+[.,]\d{2})/i, text);
+            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior.*?(-?\d+[.,]\d{2})/i, text);
+            const v_red_act = buscarNumero(/redondeo\s*mes\s*actual.*?(-?\d+[.,]\d{2})/i, text);
             
-            const v_tarifa = buscarNumero(/tarifa.*?(\d+[.,]\d{4})/i, text); 
-            const v_lec_act = buscarNumero(/lectura\s*actual.*?(\d+)/i, text); 
-            const v_lec_ant = buscarNumero(/lectura\s*anterior.*?(\d+)/i, text);
+            // "al precio de S/ X.XXXX"
+            const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*(-?\d+[.,]\d+)/i, text); 
             
-            // Busca fecha tolerando espacios (ej: 11 / 07 / 2026)
-            const f_act = buscarFecha(/fecha\s*actual.*?(\d{2,4}\s*[-/]\s*\d{2}\s*[-/]\s*\d{2,4})/i, text);
-            const f_ant = buscarFecha(/fecha\s*anterior.*?(\d{2,4}\s*[-/]\s*\d{2}\s*[-/]\s*\d{2,4})/i, text);
+            // Extracción de Fechas atadas a Lectura Actual y Anterior
+            const f_act = buscarFecha(/lectura\s*actual.*?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
+            const f_ant = buscarFecha(/lectura\s*anterior.*?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
 
-            if (v_rep) document.getElementById('rep_m').value = v_rep;
-            if (v_fijo) document.getElementById('cargo_fijo_m').value = v_fijo;
-            if (v_alum) document.getElementById('alum_m').value = v_alum;
-            if (v_int) document.getElementById('int_m').value = v_int;
-            if (v_red_ant) document.getElementById('red_ant_m').value = v_red_ant;
-            if (v_red_act) document.getElementById('red_act_m').value = v_red_act;
-            if (v_tarifa) document.getElementById('tarifa').value = v_tarifa;
-            if (v_lec_act) document.getElementById('lec_act_m').value = v_lec_act;
-            if (v_lec_ant) document.getElementById('lec_ant_m').value = v_lec_ant;
-            if (f_act) document.getElementById('fec_act_m').value = f_act;
-            if (f_ant) document.getElementById('fec_ant_m').value = f_ant;
+            // Para evitar atrapar los números de las fechas en las Lecturas, limpiamos las fechas del texto antes de buscar el valor de lectura
+            const textWithoutDates = text.replace(/\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4}/g, '');
+            const v_lec_act = buscarNumero(/lectura\s*actual.*?(\d+)/i, textWithoutDates); 
+            const v_lec_ant = buscarNumero(/lectura\s*anterior.*?(\d+)/i, textWithoutDates);
+
+            if (v_rep !== null) document.getElementById('rep_m').value = v_rep;
+            if (v_fijo !== null) document.getElementById('cargo_fijo_m').value = v_fijo;
+            if (v_alum !== null) document.getElementById('alum_m').value = v_alum;
+            if (v_int !== null) document.getElementById('int_m').value = v_int;
+            if (v_red_ant !== null) document.getElementById('red_ant_m').value = v_red_ant;
+            if (v_red_act !== null) document.getElementById('red_act_m').value = v_red_act;
+            if (v_tarifa !== null) document.getElementById('tarifa').value = v_tarifa;
+            if (v_lec_act !== null) document.getElementById('lec_act_m').value = v_lec_act;
+            if (v_lec_ant !== null) document.getElementById('lec_ant_m').value = v_lec_ant;
+            if (f_act !== null) document.getElementById('fec_act_m').value = f_act;
+            if (f_ant !== null) document.getElementById('fec_ant_m').value = f_ant;
 
             calculate();
 
             statusLabel.style.background = '#d1fae5';
             statusLabel.style.color = '#065f46';
-            statusLabel.innerText = '✅ ¡Lectura terminada! Revisa y corrige si es necesario.';
+            statusLabel.innerText = '✅ ¡Lecturas terminadas! Revisa y corrige si es necesario.';
             
             setTimeout(() => { statusLabel.style.display = 'none'; statusLabel.style.background = '#ede9fe'; statusLabel.style.color = '#6d28d9'; }, 4000);
             
