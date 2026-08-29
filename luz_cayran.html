@@ -783,25 +783,23 @@
                 return null;
             };
 
-            // Ajustes de palabras clave basados en el recibo proporcionado y captura de signos negativos (-)
-            const v_rep = buscarNumero(/reposic\.?\s*y\s*mant.*?(-?\d+[.,]\d{2})/i, text);
-            const v_fijo = buscarNumero(/cargo\s*fijo.*?(-?\d+[.,]\d{2})/i, text);
-            const v_alum = buscarNumero(/alumbrado.*?(-?\d+[.,]\d{2})/i, text);
-            const v_int = buscarNumero(/inter[eé]s.*?(-?\d+[.,]\d{2})/i, text);
-            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior.*?(-?\d+[.,]\d{2})/i, text);
-            const v_red_act = buscarNumero(/redondeo\s*mes\s*actual.*?(-?\d+[.,]\d{2})/i, text);
+            // Ajustes usando [\s\S]*? para saltar líneas (Enter) entre el texto guía y el valor.
+            const v_rep = buscarNumero(/reposic\.?\s*y\s*mant[\s\S]*?(-?\d+[.,]\d{2})/i, text);
+            const v_fijo = buscarNumero(/cargo\s*fijo[\s\S]*?(-?\d+[.,]\d{2})/i, text);
+            const v_alum = buscarNumero(/alumbrado[\s\S]*?(-?\d+[.,]\d{2})/i, text);
+            const v_int = buscarNumero(/inter[eé]s[\s\S]*?(-?\d+[.,]\d{2})/i, text);
+            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior[\s\S]*?(-?\d+[.,]\d{2})/i, text);
+            const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[\s\S]*?(-?\d+[.,]\d{2})/i, text);
             
-            // "al precio de S/ X.XXXX"
             const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*(-?\d+[.,]\d+)/i, text); 
             
-            // Extracción de Fechas atadas a Lectura Actual y Anterior
-            const f_act = buscarFecha(/lectura\s*actual.*?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
-            const f_ant = buscarFecha(/lectura\s*anterior.*?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
+            // Extracción de Fechas atadas a Lectura Actual y Anterior, saltando nuevas líneas.
+            const f_act = buscarFecha(/lectura\s*actual[\s\S]*?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
+            const f_ant = buscarFecha(/lectura\s*anterior[\s\S]*?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
 
-            // Para evitar atrapar los números de las fechas en las Lecturas, limpiamos las fechas del texto antes de buscar el valor de lectura
             const textWithoutDates = text.replace(/\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4}/g, '');
-            const v_lec_act = buscarNumero(/lectura\s*actual.*?(\d+)/i, textWithoutDates); 
-            const v_lec_ant = buscarNumero(/lectura\s*anterior.*?(\d+)/i, textWithoutDates);
+            const v_lec_act = buscarNumero(/lectura\s*actual[\s\S]*?(\d+)/i, textWithoutDates); 
+            const v_lec_ant = buscarNumero(/lectura\s*anterior[\s\S]*?(\d+)/i, textWithoutDates);
 
             if (v_rep !== null) document.getElementById('rep_m').value = v_rep;
             if (v_fijo !== null) document.getElementById('cargo_fijo_m').value = v_fijo;
