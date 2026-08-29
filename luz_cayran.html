@@ -107,9 +107,9 @@
             <div class="btn-group">
                 <button class="btn btn-limpiar" onclick="limpiarPrincipal()">Limpiar Datos</button>
                 <!-- Botón de Escaneo OCR -->
-                <button class="btn" style="background: #8b5cf6; color: white;" onclick="document.getElementById('input_camara').click()">📷 Escanear Recibo</button>
-                <!-- Input oculto que invoca la cámara del celular -->
-                <input type="file" id="input_camara" accept="image/*" capture="environment" style="display:none;" onchange="procesarOCR(event)">
+                <button class="btn" style="background: #8b5cf6; color: white;" onclick="document.getElementById('input_camara').click()">📷 Escanear Recibo (Max 5)</button>
+                <!-- Input que permite múltiples archivos -->
+                <input type="file" id="input_camara" accept="image/*" multiple style="display:none;" onchange="procesarOCR(event)">
             </div>
         </div>
 
@@ -154,8 +154,9 @@
         <div class="grid-2">
             <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()" autofocus></div>
             <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
-            <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
+            <!-- Cambiados a texto para permitir formato DD/MM/YYYY -->
+            <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="text" id="fec_ant_m" placeholder="DD/MM/YYYY" oninput="calculate()"></div>
+            <div class="form-group"><label>Fecha Lectura Actual:</label><input type="text" id="fec_act_m" placeholder="DD/MM/YYYY" oninput="calculate()"></div>
         </div>
 
         <div class="section-title">Importes del Recibo (S/.)</div>
@@ -182,6 +183,17 @@
 <script>
     const UIT_VIGENTE = 5500;
     const container = document.getElementById('inquilinos-container');
+    
+    // Función de ayuda para interpretar fechas escritas como texto
+    function parseDDMMYYYY(dStr) {
+        if(!dStr) return null;
+        const parts = dStr.trim().split(/[-/]/);
+        if(parts.length === 3) {
+            const d = new Date(parts[2], parseInt(parts[1])-1, parts[0]);
+            if(!isNaN(d)) return d;
+        }
+        return null;
+    }
     
     container.innerHTML += `
         <div class="card" id="recibo_i1" style="border: 2px solid #ef4444;">
@@ -364,9 +376,11 @@
 
         const t = getVal('tarifa');
 
-        const f1m = document.getElementById('fec_act_m').value;
-        const f2m = document.getElementById('fec_ant_m').value;
-        const dm = (f1m && f2m) ? Math.max(1, Math.floor((new Date(f1m+'T00:00:00') - new Date(f2m+'T00:00:00')) / 864e5) + 1) : 0;
+        const f1m_val = document.getElementById('fec_act_m').value;
+        const f2m_val = document.getElementById('fec_ant_m').value;
+        const d_f1m = parseDDMMYYYY(f1m_val);
+        const d_f2m = parseDDMMYYYY(f2m_val);
+        const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
         const km = Math.max(0, getVal('lec_act_m') - getVal('lec_ant_m'));
         const aporteLeyPrincipal = km * factorLey;
@@ -568,8 +582,12 @@
             const l_ant = getVal(`lec_ant_i${id}`); const l_act = getVal(`lec_act_i${id}`);
             const f1i = document.getElementById(`fec_act_i${id}`).value; const f2i = document.getElementById(`fec_ant_i${id}`).value;
             const di_lectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
-            const f1m = document.getElementById('fec_act_m').value; const f2m = document.getElementById('fec_ant_m').value;
-            const dm = (f1m && f2m) ? Math.max(1, Math.floor((new Date(f1m+'T00:00:00') - new Date(f2m+'T00:00:00')) / 864e5) + 1) : 0;
+            
+            const f1m_val = document.getElementById('fec_act_m').value;
+            const f2m_val = document.getElementById('fec_ant_m').value;
+            const d_f1m = parseDDMMYYYY(f1m_val);
+            const d_f2m = parseDDMMYYYY(f2m_val);
+            const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
             
             const modo = document.getElementById(`modo_dias_i${id}`).value;
             const dias_facturar = (modo === 'recibo') ? dm : getVal(`dias_vividos_i${id}`);
@@ -723,26 +741,30 @@
         if (document.activeElement.type === 'number') event.preventDefault();
     }, { passive: false });
 
-    // --- SISTEMA DE ESCANEO OCR ---
+    // --- SISTEMA DE ESCANEO OCR MULTIPLE ---
     async function procesarOCR(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+        // Limitar a un máximo de 5 archivos
+        const files = Array.from(event.target.files).slice(0, 5);
+        if (files.length === 0) return;
 
         const statusLabel = document.getElementById('ocr_status');
         statusLabel.style.display = 'block';
-        statusLabel.innerText = '⏳ Cargando motor de lectura (esto puede tardar unos segundos)...';
+        statusLabel.innerText = '⏳ Cargando motor de lectura...';
 
         try {
-            // Inicializamos Tesseract en idioma español
             const worker = await Tesseract.createWorker('spa');
+            let combinedText = "";
+
+            for (let i = 0; i < files.length; i++) {
+                statusLabel.innerText = `🔍 Analizando imagen ${i + 1} de ${files.length}...`;
+                const ret = await worker.recognize(files[i]);
+                combinedText += " " + ret.data.text.toLowerCase();
+            }
             
-            statusLabel.innerText = '🔍 Analizando la foto del recibo...';
-            const ret = await worker.recognize(file);
-            const text = ret.data.text.toLowerCase();
-            
-            console.log("Texto detectado por OCR:\n", text);
+            console.log("Texto combinado detectado por OCR:\n", combinedText);
             
             statusLabel.innerText = '⚙️ Extrayendo valores...';
+            const text = combinedText;
 
             const buscarNumero = (regex, texto) => {
                 const coincidencia = texto.match(regex);
@@ -755,8 +777,14 @@
             const buscarFecha = (regex, texto) => {
                 const coincidencia = texto.match(regex);
                 if (coincidencia) {
-                    const partes = coincidencia[1].split(/[-/]/);
-                    if (partes.length === 3) return `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    const limpio = coincidencia[1].replace(/\s+/g, '');
+                    const partes = limpio.split(/[-/]/);
+                    if (partes.length === 3) {
+                        if (partes[0].length === 4) { // Si detectó YYYY/MM/DD
+                            return `${partes[2].padStart(2,'0')}/${partes[1].padStart(2,'0')}/${partes[0]}`;
+                        }
+                        return `${partes[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
+                    }
                 }
                 return null;
             };
@@ -772,8 +800,9 @@
             const v_lec_act = buscarNumero(/lectura\s*actual.*?(\d+)/i, text); 
             const v_lec_ant = buscarNumero(/lectura\s*anterior.*?(\d+)/i, text);
             
-            const f_act = buscarFecha(/fecha\s*actual.*?(\d{2}[-/]\d{2}[-/]\d{4})/i, text);
-            const f_ant = buscarFecha(/fecha\s*anterior.*?(\d{2}[-/]\d{2}[-/]\d{4})/i, text);
+            // Busca fecha tolerando espacios (ej: 11 / 07 / 2026)
+            const f_act = buscarFecha(/fecha\s*actual.*?(\d{2,4}\s*[-/]\s*\d{2}\s*[-/]\s*\d{2,4})/i, text);
+            const f_ant = buscarFecha(/fecha\s*anterior.*?(\d{2,4}\s*[-/]\s*\d{2}\s*[-/]\s*\d{2,4})/i, text);
 
             if (v_rep) document.getElementById('rep_m').value = v_rep;
             if (v_fijo) document.getElementById('cargo_fijo_m').value = v_fijo;
@@ -801,7 +830,7 @@
             console.error("Error en OCR:", error);
             statusLabel.style.background = '#fee2e2';
             statusLabel.style.color = '#991b1b';
-            statusLabel.innerText = '❌ Error al leer la imagen. Intenta con una foto más clara.';
+            statusLabel.innerText = '❌ Error al leer las imágenes. Intenta con fotos más claras.';
             setTimeout(() => { statusLabel.style.display = 'none'; }, 4000);
         }
         
