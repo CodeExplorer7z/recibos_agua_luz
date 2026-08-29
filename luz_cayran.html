@@ -9,7 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Librería OCR para leer el recibo -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root { --primary: #4338ca; --bg: #eef2ff; --card: #ffffff; --text: #1e293b; --border: #c7d2fe; --enel-blue: #4338ca; --input-fill: #fef9c3; }
@@ -69,29 +68,12 @@
         input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
-        /* Estilos de la galería de fotos (estilo app móvil) */
-        .photo-gallery-wrapper {
-            background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 15px;
-        }
-        .gallery-container {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; align-items: center;
-        }
-        .thumb-wrapper {
-            position: relative; width: 75px; height: 75px; flex-shrink: 0;
-        }
-        .thumb-wrapper img {
-            width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #3b82f6;
-        }
-        .btn-remove-thumb {
-            position: absolute; top: -6px; right: -6px; background: #ef4444; color: white;
-            border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center;
-            justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .btn-add-photo {
-            width: 75px; height: 75px; flex-shrink: 0; background: #e2e8f0; border: 2px dashed #94a3b8;
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; color: #64748b; cursor: pointer;
-        }
+        .photo-gallery-wrapper { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 15px; }
+        .gallery-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; align-items: center; }
+        .thumb-wrapper { position: relative; width: 75px; height: 75px; flex-shrink: 0; }
+        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 2px solid #3b82f6; }
+        .btn-remove-thumb { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .btn-add-photo { width: 75px; height: 75px; flex-shrink: 0; background: #e2e8f0; border: 2px dashed #94a3b8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #64748b; cursor: pointer; }
         .btn-add-photo:active { background: #cbd5e1; }
     </style>
 </head>
@@ -104,24 +86,17 @@
 <div id="pdf-template-container"></div> 
 
 <div class="container">
-    <!-- RECIBO PRINCIPAL -->
     <div class="card" id="main-receipt">
         <div class="header-card">
             <div id="titulo_principal" class="titulo-fijo">DATOS DEL RECIBO PRINCIPAL (EMPRESA LUZ)</div>
         </div>
 
-        <!-- SECCIÓN DE CÁMARA / GALERÍA DE FOTOS -->
         <div class="photo-gallery-wrapper">
             <div style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📷 TOMA O SUBE FOTOS DEL RECIBO (Max 5):</div>
             
-            <div class="gallery-container" id="gallery-ui">
-                <!-- El botón dinámico "+" y las miniaturas se generarán aquí mediante JS -->
-            </div>
+            <div class="gallery-container" id="gallery-ui"></div>
             
-            <!-- INPUT PARA CÁMARA DIRECTA (Sin "multiple", usando "capture") -->
             <input type="file" id="input_camara" accept="image/*" capture="environment" style="display:none;" onchange="manejarSeleccionFotos(event)">
-            
-            <!-- INPUT PARA GALERÍA (Con "multiple", sin "capture") -->
             <input type="file" id="input_subir" accept="image/*" multiple style="display:none;" onchange="manejarSeleccionFotos(event)">
             
             <div class="btn-group" style="margin-top: 10px;">
@@ -589,7 +564,6 @@
     let arrayFotos = [];
     const MAX_FOTOS = 5;
 
-    // Procesa las fotos que el usuario eligió de su cámara o galería
     function manejarSeleccionFotos(event) {
         const files = Array.from(event.target.files);
         
@@ -603,25 +577,21 @@
         }
         
         dibujarGaleria();
-        event.target.value = ''; // Resetear input para permitir seleccionar la misma foto si se desea
+        event.target.value = ''; 
     }
 
-    // Elimina una foto de la cola
     function removerFoto(index) {
         arrayFotos.splice(index, 1);
         dibujarGaleria();
     }
 
-    // Genera el HTML de las miniaturas y el botón "+"
     function dibujarGaleria() {
         const galleryUI = document.getElementById('gallery-ui');
         const btnProcesar = document.getElementById('btn-procesar-ocr');
-        galleryUI.innerHTML = ''; // Limpiar
+        galleryUI.innerHTML = ''; 
         
-        // Dibujar miniaturas existentes
         arrayFotos.forEach((file, index) => {
             const url = URL.createObjectURL(file);
-            
             const thumbWrap = document.createElement('div');
             thumbWrap.className = 'thumb-wrapper';
             
@@ -638,17 +608,14 @@
             galleryUI.appendChild(thumbWrap);
         });
 
-        // Dibujar botón "+" si hay espacio (menos de 5 fotos)
         if (arrayFotos.length < MAX_FOTOS) {
             const addBtn = document.createElement('div');
             addBtn.className = 'btn-add-photo';
             addBtn.innerHTML = '+';
-            // Al presionar el +, abrimos la cámara directa (input_camara)
             addBtn.onclick = () => document.getElementById('input_camara').click();
             galleryUI.appendChild(addBtn);
         }
 
-        // Mostrar botón de procesar si hay al menos una foto
         if (arrayFotos.length > 0) {
             btnProcesar.style.display = 'block';
         } else {
@@ -656,10 +623,8 @@
         }
     }
 
-    // Inicializar galería vacía
     dibujarGaleria();
 
-    // Función que envía el array de imágenes a Tesseract
     async function procesarFotosConOCR() {
         if (arrayFotos.length === 0) return;
 
@@ -683,7 +648,11 @@
 
             const buscarNumero = (regex, texto) => {
                 const coincidencia = texto.match(regex);
-                return coincidencia ? parseFloat(coincidencia[1].replace(',', '.')) : null;
+                if (coincidencia) {
+                    const limpio = coincidencia[1].replace(/\s+/g, '').replace(',', '.');
+                    return parseFloat(limpio);
+                }
+                return null;
             };
 
             const buscarFecha = (regex, texto) => {
@@ -700,20 +669,22 @@
                 return null;
             };
 
-            const v_rep = buscarNumero(/reposic\.?\s*y\s*mant[\s\S]*?(-?\d+[.,]\d{2})/i, text);
-            const v_fijo = buscarNumero(/cargo\s*fijo[\s\S]*?(-?\d+[.,]\d{2})/i, text);
-            const v_alum = buscarNumero(/alumbrado[\s\S]*?(-?\d+[.,]\d{2})/i, text);
-            const v_int = buscarNumero(/inter[eé]s[\s\S]*?(-?\d+[.,]\d{2})/i, text);
-            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior[\s\S]*?(-?\d+[.,]\d{2})/i, text);
-            const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[\s\S]*?(-?\d+[.,]\d{2})/i, text);
-            const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*(-?\d+[.,]\d+)/i, text); 
+            // Ajuste regex: [^0-9]*? fuerza a atrapar el primer número después de la palabra clave sin saltar de línea inútilmente
+            const v_rep = buscarNumero(/reposic.*?mant[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_fijo = buscarNumero(/cargo\s*fijo[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_alum = buscarNumero(/alumbrado[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_int = buscarNumero(/inter[eé]s[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*[^0-9]*?(-?\d+\s*[.,]\s*\d+)/i, text); 
             
-            const f_act = buscarFecha(/lectura\s*actual[\s\S]*?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
-            const f_ant = buscarFecha(/lectura\s*anterior[\s\S]*?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
+            // Limitamos a 30 caracteres máximo de salto para que no busque fechas de otras secciones
+            const f_act = buscarFecha(/lectura\s*actual[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
+            const f_ant = buscarFecha(/lectura\s*anterior[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
 
             const textWithoutDates = text.replace(/\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4}/g, '');
-            const v_lec_act = buscarNumero(/lectura\s*actual[\s\S]*?(\d+)/i, textWithoutDates); 
-            const v_lec_ant = buscarNumero(/lectura\s*anterior[\s\S]*?(\d+)/i, textWithoutDates);
+            const v_lec_act = buscarNumero(/lectura\s*actual[^0-9]*?(\d+)/i, textWithoutDates); 
+            const v_lec_ant = buscarNumero(/lectura\s*anterior[^0-9]*?(\d+)/i, textWithoutDates);
 
             if (v_rep !== null) document.getElementById('rep_m').value = v_rep;
             if (v_fijo !== null) document.getElementById('cargo_fijo_m').value = v_fijo;
