@@ -92,15 +92,13 @@
         </div>
 
         <div class="photo-gallery-wrapper">
-            <div style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📷 TOMA O SUBE FOTOS DEL RECIBO (Max 5):</div>
+            <div style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📁 SUBE FOTOS DEL RECIBO (Max 5):</div>
             
             <div class="gallery-container" id="gallery-ui"></div>
             
-            <input type="file" id="input_camara" accept="image/*" capture="environment" style="display:none;" onchange="manejarSeleccionFotos(event)">
             <input type="file" id="input_subir" accept="image/*" multiple style="display:none;" onchange="manejarSeleccionFotos(event)">
             
             <div class="btn-group" style="margin-top: 10px;">
-                <button class="btn" style="background: #8b5cf6; color: white;" onclick="document.getElementById('input_camara').click()">📸 Tomar Foto</button>
                 <button class="btn" style="background: #0ea5e9; color: white;" onclick="document.getElementById('input_subir').click()">📁 Subir de Galería</button>
             </div>
 
@@ -612,7 +610,7 @@
             const addBtn = document.createElement('div');
             addBtn.className = 'btn-add-photo';
             addBtn.innerHTML = '+';
-            addBtn.onclick = () => document.getElementById('input_camara').click();
+            addBtn.onclick = () => document.getElementById('input_subir').click();
             galleryUI.appendChild(addBtn);
         }
 
