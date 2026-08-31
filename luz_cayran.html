@@ -38,6 +38,7 @@
         .btn-pdf { background: #10b981; color: white; }
         .btn-calculos { background: #f59e0b; color: white; }
         .btn-resumen { background: #6366f1; color: white; }
+        .btn-toggle { background: #475569; color: white; }
         
         #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
         .modo-recibo { font-family: Arial, sans-serif !important; padding: 40px !important; color: #000 !important; background: white !important; }
@@ -187,25 +188,6 @@
         }
         return null;
     }
-    
-    container.innerHTML += `
-        <div class="card" id="recibo_i1" style="border: 2px solid #ef4444;">
-            <div class="header-card">
-                <input type="text" id="titulo_i1" class="titulo-editable" value="Inquilino sin medidor" style="color:#ef4444; border-color:#fca5a5;">
-                <div class="btn-group">
-                    <button class="btn btn-pdf" style="background:#ef4444;" onclick="descargarPDF(1)">Descargar PDF</button>
-                    <button class="btn btn-calculos" style="background:#991b1b;" onclick="descargarCalculosPDF(1)">CÁLCULOS</button>
-                </div>
-            </div>
-            <div class="info-box" style="background:#fee2e2; border-color:#fca5a5; color:#991b1b; font-weight: bold;">
-                ESTE INQUILINO NO TIENE MEDIDOR ASI QUE SU MONTO SE CALCULA RESTANDO AL RECIBO PRINCIPAL LOS MONTOS DE LOS DEMÁS INQUILINOS QUE TIENEN MEDIDOR
-            </div>
-            <div class="form-group" style="margin-top:10px">
-                <label>TOTAL A PAGAR (INQUILINO SIN MEDIDOR):</label>
-                <input type="text" id="total_pagar_i1" class="readonly" style="font-size:1.5rem; border:none; background:transparent; color:#ef4444;" readonly>
-            </div>
-        </div>
-    `;
 
     function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault, alertBg) {
         return `
@@ -213,55 +195,93 @@
             <div class="header-card">
                 <input type="text" id="titulo_i${id}" class="titulo-editable" value="${titulo}" style="color:${colorBorde}; border-color:${colorBorde};" oninput="sincronizarNombre(${id})">
                 <div class="btn-group">
+                    <button class="btn btn-toggle" onclick="toggleCardBody(${id})">👁️ Ocultar / Mostrar</button>
                     <button class="btn btn-limpiar" onclick="limpiarInquilino(${id})">Borrar</button>
                     <button class="btn btn-pdf" style="background:${colorBorde};" onclick="descargarPDF(${id})">Descargar PDF</button>
                     <button class="btn btn-calculos" onclick="descargarCalculosPDF(${id})">CÁLCULOS</button>
                 </div>
             </div>
-            <div class="section-title">1. DATOS DE LECTURA (Promedio diario)</div>
-            <div class="grid-2">
-                <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_i${id}" inputmode="decimal" oninput="calculate()"></div>
-                <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_i${id}" inputmode="decimal" oninput="calculate()"></div>
-                <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_i${id}" onchange="calculate()"></div>
-                <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_i${id}" onchange="calculate()"></div>
-            </div>
-            <div class="section-title">2. DÍAS A COBRAR</div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Modo de cálculo:</label>
-                    <select id="modo_dias_i${id}" onchange="toggleModoDias(${id}, true); calculate();" style="background-color: ${alertBg}; border-color: ${colorBorde}; font-weight:bold;">
-                        <option value="recibo" ${modoDefault === 'recibo' ? 'selected' : ''}>Asumir días del recibo</option>
-                        <option value="manual" ${modoDefault === 'manual' ? 'selected' : ''}>Escribir días manualmente</option>
-                    </select>
+            <div id="body_i${id}">
+                <div class="section-title">1. DATOS DE LECTURA (Promedio diario)</div>
+                <div class="grid-2">
+                    <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_i${id}" inputmode="decimal" oninput="calculate()"></div>
+                    <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_i${id}" inputmode="decimal" oninput="calculate()"></div>
+                    <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_i${id}" onchange="calculate()"></div>
+                    <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_i${id}" onchange="calculate()"></div>
                 </div>
-                <div class="form-group">
-                    <label>Días a Facturar (Control):</label>
-                    <input type="number" id="dias_vividos_i${id}" disabled oninput="calculate()">
+                <div class="section-title">2. DÍAS A COBRAR</div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Modo de cálculo:</label>
+                        <select id="modo_dias_i${id}" onchange="toggleModoDias(${id}, true); calculate();" style="background-color: ${alertBg}; border-color: ${colorBorde}; font-weight:bold;">
+                            <option value="recibo" ${modoDefault === 'recibo' ? 'selected' : ''}>Asumir días del recibo</option>
+                            <option value="manual" ${modoDefault === 'manual' ? 'selected' : ''}>Escribir días manualmente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Días a Facturar (Control):</label>
+                        <input type="number" id="dias_vividos_i${id}" disabled oninput="calculate()">
+                    </div>
+                </div>
+                <div class="section-title">DETALLE DE IMPORTES (S/.)</div>
+                <div class="grid-2">
+                    <div class="form-group"><label>Cargo energía:</label><input id="ener_i${id}" class="readonly" readonly></div>
+                    <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i${id}" class="readonly" readonly></div>
+                    <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i${id}" class="readonly" readonly></div>
+                    <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i${id}" class="readonly" readonly></div>
+                    <div class="form-group"><label>Interés compensatorio:</label><input id="int_i${id}" class="readonly" readonly></div>
+                    <div class="form-group"><label>IGV (18%):</label><input id="igv_i${id}" class="readonly" readonly></div>
+                    <div class="form-group"><label>Ley N° 28749:</label><input id="aporte_i${id}" class="readonly" readonly></div>
+                    <div class="form-group"><label>Redondeo anterior:</label><input id="red_ant_i${id}" class="readonly" readonly></div>
+                    <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i${id}" class="readonly" readonly></div>
+                </div>
+                <div class="form-group" style="margin-top:10px">
+                    <label>TOTAL A PAGAR (INQUILINO ${id - 1}):</label>
+                    <input type="text" id="total_pagar_i${id}" class="readonly" style="font-size:1.3rem; border:none; background:transparent" readonly>
                 </div>
             </div>
-            <div class="section-title">DETALLE DE IMPORTES (S/.)</div>
-            <div class="grid-2">
-                <div class="form-group"><label>Cargo energía:</label><input id="ener_i${id}" class="readonly" readonly></div>
-                <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i${id}" class="readonly" readonly></div>
-                <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i${id}" class="readonly" readonly></div>
-                <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i${id}" class="readonly" readonly></div>
-                <div class="form-group"><label>Interés compensatorio:</label><input id="int_i${id}" class="readonly" readonly></div>
-                <div class="form-group"><label>IGV (18%):</label><input id="igv_i${id}" class="readonly" readonly></div>
-                <div class="form-group"><label>Ley N° 28749:</label><input id="aporte_i${id}" class="readonly" readonly></div>
-                <div class="form-group"><label>Redondeo anterior:</label><input id="red_ant_i${id}" class="readonly" readonly></div>
-                <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i${id}" class="readonly" readonly></div>
-            </div>
-            <div class="form-group" style="margin-top:10px">
-                <label>TOTAL A PAGAR (INQUILINO ${id - 1}):</label>
-                <input type="text" id="total_pagar_i${id}" class="readonly" style="font-size:1.3rem; border:none; background:transparent" readonly>
-            </div>
-        </div>`;
+        `;
     }
 
+    // 1. Primero se generan las fichas de los inquilinos CON medidor (del 2 al 5)
     container.innerHTML += generarTarjetaInquilino(2, "Inquilino 1", "#059669", "recibo", "#d1fae5");
     container.innerHTML += generarTarjetaInquilino(3, "Inquilino 2", "#2563eb", "recibo", "#dbeafe");
     container.innerHTML += generarTarjetaInquilino(4, "Inquilino 3", "#9333ea", "recibo", "#f3e8ff");
     container.innerHTML += generarTarjetaInquilino(5, "Inquilino 4", "#ea580c", "recibo", "#ffedd5");
+
+    // 2. Al final se genera la ficha del inquilino SIN medidor (id 1) para que aparezca siempre abajo
+    container.innerHTML += `
+        <div class="card" id="recibo_i1" style="border: 2px solid #ef4444;">
+            <div class="header-card">
+                <input type="text" id="titulo_i1" class="titulo-editable" value="Inquilino sin medidor" style="color:#ef4444; border-color:#fca5a5;">
+                <div class="btn-group">
+                    <button class="btn btn-toggle" onclick="toggleCardBody(1)">👁️ Ocultar / Mostrar</button>
+                    <button class="btn btn-pdf" style="background:#ef4444;" onclick="descargarPDF(1)">Descargar PDF</button>
+                    <button class="btn btn-calculos" style="background:#991b1b;" onclick="descargarCalculosPDF(1)">CÁLCULOS</button>
+                </div>
+            </div>
+            <div id="body_i1">
+                <div class="info-box" style="background:#fee2e2; border-color:#fca5a5; color:#991b1b; font-weight: bold;">
+                    ESTE INQUILINO NO TIENE MEDIDOR ASI QUE SU MONTO SE CALCULA RESTANDO AL RECIBO PRINCIPAL LOS MONTOS DE LOS DEMÁS INQUILINOS QUE TIENEN MEDIDOR
+                </div>
+                <div class="form-group" style="margin-top:10px">
+                    <label>TOTAL A PAGAR (INQUILINO SIN MEDIDOR):</label>
+                    <input type="text" id="total_pagar_i1" class="readonly" style="font-size:1.5rem; border:none; background:transparent; color:#ef4444;" readonly>
+                </div>
+            </div>
+        </div>
+    `;
+
+    function toggleCardBody(id) {
+        const bodyEl = document.getElementById(`body_i${id}`);
+        if(bodyEl) {
+            if(bodyEl.style.display === 'none') {
+                bodyEl.style.display = 'block';
+            } else {
+                bodyEl.style.display = 'none';
+            }
+        }
+    }
 
     function verificarDatosCompletos() {
         const numMedidores = parseInt(document.getElementById('num_medidores').value);
@@ -383,7 +403,6 @@
             let dias_facturar = modo === 'recibo' ? dm : getVal(`dias_vividos_i${i}`);
             if (modo === 'recibo') document.getElementById(`dias_vividos_i${i}`).value = dm;
             
-            // Consumo real = consumo diario * días a cobrar
             sumaKwhInquilinosMedidorReal += (kd * dias_facturar);
 
             const en_i = (dias_facturar > 0) ? (kd * dias_facturar * t) : 0;
@@ -405,7 +424,6 @@
         }
 
         if (hasSinMedidor) {
-            // El consumo del inquilino sin medidor es el consumo total menos la suma de los consumos reales de los demás inquilinos con medidor
             const kwhDiferencia = Math.max(0, km - sumaKwhInquilinosMedidorReal);
             const en_i1 = kwhDiferencia * t;
             
@@ -688,9 +706,7 @@
             const modo = document.getElementById(`modo_dias_i${i}`).value;
             let dias_facturar = modo === 'recibo' ? dm : getVal(`dias_vividos_i${i}`);
             
-            // Consumo real = consumo diario * días a cobrar
             const kwhConsumidoReal = (kd * dias_facturar).toFixed(2);
-            
             const totalInq = document.getElementById(`total_pagar_i${i}`).value || '0.00';
 
             filasTabla += `<tr>
@@ -739,6 +755,7 @@
         [`lec_ant_i${i}`, `lec_act_i${i}`, `fec_ant_i${i}`, `fec_act_i${i}`].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
         const selectModo = document.getElementById(`modo_dias_i${i}`);
         if(selectModo) { selectModo.value = 'recibo'; toggleModoDias(i); }
+        document.getElementById(`body_i${i}`).style.display = 'block';
         calculate();
     }
     
