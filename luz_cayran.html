@@ -130,8 +130,9 @@
             </div>
             <div class="form-group">
                 <label>N° Inquilinos CON medidor (Máx 4):</label>
+                <!-- Modificado aquí: selected en el valor 2 -->
                 <select id="num_medidores" onchange="actualizarVista()">
-                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option>
+                    <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
                 </select>
             </div>
         </div>
@@ -148,7 +149,8 @@
 
         <div class="section-title">Fechas y Lecturas (Recibo Principal)</div>
         <div class="grid-2">
-            <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()" autofocus></div>
+            <!-- Modificado aquí: se eliminó el atributo "autofocus" -->
+            <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
             <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
             <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="text" id="fec_ant_m" placeholder="DD/MM/YYYY" oninput="calculate()"></div>
             <div class="form-group"><label>Fecha Lectura Actual:</label><input type="text" id="fec_act_m" placeholder="DD/MM/YYYY" oninput="calculate()"></div>
