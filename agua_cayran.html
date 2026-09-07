@@ -12,89 +12,30 @@
         :root { --blue-dark: #2c3e50; --blue-light: #3498db; }
         body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px; }
         
-        .nav-back-bar {
-            max-width: 1300px;
-            margin: 0 auto 10px auto;
-            padding: 0 5px;
-        }
-        .btn-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #334155;
-            color: white !important;
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-
+        .nav-back-bar { max-width: 1300px; margin: 0 auto 10px auto; padding: 0 5px; }
+        .btn-back { display: inline-flex; align-items: center; gap: 6px; background: #334155; color: white !important; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
+        
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+        
         .main-card { border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 5px solid var(--blue-light); }
         .input-editable { background-color: #fffde7 !important; border: 1px solid #fbc02d !important; font-size: 16px !important; }
         .input-total-main { background-color: #e2f0d9 !important; border: 1px solid #70ad47 !important; font-weight: bold; color: #385723; font-size: 16px !important; }
         
-        .tenant-name-input {
-            border: 1px solid #fbc02d !important;
-            background-color: #fffde7 !important;
-            font-weight: bold;
-            font-size: 1.1rem;
-            width: 100%;
-            padding: 2px 5px;
-            border-radius: 4px;
-            color: var(--blue-dark);
-        }
-
+        .tenant-name-input { border: 1px solid #fbc02d !important; background-color: #fffde7 !important; font-weight: bold; font-size: 1.1rem; width: 100%; padding: 2px 5px; border-radius: 4px; color: var(--blue-dark); }
+        
         .receipt-container { background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; height: 100%; width: 100%; box-sizing: border-box; }
         .concept-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f1f1; }
         
-        .total-box-web, .total-box-pdf { 
-            background: var(--blue-dark); 
-            color: white; 
-            padding: 12px; 
-            border-radius: 5px; 
-            margin-top: 15px;
-            font-weight: bold;
-            text-align: center;
-        }
-
+        .total-box-web, .total-box-pdf { background: var(--blue-dark); color: white; padding: 12px; border-radius: 5px; margin-top: 15px; font-weight: bold; text-align: center; }
         .small-label { font-size: 0.72rem; font-weight: bold; display: block; color: #555; margin-bottom: 2px; }
-
+        
         .pdf-only-section { display: none; }
-
-        .pdf-tenant-title {
-            color: #3498db;
-            font-weight: bold;
-            font-size: 1.3rem;
-            margin: 0;
-        }
-
-        .pdf-layout-fix {
-            display: block !important;
-            margin: 0 auto !important;
-            padding: 15mm !important; 
-            width: 100% !important;
-            max-width: 190mm !important; 
-            box-sizing: border-box !important;
-        }
-
-        .pdf-border-dashed {
-            border: 2px dashed #ccc !important;
-            padding: 10mm !important;
-            border-radius: 5px !important;
-        }
-
+        .pdf-tenant-title { color: #3498db; font-weight: bold; font-size: 1.3rem; margin: 0; }
+        .pdf-layout-fix { display: block !important; margin: 0 auto !important; padding: 15mm !important; width: 100% !important; max-width: 190mm !important; box-sizing: border-box !important; }
+        .pdf-border-dashed { border: 2px dashed #ccc !important; padding: 10mm !important; border-radius: 5px !important; }
         .pdf-text-fix { font-size: 0.9rem !important; }
-
+        
         @media (max-width: 768px) { .container { padding: 10px; } }
     </style>
 </head>
@@ -371,7 +312,7 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-3 d-print-none" id="web_header_${i}">
                             <input type="text" id="i${i}_name" class="tenant-name-input" value="Inquilino #${i}" oninput="calc()">
-                            <button class="btn btn-danger btn-sm ms-2" onclick="exportPDF(${i})">PDF</button>
+                            <button class="btn btn-danger btn-sm ms-2 fw-bold w-25" onclick="exportPDF(${i})">PDF</button>
                         </div>
 
                         <div class="row g-2 mb-2 d-print-none" id="inputs_${i}">
@@ -433,7 +374,7 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-3 d-print-none" id="web_header_nometer">
                             <input type="text" id="inometer_name" class="tenant-name-input" style="background-color: #e8f8f5 !important; border-color: #1abc9c !important;" value="Inquilino Sin Medidor" oninput="calc()">
-                            <button class="btn btn-danger btn-sm ms-2" onclick="exportPDF('nometer')">PDF</button>
+                            <button class="btn btn-danger btn-sm ms-2 fw-bold w-25" onclick="exportPDF('nometer')">PDF</button>
                         </div>
                         
                         <div class="alert alert-info py-2 px-2 text-center d-print-none" style="font-size: 0.8rem; margin-bottom: 15px;">
@@ -502,16 +443,282 @@
         if (iWeb) iWeb.style.setProperty('display', 'none', 'important');
         if (tWeb) tWeb.style.setProperty('display', 'none', 'important');
 
+        // =========================================================================
+        // GENERACIÓN DE LOS CÁLCULOS MATEMÁTICOS MEJORADOS (SEGUNDA PÁGINA)
+        // =========================================================================
+        
         const mes = document.getElementById('m_mes').value;
-        const tenantNameInput = document.getElementById(`i${id}_name`) || document.getElementById(`inometer_name`);
-        const fileName = tenantNameInput ? tenantNameInput.value : 'Inquilino';
-        const exportFileName = `RECIBO AGUA ${mes} - ${fileName}.pdf`;
+        const tenantNameInput = document.getElementById(id === 'nometer' ? 'inometer_name' : `i${id}_name`);
+        const nombre = tenantNameInput ? tenantNameInput.value : 'Inquilino';
 
+        const getVal = (elemId) => parseFloat(document.getElementById(elemId)?.value) || 0;
+        const mainPrevR = getVal('m_prev_r');
+        const mainCurrR = getVal('m_curr_r');
+        const diffTotal = mainCurrR - mainPrevR; 
+        const vWater = getVal('v_water');
+        const vSewer = getVal('v_sewer');
+        const vFixed = getVal('v_fixed');
+        const vMora = getVal('v_mora');
+        const vRedAnt = getVal('v_red_ant');
+        const vRedAct = getVal('v_red_act');
+        
+        const mPrevDStr = document.getElementById('m_prev_d').value;
+        const mCurrDStr = document.getElementById('m_curr_d').value;
+        const mPrevD = new Date(mPrevDStr + "T00:00:00");
+        const mCurrD = new Date(mCurrDStr + "T00:00:00");
+        
+        let mainDays = 0;
+        if (!isNaN(mCurrD) && !isNaN(mPrevD)) {
+            mainDays = Math.floor((mCurrD - mPrevD) / 864e5) + 1;
+        }
+        mainDays = mainDays > 0 ? mainDays : 1; 
+
+        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 1;
+        const hasNoMeter = document.getElementById('has_nometer').checked;
+        const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
+
+        const tAgua = diffTotal > 0 ? (vWater / diffTotal) : 0;
+        const tDesague = diffTotal > 0 ? (vSewer / diffTotal) : 0;
+
+        let htmlContenido = '';
+
+        if (id === 'nometer') {
+            const cCons = document.getElementById('inometer_res_cons').innerText;
+            const cWater = document.getElementById('inometer_val_water').innerText;
+            const cSewer = document.getElementById('inometer_val_sewer').innerText;
+            const cFixed = document.getElementById('inometer_val_fixed').innerText;
+            const cIgv = document.getElementById('inometer_val_igv').innerText;
+            const cMora = document.getElementById('inometer_val_mora').innerText;
+            const cRedAnt = document.getElementById('inometer_val_red_ant').innerText;
+            const cRedAct = document.getElementById('inometer_val_red_act').innerText;
+            const total = document.getElementById('inometer_pdf_total_val').innerText;
+
+            htmlContenido = `
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #334155; font-size: 13px; padding-top: 10px;">
+                    <div style="text-align: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h2 style="color: #0f172a; margin: 0 0 5px 0; font-weight: 800; font-size: 22px;">MEMORIA DE CÁLCULO</h2>
+                        <p style="margin: 0; font-size: 14px; color: #475569;">
+                            Inquilino: <strong style="color: #0f172a;">${nombre} (Sin Medidor)</strong> | Mes: <strong style="color: #0f172a;">${mes}</strong>
+                        </p>
+                    </div>
+
+                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 13px;">
+                        <strong>Nota Importante:</strong> Al no tener medidor individual, tus cálculos se obtienen restando el consumo y costos de los inquilinos con medidor al total del recibo principal.
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 1: CONSUMO ESTIMADO</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <p style="margin: 0 0 8px 0; color: #64748b;">¿Cuánto se asume que consumiste?</p>
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
+                                <strong>Fórmula:</strong> Consumo Total (Recibo) - Suma de Consumo (Inquilinos con Medidor)<br>
+                                <strong>Resultado:</strong> <span style="color: #2563eb; font-weight: bold; font-size: 14px;">${cCons} m³</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 2: CONCEPTOS BÁSICOS (AGUA Y DESAGÜE)</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
+                                <strong>Agua:</strong> Costo Total Agua - Suma Costo Agua Inquilinos = <strong style="color: #2563eb;">S/. ${cWater}</strong><br>
+                                <strong>Alcantarillado:</strong> Costo Total Desagüe - Suma Costo Desagüe Inq. = <strong style="color: #2563eb;">S/. ${cSewer}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 3: SERVICIOS COMPARTIDOS</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <p style="margin: 0 0 8px 0; color: #64748b;">Diferencia restante de los gastos fijos no cubiertos por los medidores.</p>
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
+                                <strong>Cargo Fijo:</strong> S/. ${cFixed}<br>
+                                <strong>Mora:</strong> S/. ${cMora}<br>
+                                <strong>Redondeo Anterior:</strong> S/. ${cRedAnt}<br>
+                                <strong>Redondeo Actual:</strong> S/. ${cRedAct}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 4: IGV (18%)</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <p style="margin: 0 0 8px 0; color: #64748b;">Impuesto aplicado sobre (Agua + Alcantarillado + Cargo Fijo).</p>
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
+                                <strong>Fórmula:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/. ${cFixed})<br>
+                                <strong>Operación:</strong> = <strong style="color: #2563eb;">S/. ${cIgv}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="page-break-inside: avoid; background-color: #0f172a; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                        <p style="margin: 0 0 15px 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose de Conceptos</p>
+                        
+                        <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #cbd5e1; border-bottom: 1px dashed #475569; padding-bottom: 15px;">
+                            <tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr>
+                        </table>
+
+                        <h3 style="margin: 0; font-size: 22px; font-weight: bold; text-align: center; color: #38bdf8;">TOTAL A PAGAR: S/. ${total}</h3>
+                    </div>
+                </div>
+            `;
+        } else {
+            const prevR = getVal(`i${id}_prev_r`);
+            const currR = getVal(`i${id}_curr_r`);
+            const prevDStr = document.getElementById(`i${id}_prev_d`).value;
+            const currDStr = document.getElementById(`i${id}_curr_d`).value;
+            
+            const iPrevD = new Date(prevDStr + "T00:00:00");
+            const iCurrD = new Date(currDStr + "T00:00:00");
+            let iDays = 0;
+            if (!isNaN(iCurrD) && !isNaN(iPrevD)) {
+                iDays = Math.floor((iCurrD - iPrevD) / 864e5) + 1;
+            }
+
+            const billedDays = parseFloat(document.getElementById(`i${id}_manual_days`).value) || mainDays;
+            
+            const iDiff = currR - prevR;
+            const iDaily = (iDays > 0 && iDiff > 0) ? (iDiff / iDays) : 0;
+            
+            const cCons = document.getElementById(`i${id}_res_cons`).innerText;
+            const cWater = document.getElementById(`i${id}_val_water`).innerText;
+            const cSewer = document.getElementById(`i${id}_val_sewer`).innerText;
+            const cFixed = document.getElementById(`i${id}_val_fixed`).innerText;
+            const cIgv = document.getElementById(`i${id}_val_igv`).innerText;
+            const cMora = document.getElementById(`i${id}_val_mora`).innerText;
+            const cRedAnt = document.getElementById(`i${id}_val_red_ant`).innerText;
+            const cRedAct = document.getElementById(`i${id}_val_red_act`).innerText;
+            const total = document.getElementById(`i${id}_pdf_total_val`).innerText;
+
+            let prevDFormatted = prevDStr ? prevDStr.split('-').reverse().join('/') : "N/A";
+            let currDFormatted = currDStr ? currDStr.split('-').reverse().join('/') : "N/A";
+
+            htmlContenido = `
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #334155; font-size: 13px; padding-top: 10px;">
+                    <div style="text-align: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h2 style="color: #0f172a; margin: 0 0 5px 0; font-weight: 800; font-size: 22px;">MEMORIA DE CÁLCULO</h2>
+                        <p style="margin: 0; font-size: 14px; color: #475569;">
+                            Inquilino: <strong style="color: #0f172a;">${nombre}</strong> | Mes: <strong style="color: #0f172a;">${mes}</strong>
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 1: TIEMPO</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <p style="margin: 0 0 8px 0; color: #64748b;">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</p>
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
+                                <strong>Fórmula:</strong> (Fecha Actual - Fecha Anterior) + 1 día<br>
+                                <strong>Operación:</strong> (${currDFormatted} - ${prevDFormatted}) + 1 = ${iDays} días.<br>
+                                <strong>Días a cobrar:</strong> <span style="color: #2563eb; font-weight: bold; font-size: 14px;">${billedDays} días</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 2: CONSUMO DIARIO Y TARIFA</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <p style="margin: 0 0 8px 0; color: #64748b;">¿Cuánto consumió el inquilino en promedio por cada día?</p>
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
+                                <strong>Fórmula:</strong> (Lectura Actual - Lectura Anterior) ÷ Número de días transcurridos<br>
+                                <strong>Operación:</strong> (${currR.toFixed(2)} - ${prevR.toFixed(2)}) ÷ ${iDays} días = ${iDaily.toFixed(4)} m³/día.<br><br>
+                                <strong>Consumo del Mes:</strong> ${iDaily.toFixed(4)} x ${billedDays} días = <strong style="color: #2563eb;">${cCons} m³</strong><br>
+                                <span style="color:#475569;">Tarifa Agua: S/. ${tAgua.toFixed(4)} por m³</span><br>
+                                <span style="color:#475569;">Tarifa Alcantarillado: S/. ${tDesague.toFixed(4)} por m³</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 3: CARGO AGUA Y ALCANTARILLADO</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <p style="margin: 0 0 8px 0; color: #64748b;">¿A cuánto dinero equivale ese consumo en el recibo completo?</p>
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
+                                <strong>Agua:</strong> ${cCons} m³ x S/. ${tAgua.toFixed(4)} = <strong style="color: #2563eb;">S/. ${cWater}</strong><br>
+                                <strong>Alcantarillado:</strong> ${cCons} m³ x S/. ${tDesague.toFixed(4)} = <strong style="color: #2563eb;">S/. ${cSewer}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 4: SERVICIOS COMPARTIDOS</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <p style="margin: 0 0 8px 0; color: #64748b;">División proporcional: (Monto del Recibo ÷ ${mainDays} días recibo) ÷ ${totalTenants} inquilinos × ${billedDays} días a cobrar.</p>
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a; line-height: 1.6;">
+                                • <strong>Cargo Fijo:</strong> S/. ${vFixed.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cFixed}</strong><br>
+                                • <strong>Mora:</strong> S/. ${vMora.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cMora}</strong><br>
+                                • <strong>Redondeo Ant.:</strong> S/. ${vRedAnt.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cRedAnt}</strong><br>
+                                • <strong>Redondeo Act.:</strong> S/. ${vRedAct.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cRedAct}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
+                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 5: IGV (18%)</h4>
+                        </div>
+                        <div style="padding: 15px;">
+                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
+                                <strong>Operación:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/. ${cFixed}) = <strong style="color: #2563eb;">S/. ${cIgv}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="page-break-inside: avoid; background-color: #0f172a; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                        <p style="margin: 0 0 15px 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose de Conceptos</p>
+                        
+                        <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #cbd5e1; border-bottom: 1px dashed #475569; padding-bottom: 15px;">
+                            <tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr>
+                            <tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr>
+                        </table>
+
+                        <h3 style="margin: 0; font-size: 22px; font-weight: bold; text-align: center; color: #38bdf8;">TOTAL A PAGAR: S/. ${total}</h3>
+                    </div>
+                </div>
+            `;
+        }
+
+        const pageBreak = document.createElement('div');
+        pageBreak.classList.add('html2pdf__page-break');
+        element.appendChild(pageBreak);
+
+        const calcDiv = document.createElement('div');
+        calcDiv.innerHTML = htmlContenido;
+        element.appendChild(calcDiv);
+
+        const exportFileName = `RECIBO AGUA ${mes} - ${nombre}.pdf`;
         const opt = {
             margin: [5, 5, 5, 5], 
             filename: exportFileName,
             image: { type: 'jpeg', quality: 1 },
             html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            pagebreak: { mode: ['css', 'legacy'] },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
@@ -529,6 +736,9 @@
             if (hWeb) hWeb.style.setProperty('display', 'flex', 'important');
             if (iWeb) iWeb.style.setProperty('display', 'flex', 'important');
             if (tWeb) tWeb.style.setProperty('display', 'flex', 'important');
+
+            element.removeChild(pageBreak);
+            element.removeChild(calcDiv);
         }
     }
 
