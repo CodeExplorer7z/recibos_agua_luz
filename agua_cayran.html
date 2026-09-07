@@ -494,87 +494,89 @@
             const total = document.getElementById('inometer_pdf_total_val').innerText;
 
             htmlContenido = `
-                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #334155; font-size: 13px; padding-top: 10px;">
-                    <div style="text-align: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px;">
-                        <h2 style="color: #0f172a; margin: 0 0 5px 0; font-weight: 800; font-size: 22px;">MEMORIA DE CÁLCULO</h2>
-                        <p style="margin: 0; font-size: 14px; color: #475569;">
-                            Inquilino: <strong style="color: #0f172a;">${nombre} (Sin Medidor)</strong> | Mes: <strong style="color: #0f172a;">${mes}</strong>
-                        </p>
-                    </div>
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #334155; font-size: 14px; padding: 10px;">
+                
+                <!-- Header Principal -->
+                <div style="background-color: #0fa968; color: white; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px;">
+                    <h2 style="margin: 0 0 5px 0; font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">CÁLCULOS MATEMÁTICOS</h2>
+                    <p style="margin: 0; font-size: 15px;">Inquilino: <span style="text-transform: uppercase;">${nombre} (Sin Medidor)</span> | Mes: <span style="text-transform: uppercase;">${mes}</span></p>
+                </div>
 
-                    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 13px;">
-                        <strong>Nota Importante:</strong> Al no tener medidor individual, tus cálculos se obtienen restando el consumo y costos de los inquilinos con medidor al total del recibo principal.
-                    </div>
+                <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 13px;">
+                    <strong>Nota Importante:</strong> Al no tener medidor individual, tus cálculos se obtienen restando el consumo y costos de los inquilinos con medidor al total del recibo principal.
+                </div>
 
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 1: CONSUMO ESTIMADO</h4>
+                <!-- PASO 1 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 1: CONSUMO ESTIMADO</div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cuánto se asume que consumiste?</h3>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; font-style: italic; color: #64748b; font-size: 13px;">
+                            Fórmula: Consumo Total (Recibo) - Suma de Consumo (Inquilinos con Medidor)
                         </div>
-                        <div style="padding: 15px;">
-                            <p style="margin: 0 0 8px 0; color: #64748b;">¿Cuánto se asume que consumiste?</p>
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
-                                <strong>Fórmula:</strong> Consumo Total (Recibo) - Suma de Consumo (Inquilinos con Medidor)<br>
-                                <strong>Resultado:</strong> <span style="color: #2563eb; font-weight: bold; font-size: 14px;">${cCons} m³</span>
-                            </div>
+                        <div style="font-size: 14px; color: #0f172a;">
+                            <strong>Resultado:</strong> <strong style="color: #0fa968; font-size: 15px;">${cCons} m³</strong>
                         </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 2: CONCEPTOS BÁSICOS (AGUA Y DESAGÜE)</h4>
-                        </div>
-                        <div style="padding: 15px;">
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
-                                <strong>Agua:</strong> Costo Total Agua - Suma Costo Agua Inquilinos = <strong style="color: #2563eb;">S/. ${cWater}</strong><br>
-                                <strong>Alcantarillado:</strong> Costo Total Desagüe - Suma Costo Desagüe Inq. = <strong style="color: #2563eb;">S/. ${cSewer}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 3: SERVICIOS COMPARTIDOS</h4>
-                        </div>
-                        <div style="padding: 15px;">
-                            <p style="margin: 0 0 8px 0; color: #64748b;">Diferencia restante de los gastos fijos no cubiertos por los medidores.</p>
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
-                                <strong>Cargo Fijo:</strong> S/. ${cFixed}<br>
-                                <strong>Mora:</strong> S/. ${cMora}<br>
-                                <strong>Redondeo Anterior:</strong> S/. ${cRedAnt}<br>
-                                <strong>Redondeo Actual:</strong> S/. ${cRedAct}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 4: IGV (18%)</h4>
-                        </div>
-                        <div style="padding: 15px;">
-                            <p style="margin: 0 0 8px 0; color: #64748b;">Impuesto aplicado sobre (Agua + Alcantarillado + Cargo Fijo).</p>
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
-                                <strong>Fórmula:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/. ${cFixed})<br>
-                                <strong>Operación:</strong> = <strong style="color: #2563eb;">S/. ${cIgv}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="page-break-inside: avoid; background-color: #0f172a; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                        <p style="margin: 0 0 15px 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose de Conceptos</p>
-                        
-                        <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #cbd5e1; border-bottom: 1px dashed #475569; padding-bottom: 15px;">
-                            <tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr>
-                        </table>
-
-                        <h3 style="margin: 0; font-size: 22px; font-weight: bold; text-align: center; color: #38bdf8;">TOTAL A PAGAR: S/. ${total}</h3>
                     </div>
                 </div>
+
+                <!-- PASO 2 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 2: CONCEPTOS BÁSICOS</div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">Agua y Alcantarillado</h3>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="font-size: 14px; color: #0f172a; line-height: 1.8;">
+                            <strong>Agua:</strong> Costo Total Agua - Suma Costo Agua Inq. = <strong style="color: #0fa968;">S/. ${cWater}</strong><br>
+                            <strong>Alcantarillado:</strong> Costo Total Desagüe - Suma Costo Desagüe Inq. = <strong style="color: #0fa968;">S/. ${cSewer}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 3: SERVICIOS COMPARTIDOS</div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">Diferencia restante de gastos fijos</h3>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="font-size: 14px; color: #0f172a; line-height: 1.6;">
+                            <strong>Cargo Fijo:</strong> S/. ${cFixed}<br>
+                            <strong>Mora:</strong> S/. ${cMora}<br>
+                            <strong>Redondeo Anterior:</strong> S/. ${cRedAnt}<br>
+                            <strong>Redondeo Actual:</strong> S/. ${cRedAct}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 4 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 4: IGV (18%)</div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">Impuesto sobre los servicios básicos</h3>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; font-style: italic; color: #64748b; font-size: 13px;">
+                            Fórmula: 18% x (S/. ${cWater} + S/. ${cSewer} + S/. ${cFixed})
+                        </div>
+                        <div style="font-size: 14px; color: #0f172a;">
+                            <strong>Operación:</strong> = <strong style="color: #0fa968;">S/. ${cIgv}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOTAL -->
+                <div style="page-break-inside: avoid; background-color: #064e3b; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <p style="margin: 0 0 15px 0; color: #a7f3d0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose Final de Conceptos</p>
+                    
+                    <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #d1fae5; border-bottom: 1px dashed #047857; padding-bottom: 15px;">
+                        <tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr>
+                    </table>
+
+                    <h3 style="margin: 0; font-size: 24px; font-weight: bold; text-align: center; color: #10b981;">TOTAL A PAGAR: S/. ${total}</h3>
+                </div>
+            </div>
             `;
         } else {
             const prevR = getVal(`i${id}_prev_r`);
@@ -608,99 +610,102 @@
             let currDFormatted = currDStr ? currDStr.split('-').reverse().join('/') : "N/A";
 
             htmlContenido = `
-                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #334155; font-size: 13px; padding-top: 10px;">
-                    <div style="text-align: center; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px;">
-                        <h2 style="color: #0f172a; margin: 0 0 5px 0; font-weight: 800; font-size: 22px;">MEMORIA DE CÁLCULO</h2>
-                        <p style="margin: 0; font-size: 14px; color: #475569;">
-                            Inquilino: <strong style="color: #0f172a;">${nombre}</strong> | Mes: <strong style="color: #0f172a;">${mes}</strong>
-                        </p>
-                    </div>
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #334155; font-size: 14px; padding: 10px;">
+                
+                <!-- Header Principal -->
+                <div style="background-color: #0fa968; color: white; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px;">
+                    <h2 style="margin: 0 0 5px 0; font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">CÁLCULOS MATEMÁTICOS</h2>
+                    <p style="margin: 0; font-size: 15px;">Inquilino: <span style="text-transform: uppercase;">${nombre}</span> | Mes: <span style="text-transform: uppercase;">${mes}</span></p>
+                </div>
 
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 1: TIEMPO</h4>
+                <!-- PASO 1 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 1: TIEMPO</div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</h3>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; font-style: italic; color: #64748b; font-size: 13px;">
+                            Fórmula: (Fecha Actual - Fecha Anterior) + 1 día
                         </div>
-                        <div style="padding: 15px;">
-                            <p style="margin: 0 0 8px 0; color: #64748b;">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</p>
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
-                                <strong>Fórmula:</strong> (Fecha Actual - Fecha Anterior) + 1 día<br>
-                                <strong>Operación:</strong> (${currDFormatted} - ${prevDFormatted}) + 1 = ${iDays} días.<br>
-                                <strong>Días a cobrar:</strong> <span style="color: #2563eb; font-weight: bold; font-size: 14px;">${billedDays} días</span>
-                            </div>
+                        <div style="font-size: 14px; color: #0f172a;">
+                            <strong>Operación:</strong> (${currDFormatted} - ${prevDFormatted}) + 1 = <strong>${iDays} días.</strong><br>
+                            <div style="margin-top: 8px;"><strong>Días a cobrar:</strong> ${billedDays} días</div>
                         </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 2: CONSUMO DIARIO Y TARIFA</h4>
-                        </div>
-                        <div style="padding: 15px;">
-                            <p style="margin: 0 0 8px 0; color: #64748b;">¿Cuánto consumió el inquilino en promedio por cada día?</p>
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
-                                <strong>Fórmula:</strong> (Lectura Actual - Lectura Anterior) ÷ Número de días transcurridos<br>
-                                <strong>Operación:</strong> (${currR.toFixed(2)} - ${prevR.toFixed(2)}) ÷ ${iDays} días = ${iDaily.toFixed(4)} m³/día.<br><br>
-                                <strong>Consumo del Mes:</strong> ${iDaily.toFixed(4)} x ${billedDays} días = <strong style="color: #2563eb;">${cCons} m³</strong><br>
-                                <span style="color:#475569;">Tarifa Agua: S/. ${tAgua.toFixed(4)} por m³</span><br>
-                                <span style="color:#475569;">Tarifa Alcantarillado: S/. ${tDesague.toFixed(4)} por m³</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 3: CARGO AGUA Y ALCANTARILLADO</h4>
-                        </div>
-                        <div style="padding: 15px;">
-                            <p style="margin: 0 0 8px 0; color: #64748b;">¿A cuánto dinero equivale ese consumo en el recibo completo?</p>
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
-                                <strong>Agua:</strong> ${cCons} m³ x S/. ${tAgua.toFixed(4)} = <strong style="color: #2563eb;">S/. ${cWater}</strong><br>
-                                <strong>Alcantarillado:</strong> ${cCons} m³ x S/. ${tDesague.toFixed(4)} = <strong style="color: #2563eb;">S/. ${cSewer}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 4: SERVICIOS COMPARTIDOS</h4>
-                        </div>
-                        <div style="padding: 15px;">
-                            <p style="margin: 0 0 8px 0; color: #64748b;">División proporcional: (Monto del Recibo ÷ ${mainDays} días recibo) ÷ ${totalTenants} inquilinos × ${billedDays} días a cobrar.</p>
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a; line-height: 1.6;">
-                                • <strong>Cargo Fijo:</strong> S/. ${vFixed.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cFixed}</strong><br>
-                                • <strong>Mora:</strong> S/. ${vMora.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cMora}</strong><br>
-                                • <strong>Redondeo Ant.:</strong> S/. ${vRedAnt.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cRedAnt}</strong><br>
-                                • <strong>Redondeo Act.:</strong> S/. ${vRedAct.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cRedAct}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 15px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;">
-                        <div style="background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0;">
-                            <h4 style="margin: 0; color: #2563eb; font-size: 14px; font-weight: bold;">PASO 5: IGV (18%)</h4>
-                        </div>
-                        <div style="padding: 15px;">
-                            <div style="background: #f1f5f9; padding: 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; color: #0f172a;">
-                                <strong>Operación:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/. ${cFixed}) = <strong style="color: #2563eb;">S/. ${cIgv}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="page-break-inside: avoid; background-color: #0f172a; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                        <p style="margin: 0 0 15px 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose de Conceptos</p>
-                        
-                        <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #cbd5e1; border-bottom: 1px dashed #475569; padding-bottom: 15px;">
-                            <tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr>
-                            <tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr>
-                        </table>
-
-                        <h3 style="margin: 0; font-size: 22px; font-weight: bold; text-align: center; color: #38bdf8;">TOTAL A PAGAR: S/. ${total}</h3>
                     </div>
                 </div>
+
+                <!-- PASO 2 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 2: CONSUMO DIARIO Y TARIFA</div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cuánto consumió el inquilino en promedio por cada día?</h3>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; font-style: italic; color: #64748b; font-size: 13px;">
+                            Fórmula: (Lectura Actual - Lectura Anterior) ÷ Número de días transcurridos
+                        </div>
+                        <div style="font-size: 14px; color: #0f172a;">
+                            <strong>Operación:</strong> (${currR.toFixed(2)} - ${prevR.toFixed(2)}) ÷ ${iDays} días = <strong>${iDaily.toFixed(4)} m³/día.</strong><br><br>
+                            <strong>Consumo del Mes:</strong> ${iDaily.toFixed(4)} x ${billedDays} días = <strong style="color: #0fa968;">${cCons} m³</strong><br>
+                            <span style="color:#64748b; font-size: 13px; display:inline-block; margin-top:5px;">Tarifa Agua: S/. ${tAgua.toFixed(4)} por m³</span><br>
+                            <span style="color:#64748b; font-size: 13px;">Tarifa Alcantarillado: S/. ${tDesague.toFixed(4)} por m³</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 3: CARGO AGUA Y ALCANTARILLADO</div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿A cuánto dinero equivale ese consumo en el recibo completo?</h3>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="font-size: 14px; color: #0f172a;">
+                            <strong>Agua:</strong> ${cCons} m³ x S/. ${tAgua.toFixed(4)} = <strong style="color: #0fa968;">S/. ${cWater}</strong><br>
+                            <div style="margin-top: 5px;"><strong>Alcantarillado:</strong> ${cCons} m³ x S/. ${tDesague.toFixed(4)} = <strong style="color: #0fa968;">S/. ${cSewer}</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 4 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 4: SERVICIOS COMPARTIDOS</div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cómo se dividen los gastos fijos no dependientes del volumen?</h3>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; font-style: italic; color: #64748b; font-size: 13px;">
+                            Fórmula: (Monto Total ÷ ${mainDays} días) ÷ ${totalTenants} inquilinos × ${billedDays} días cobrados.
+                        </div>
+                        <div style="font-size: 14px; color: #0f172a; line-height: 1.6;">
+                            • <strong>Cargo Fijo:</strong> S/. ${vFixed.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cFixed}</strong><br>
+                            • <strong>Mora:</strong> S/. ${vMora.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cMora}</strong><br>
+                            • <strong>Redondeo Ant.:</strong> S/. ${vRedAnt.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cRedAnt}</strong><br>
+                            • <strong>Redondeo Act.:</strong> S/. ${vRedAct.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cRedAct}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 5 -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
+                    <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 5: IGV (18%)</div>
+                    <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
+                        <div style="font-size: 14px; color: #0f172a;">
+                            <strong>Operación:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/. ${cFixed}) = <strong style="color: #0fa968;">S/. ${cIgv}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOTAL -->
+                <div style="page-break-inside: avoid; background-color: #064e3b; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <p style="margin: 0 0 15px 0; color: #a7f3d0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose Final de Conceptos</p>
+                    
+                    <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #d1fae5; border-bottom: 1px dashed #047857; padding-bottom: 15px;">
+                        <tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr>
+                        <tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr>
+                    </table>
+
+                    <h3 style="margin: 0; font-size: 24px; font-weight: bold; text-align: center; color: #10b981;">TOTAL A PAGAR: S/. ${total}</h3>
+                </div>
+            </div>
             `;
         }
 
