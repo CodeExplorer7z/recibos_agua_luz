@@ -93,7 +93,7 @@
             <div id="titulo_principal" class="titulo-fijo">DATOS DEL RECIBO PRINCIPAL (EMPRESA LUZ)</div>
         </div>
 
-        <div class="photo-gallery-wrapper">
+        <div class="photo-gallery-wrapper" style="display: none;">
             <div style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📁 SUBE FOTOS DEL RECIBO (Max 5):</div>
             
             <div class="gallery-container" id="gallery-ui"></div>
@@ -130,7 +130,6 @@
             </div>
             <div class="form-group">
                 <label>N° Inquilinos CON medidor (Máx 4):</label>
-                <!-- Modificado aquí: selected en el valor 2 -->
                 <select id="num_medidores" onchange="actualizarVista()">
                     <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
                 </select>
@@ -149,11 +148,10 @@
 
         <div class="section-title">Fechas y Lecturas (Recibo Principal)</div>
         <div class="grid-2">
-            <!-- Modificado aquí: se eliminó el atributo "autofocus" -->
             <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
             <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="text" id="fec_ant_m" placeholder="DD/MM/YYYY" oninput="calculate()"></div>
-            <div class="form-group"><label>Fecha Lectura Actual:</label><input type="text" id="fec_act_m" placeholder="DD/MM/YYYY" oninput="calculate()"></div>
+            <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
+            <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
         </div>
 
         <div class="section-title">Importes del Recibo (S/.)</div>
@@ -181,14 +179,10 @@
     const UIT_VIGENTE = 5500;
     const container = document.getElementById('inquilinos-container');
     
-    function parseDDMMYYYY(dStr) {
+    function parseDateLocal(dStr) {
         if(!dStr) return null;
-        const parts = dStr.trim().split(/[-/]/);
-        if(parts.length === 3) {
-            const d = new Date(parts[2], parseInt(parts[1])-1, parts[0]);
-            if(!isNaN(d)) return d;
-        }
-        return null;
+        const d = new Date(dStr + 'T00:00:00');
+        return isNaN(d) ? null : d;
     }
 
     function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault, alertBg) {
@@ -225,18 +219,22 @@
                         <input type="number" id="dias_vividos_i${id}" disabled oninput="calculate()">
                     </div>
                 </div>
-                <div class="section-title">DETALLE DE IMPORTES (S/.)</div>
-                <div class="grid-2">
-                    <div class="form-group"><label>Cargo energía:</label><input id="ener_i${id}" class="readonly" readonly></div>
-                    <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i${id}" class="readonly" readonly></div>
-                    <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i${id}" class="readonly" readonly></div>
-                    <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i${id}" class="readonly" readonly></div>
-                    <div class="form-group"><label>Interés compensatorio:</label><input id="int_i${id}" class="readonly" readonly></div>
-                    <div class="form-group"><label>IGV (18%):</label><input id="igv_i${id}" class="readonly" readonly></div>
-                    <div class="form-group"><label>Ley N° 28749:</label><input id="aporte_i${id}" class="readonly" readonly></div>
-                    <div class="form-group"><label>Redondeo anterior:</label><input id="red_ant_i${id}" class="readonly" readonly></div>
-                    <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i${id}" class="readonly" readonly></div>
+                
+                <div style="display: none;">
+                    <div class="section-title">DETALLE DE IMPORTES (S/.)</div>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Cargo energía:</label><input id="ener_i${id}" class="readonly" readonly></div>
+                        <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i${id}" class="readonly" readonly></div>
+                        <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i${id}" class="readonly" readonly></div>
+                        <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i${id}" class="readonly" readonly></div>
+                        <div class="form-group"><label>Interés compensatorio:</label><input id="int_i${id}" class="readonly" readonly></div>
+                        <div class="form-group"><label>IGV (18%):</label><input id="igv_i${id}" class="readonly" readonly></div>
+                        <div class="form-group"><label>Ley N° 28749:</label><input id="aporte_i${id}" class="readonly" readonly></div>
+                        <div class="form-group"><label>Redondeo anterior:</label><input id="red_ant_i${id}" class="readonly" readonly></div>
+                        <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i${id}" class="readonly" readonly></div>
+                    </div>
                 </div>
+
                 <div class="form-group" style="margin-top:10px">
                     <label>TOTAL A PAGAR (INQUILINO ${id - 1}):</label>
                     <input type="text" id="total_pagar_i${id}" class="readonly" style="font-size:1.3rem; border:none; background:transparent" readonly>
@@ -245,13 +243,11 @@
         `;
     }
 
-    // 1. Primero se generan las fichas de los inquilinos CON medidor (del 2 al 5)
     container.innerHTML += generarTarjetaInquilino(2, "Inquilino 1", "#059669", "recibo", "#d1fae5");
     container.innerHTML += generarTarjetaInquilino(3, "Inquilino 2", "#2563eb", "recibo", "#dbeafe");
     container.innerHTML += generarTarjetaInquilino(4, "Inquilino 3", "#9333ea", "recibo", "#f3e8ff");
     container.innerHTML += generarTarjetaInquilino(5, "Inquilino 4", "#ea580c", "recibo", "#ffedd5");
 
-    // 2. Al final se genera la ficha del inquilino SIN medidor (id 1) para que aparezca siempre abajo
     container.innerHTML += `
         <div class="card" id="recibo_i1" style="border: 2px solid #ef4444;">
             <div class="header-card">
@@ -379,8 +375,8 @@
 
         const f1m_val = document.getElementById('fec_act_m').value;
         const f2m_val = document.getElementById('fec_ant_m').value;
-        const d_f1m = parseDDMMYYYY(f1m_val);
-        const d_f2m = parseDDMMYYYY(f2m_val);
+        const d_f1m = parseDateLocal(f1m_val);
+        const d_f2m = parseDateLocal(f2m_val);
         const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
         const km = Math.max(0, getVal('lec_act_m') - getVal('lec_ant_m'));
@@ -475,8 +471,8 @@
         let diasFacturadosTexto = '';
         let f1m_val = document.getElementById('fec_act_m').value;
         let f2m_val = document.getElementById('fec_ant_m').value;
-        let d_f1m = parseDDMMYYYY(f1m_val);
-        let d_f2m = parseDDMMYYYY(f2m_val);
+        let d_f1m = parseDateLocal(f1m_val);
+        let d_f2m = parseDateLocal(f2m_val);
         let dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
         if(id === 1) {
@@ -626,7 +622,7 @@
             const f1i = document.getElementById(`fec_act_i${id}`).value; const f2i = document.getElementById(`fec_ant_i${id}`).value;
             const di_lectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
             const f1m_val = document.getElementById('fec_act_m').value; const f2m_val = document.getElementById('fec_ant_m').value;
-            const d_f1m = parseDDMMYYYY(f1m_val); const d_f2m = parseDDMMYYYY(f2m_val);
+            const d_f1m = parseDateLocal(f1m_val); const d_f2m = parseDateLocal(f2m_val);
             const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
             const modo = document.getElementById(`modo_dias_i${id}`).value;
             const dias_facturar = (modo === 'recibo') ? dm : getVal(`dias_vividos_i${id}`);
@@ -677,8 +673,8 @@
         
         let f1m_val = document.getElementById('fec_act_m').value;
         let f2m_val = document.getElementById('fec_ant_m').value;
-        let d_f1m = parseDDMMYYYY(f1m_val);
-        let d_f2m = parseDDMMYYYY(f2m_val);
+        let d_f1m = parseDateLocal(f1m_val);
+        let d_f2m = parseDateLocal(f2m_val);
         let dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
         let filasTabla = '';
@@ -862,8 +858,8 @@
                     const partes = limpio.split(/[-/]/);
                     if (partes.length === 3) {
                         return partes[0].length === 4 
-                            ? `${partes[2].padStart(2,'0')}/${partes[1].padStart(2,'0')}/${partes[0]}`
-                            : `${partes[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
+                            ? `${partes[0]}-${partes[1].padStart(2,'0')}-${partes[2].padStart(2,'0')}`
+                            : `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
                     }
                 }
                 return null;
