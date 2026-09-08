@@ -22,7 +22,7 @@
         .input-editable { background-color: #fffde7 !important; border: 1px solid #fbc02d !important; font-size: 16px !important; }
         .input-total-main { background-color: #e2f0d9 !important; border: 1px solid #70ad47 !important; font-weight: bold; color: #385723; font-size: 16px !important; }
         
-        .tenant-name-input { border: 1px solid #fbc02d !important; background-color: #fffde7 !important; font-weight: bold; font-size: 1.1rem; width: 100%; padding: 2px 5px; border-radius: 4px; color: var(--blue-dark); }
+        .tenant-name-input { border: 1px solid #fbc02d !important; background-color: #fffde7 !important; font-weight: bold; font-size: 1.1rem; padding: 4px 8px; border-radius: 4px; color: var(--blue-dark); width: 100%; }
         
         .receipt-container { background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; height: 100%; width: 100%; box-sizing: border-box; }
         .concept-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f1f1; }
@@ -32,10 +32,18 @@
         
         .pdf-only-section { display: none; }
         .pdf-tenant-title { color: #3498db; font-weight: bold; font-size: 1.3rem; margin: 0; }
-        .pdf-layout-fix { display: block !important; margin: 0 auto !important; padding: 15mm !important; width: 100% !important; max-width: 190mm !important; box-sizing: border-box !important; }
-        .pdf-border-dashed { border: 2px dashed #ccc !important; padding: 10mm !important; border-radius: 5px !important; }
-        .pdf-text-fix { font-size: 0.9rem !important; }
         
+        /* Contenedor maestro para renderizar los PDF (Metodología del archivo de Luz) */
+        #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
+        
+        /* Estilos específicos para el diseño del PDF del RECIBO (Modelo Luz) */
+        .modo-recibo { font-family: Arial, sans-serif !important; padding: 40px !important; color: #000 !important; background: white !important; }
+        .modo-recibo .header-pdf { display: flex; justify-content: space-between; border-bottom: 3px solid var(--blue-dark); padding-bottom: 10px; margin-bottom: 20px; }
+        .modo-recibo .total-box-pdf { background: var(--blue-dark); color: white; padding: 10px; border-radius: 5px; text-align: center; min-width: 150px; }
+        .modo-recibo .tabla-pdf { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .modo-recibo .tabla-pdf th { text-align: left; background: #f1f5f9; padding: 10px; border-bottom: 2px solid #cbd5e1; }
+        .modo-recibo .tabla-pdf td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+
         @media (max-width: 768px) { .container { padding: 10px; } }
     </style>
 </head>
@@ -44,6 +52,9 @@
 <div class="nav-back-bar">
     <a href="./index.html" class="btn-back">&#8592; Menú Principal</a>
 </div>
+
+<!-- Contenedor oculto estático donde se renderizarán los PDFs -->
+<div id="pdf-template-container"></div>
 
 <div class="container py-2">
     <div class="text-center mb-4">
@@ -132,7 +143,7 @@
                 await Share.share({
                     title: nombreArchivo,
                     url: savedFile.uri,
-                    dialogTitle: 'Abrir o Guardar Recibo PDF'
+                    dialogTitle: 'Abrir o Guardar Documento PDF'
                 });
                 return;
             } catch (err) {
@@ -299,23 +310,31 @@
             <div class="col-lg-4 col-md-6 col-12">
                 <div class="receipt-container" id="pdf_area_${i}">
                     <div id="pdf_content_wrapper_${i}">
-                        <div id="pdf_header_${i}" class="pdf-only-section mb-4">
-                            <h2 class="fw-bold m-0" style="color:#2c3e50; font-size: 1.5rem;">RECIBO DE AGUA</h2>
-                            <p class="fw-bold mb-0">MES: <span id="pdf_mes_${i}">---</span></p>
-                            <p class="pdf-tenant-title" id="pdf_tenant_name_${i}">Inquilino #${i}</p>
-                            <p class="fw-bold mb-0" style="font-size: 0.9rem; color: #555;" id="pdf_dias_${i}">Días facturados: 0</p>
+                        
+                        <!-- Elementos ocultos mantenidos para no romper lógica JS -->
+                        <div id="pdf_header_${i}" class="pdf-only-section">
+                            <span id="pdf_mes_${i}">---</span>
+                            <span id="pdf_tenant_name_${i}">Inquilino #${i}</span>
+                            <span id="pdf_dias_${i}">Días facturados: 0</span>
+                        </div>
+                        <div id="pdf_lecturas_${i}" class="pdf-only-section">
+                            <span id="pdf_lec_txt_${i}">0.00 (ANT) - 0.00 (ACT)</span>
+                        </div>
+                        <div id="pdf_total_box_${i}" class="pdf-only-section">
+                            <span id="i${i}_pdf_total_val">0.00</span>
                         </div>
 
-                        <div id="pdf_lecturas_${i}" class="pdf-only-section border-bottom pb-2 mb-3">
-                            <span class="fw-bold" style="font-size: 0.9rem;" id="pdf_lec_txt_${i}">0.00 (ANT) - 0.00 (ACT)</span>
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2" id="web_header_${i}">
+                            <div class="flex-grow-1" style="min-width: 40%;">
+                                <input type="text" id="i${i}_name" class="tenant-name-input" value="Inquilino #${i}" oninput="calc()">
+                            </div>
+                            <div class="d-flex gap-1" style="min-width: 50%;">
+                                <button class="btn btn-danger btn-sm fw-bold flex-fill" onclick="exportPDF(${i})">RECIBO</button>
+                                <button class="btn btn-warning btn-sm fw-bold text-dark flex-fill" onclick="exportCalculos(${i})">CÁLCULOS</button>
+                            </div>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center mb-3 d-print-none" id="web_header_${i}">
-                            <input type="text" id="i${i}_name" class="tenant-name-input" value="Inquilino #${i}" oninput="calc()">
-                            <button class="btn btn-danger btn-sm ms-2 fw-bold w-25" onclick="exportPDF(${i})">PDF</button>
-                        </div>
-
-                        <div class="row g-2 mb-2 d-print-none" id="inputs_${i}">
+                        <div class="row g-2 mb-2" id="inputs_${i}">
                             <div class="col-6"><label class="small-label">Lectura Anterior</label><input type="number" id="i${i}_prev_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                             <div class="col-6"><label class="small-label">Lectura Actual</label><input type="number" id="i${i}_curr_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                             <div class="col-6"><label class="small-label">Fecha Anterior</label><input type="date" id="i${i}_prev_d" class="form-control form-control-sm input-editable" oninput="calc()"></div>
@@ -343,13 +362,9 @@
                         <div class="concept-item pdf-text-fix"><span>Redondeo Anterior</span><span><span id="i${i}_val_red_ant">0.00</span></span></div>
                         <div class="concept-item pdf-text-fix"><span>Redondeo Actual</span><span><span id="i${i}_val_red_act">0.00</span></span></div>
 
-                        <div class="total-box-web d-flex justify-content-between d-print-none" id="web_total_${i}">
+                        <div class="total-box-web d-flex justify-content-between" id="web_total_${i}">
                             <span>TOTAL A PAGAR</span>
                             <span class="fw-bold">S/. <span id="i${i}_val_total">0.00</span></span>
-                        </div>
-
-                        <div id="pdf_total_box_${i}" class="total-box-pdf pdf-only-section">
-                            TOTAL A PAGAR: S/ <span id="i${i}_pdf_total_val">0.00</span>
                         </div>
                     </div>
                 </div>
@@ -361,23 +376,31 @@
             <div class="col-lg-4 col-md-6 col-12">
                 <div class="receipt-container" id="pdf_area_nometer" style="background-color: #f4f6f7; border: 2px solid #bdc3c7;">
                     <div id="pdf_content_wrapper_nometer">
-                        <div id="pdf_header_nometer" class="pdf-only-section mb-4">
-                            <h2 class="fw-bold m-0" style="color:#2c3e50; font-size: 1.5rem;">RECIBO DE AGUA</h2>
-                            <p class="fw-bold mb-0">MES: <span id="pdf_mes_nometer">---</span></p>
-                            <p class="pdf-tenant-title" id="pdf_tenant_name_nometer">Inquilino Sin Medidor</p>
-                            <p class="fw-bold mb-0" style="font-size: 0.9rem; color: #555;" id="pdf_dias_nometer">Días facturados: 0</p>
+                        
+                        <!-- Elementos ocultos mantenidos para no romper lógica JS -->
+                        <div id="pdf_header_nometer" class="pdf-only-section">
+                            <span id="pdf_mes_nometer">---</span>
+                            <span id="pdf_tenant_name_nometer">Inquilino Sin Medidor</span>
+                            <span id="pdf_dias_nometer">Días facturados: 0</span>
+                        </div>
+                        <div id="pdf_lecturas_nometer" class="pdf-only-section">
+                            <span id="pdf_lec_txt_nometer">Cálculo Diferencial</span>
+                        </div>
+                        <div id="pdf_total_box_nometer" class="pdf-only-section">
+                            <span id="inometer_pdf_total_val">0.00</span>
                         </div>
 
-                        <div id="pdf_lecturas_nometer" class="pdf-only-section border-bottom pb-2 mb-3">
-                            <span class="fw-bold" style="font-size: 0.9rem;" id="pdf_lec_txt_nometer">Cálculo Diferencial</span>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mb-3 d-print-none" id="web_header_nometer">
-                            <input type="text" id="inometer_name" class="tenant-name-input" style="background-color: #e8f8f5 !important; border-color: #1abc9c !important;" value="Inquilino Sin Medidor" oninput="calc()">
-                            <button class="btn btn-danger btn-sm ms-2 fw-bold w-25" onclick="exportPDF('nometer')">PDF</button>
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2" id="web_header_nometer">
+                            <div class="flex-grow-1" style="min-width: 40%;">
+                                <input type="text" id="inometer_name" class="tenant-name-input" style="background-color: #e8f8f5 !important; border-color: #1abc9c !important;" value="Inquilino Sin Medidor" oninput="calc()">
+                            </div>
+                            <div class="d-flex gap-1" style="min-width: 50%;">
+                                <button class="btn btn-danger btn-sm fw-bold flex-fill" onclick="exportPDF('nometer')">RECIBO</button>
+                                <button class="btn btn-warning btn-sm fw-bold text-dark flex-fill" onclick="exportCalculos('nometer')">CÁLCULOS</button>
+                            </div>
                         </div>
                         
-                        <div class="alert alert-info py-2 px-2 text-center d-print-none" style="font-size: 0.8rem; margin-bottom: 15px;">
+                        <div class="alert alert-info py-2 px-2 text-center" style="font-size: 0.8rem; margin-bottom: 15px;">
                             <strong>Sin Medidor:</strong> Se calcula restando los consumos de los demás inquilinos al total del recibo principal.
                         </div>
 
@@ -390,13 +413,9 @@
                         <div class="concept-item pdf-text-fix"><span>Redondeo Anterior</span><span><span id="inometer_val_red_ant">0.00</span></span></div>
                         <div class="concept-item pdf-text-fix"><span>Redondeo Actual</span><span><span id="inometer_val_red_act">0.00</span></span></div>
 
-                        <div class="total-box-web d-flex justify-content-between d-print-none" id="web_total_nometer" style="background: #1abc9c;">
+                        <div class="total-box-web d-flex justify-content-between" id="web_total_nometer" style="background: #1abc9c;">
                             <span>TOTAL A PAGAR</span>
                             <span class="fw-bold">S/. <span id="inometer_val_total">0.00</span></span>
-                        </div>
-
-                        <div id="pdf_total_box_nometer" class="total-box-pdf pdf-only-section" style="background: #1abc9c;">
-                            TOTAL A PAGAR: S/ <span id="inometer_pdf_total_val">0.00</span>
                         </div>
                     </div>
                 </div>
@@ -421,32 +440,94 @@
         calc();
     }
 
+    // =========================================================================
+    // EXPORTACIÓN EXCLUSIVA DEL RECIBO PRINCIPAL (METODOLOGÍA DEL RECIBO DE LUZ)
+    // =========================================================================
     async function exportPDF(id) {
-        const element = document.getElementById(`pdf_area_${id}`);
-        const wrapper = document.getElementById(`pdf_content_wrapper_${id}`);
-        const hPdf = document.getElementById(`pdf_header_${id}`);
-        const lPdf = document.getElementById(`pdf_lecturas_${id}`);
-        const tPdf = document.getElementById(`pdf_total_box_${id}`);
-        
-        const hWeb = document.getElementById(`web_header_${id}`);
-        const iWeb = document.getElementById(`inputs_${id}`);
-        const tWeb = document.getElementById(`web_total_${id}`);
+        const tempCont = document.getElementById('pdf-template-container');
+        const mes = document.getElementById('m_mes').value;
+        const tenantNameInput = document.getElementById(id === 'nometer' ? 'inometer_name' : `i${id}_name`);
+        const nombreInq = tenantNameInput ? tenantNameInput.value : 'Inquilino';
+        const total_pagar = document.getElementById(id === 'nometer' ? 'inometer_pdf_total_val' : `i${id}_pdf_total_val`).innerText;
 
-        hPdf.style.display = 'block';
-        lPdf.style.display = 'block';
-        tPdf.style.display = 'block';
-        
-        element.classList.add('pdf-layout-fix');
-        wrapper.classList.add('pdf-border-dashed'); 
-        
-        if (hWeb) hWeb.style.setProperty('display', 'none', 'important');
-        if (iWeb) iWeb.style.setProperty('display', 'none', 'important');
-        if (tWeb) tWeb.style.setProperty('display', 'none', 'important');
+        let color = '#2c3e50'; 
+        let diasFacturadosTexto = '';
+        let lecturasTexto = '';
+        let htmlTabla = '';
 
-        // =========================================================================
-        // GENERACIÓN DE LOS CÁLCULOS MATEMÁTICOS MEJORADOS (SEGUNDA PÁGINA)
-        // =========================================================================
+        if (id === 'nometer') {
+            const diasFct = document.getElementById('pdf_dias_nometer').innerText.replace('Días facturados: ', '');
+            diasFacturadosTexto = `<b>DÍAS FACTURADOS:</b> ${diasFct}<br>`;
+            lecturasTexto = `<b>CÁLCULO:</b> Diferencial (Sin Medidor)<br>`;
+
+            htmlTabla = `
+                <tr><td>Consumo Estimado</td><td style="text-align:right">${document.getElementById('inometer_res_cons').innerText} m³</td></tr>
+                <tr><td>Agua</td><td style="text-align:right">${document.getElementById('inometer_val_water').innerText}</td></tr>
+                <tr><td>Alcantarillado</td><td style="text-align:right">${document.getElementById('inometer_val_sewer').innerText}</td></tr>
+                <tr><td>Cargo Fijo</td><td style="text-align:right">${document.getElementById('inometer_val_fixed').innerText}</td></tr>
+                <tr><td>IGV (18%)</td><td style="text-align:right">${document.getElementById('inometer_val_igv').innerText}</td></tr>
+                <tr><td>Mora</td><td style="text-align:right">${document.getElementById('inometer_val_mora').innerText}</td></tr>
+                <tr><td>Redondeo Anterior</td><td style="text-align:right">${document.getElementById('inometer_val_red_ant').innerText}</td></tr>
+                <tr><td>Redondeo Actual</td><td style="text-align:right">${document.getElementById('inometer_val_red_act').innerText}</td></tr>
+            `;
+        } else {
+            const diasFct = document.getElementById(`pdf_dias_${id}`).innerText.replace('Días facturados: ', '');
+            diasFacturadosTexto = `<b>DÍAS FACTURADOS:</b> ${diasFct}<br>`;
+            
+            const l_ant = parseFloat(document.getElementById(`i${id}_prev_r`).value) || 0;
+            const l_act = parseFloat(document.getElementById(`i${id}_curr_r`).value) || 0;
+            lecturasTexto = `<b>LECTURAS:</b> ${l_ant.toFixed(2)} (ANTERIOR); ${l_act.toFixed(2)} (ACTUAL)<br>`;
+
+            htmlTabla = `
+                <tr><td>Consumo</td><td style="text-align:right">${document.getElementById(`i${id}_res_cons`).innerText} m³</td></tr>
+                <tr><td>Agua</td><td style="text-align:right">${document.getElementById(`i${id}_val_water`).innerText}</td></tr>
+                <tr><td>Alcantarillado</td><td style="text-align:right">${document.getElementById(`i${id}_val_sewer`).innerText}</td></tr>
+                <tr><td>Cargo Fijo</td><td style="text-align:right">${document.getElementById(`i${id}_val_fixed`).innerText}</td></tr>
+                <tr><td>IGV (18%)</td><td style="text-align:right">${document.getElementById(`i${id}_val_igv`).innerText}</td></tr>
+                <tr><td>Mora</td><td style="text-align:right">${document.getElementById(`i${id}_val_mora`).innerText}</td></tr>
+                <tr><td>Redondeo Anterior</td><td style="text-align:right">${document.getElementById(`i${id}_val_red_ant`).innerText}</td></tr>
+                <tr><td>Redondeo Actual</td><td style="text-align:right">${document.getElementById(`i${id}_val_red_act`).innerText}</td></tr>
+            `;
+        }
+
+        // Construcción del HTML exactamente igual a la estructura del recibo de luz
+        tempCont.innerHTML = `
+            <div class="modo-recibo" id="recibo-captura">
+                <div class="header-pdf" style="border-bottom-color:${color};">
+                    <div><b style="color:${color}; font-size:1.6rem">RECIBO DE AGUA</b><br>MES: ${mes}</div>
+                    <div class="total-box-pdf" style="background:${color};"><small>TOTAL A PAGAR</small><br><b style="font-size:1.5rem">S/. ${total_pagar}</b></div>
+                </div>
+                <div style="margin-bottom:15px"><b>NOMBRE:</b> ${nombreInq}<br>${lecturasTexto}${diasFacturadosTexto}</div>
+                <table class="tabla-pdf">
+                    <thead><tr><th>DETALLE DE IMPORTES</th><th style="text-align:right">S/.</th></tr></thead>
+                    <tbody>
+                        ${htmlTabla}
+                    </tbody>
+                </table>
+            </div>`;
+
+        const exportFileName = `RECIBO AGUA ${mes} - ${nombreInq}.pdf`;
         
+        const opt = {
+            margin: [10, 10, 10, 10], 
+            filename: exportFileName,
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            const pdfBase64 = await html2pdf().set(opt).from(document.getElementById('recibo-captura')).outputPdf('datauristring');
+            await guardarOCompartirPDF(exportFileName, pdfBase64);
+        } finally {
+            tempCont.innerHTML = '';
+        }
+    }
+
+    // =========================================================================
+    // EXPORTACIÓN EXCLUSIVA DE LOS CÁLCULOS MATEMÁTICOS (CORREGIDO PÁGINA EN BLANCO)
+    // =========================================================================
+    async function exportCalculos(id) {
         const mes = document.getElementById('m_mes').value;
         const tenantNameInput = document.getElementById(id === 'nometer' ? 'inometer_name' : `i${id}_name`);
         const nombre = tenantNameInput ? tenantNameInput.value : 'Inquilino';
@@ -494,19 +575,14 @@
             const total = document.getElementById('inometer_pdf_total_val').innerText;
 
             htmlContenido = `
-            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #334155; font-size: 14px; padding: 10px;">
-                
-                <!-- Header Principal -->
+            <div id="calculos-captura" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #334155; font-size: 14px; padding: 10px;">
                 <div style="background-color: #0fa968; color: white; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px;">
                     <h2 style="margin: 0 0 5px 0; font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">CÁLCULOS MATEMÁTICOS</h2>
                     <p style="margin: 0; font-size: 15px;">Inquilino: <span style="text-transform: uppercase;">${nombre} (Sin Medidor)</span> | Mes: <span style="text-transform: uppercase;">${mes}</span></p>
                 </div>
-
                 <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 13px;">
                     <strong>Nota Importante:</strong> Al no tener medidor individual, tus cálculos se obtienen restando el consumo y costos de los inquilinos con medidor al total del recibo principal.
                 </div>
-
-                <!-- PASO 1 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 1: CONSUMO ESTIMADO</div>
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cuánto se asume que consumiste?</h3>
@@ -519,8 +595,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- PASO 2 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 2: CONCEPTOS BÁSICOS</div>
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">Agua y Alcantarillado</h3>
@@ -531,8 +605,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- PASO 3 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 3: SERVICIOS COMPARTIDOS</div>
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">Diferencia restante de gastos fijos</h3>
@@ -545,8 +617,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- PASO 4 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 4: IGV (18%)</div>
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">Impuesto sobre los servicios básicos</h3>
@@ -559,11 +629,8 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- TOTAL -->
                 <div style="page-break-inside: avoid; background-color: #064e3b; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                     <p style="margin: 0 0 15px 0; color: #a7f3d0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose Final de Conceptos</p>
-                    
                     <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #d1fae5; border-bottom: 1px dashed #047857; padding-bottom: 15px;">
                         <tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr>
                         <tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr>
@@ -573,11 +640,9 @@
                         <tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr>
                         <tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr>
                     </table>
-
                     <h3 style="margin: 0; font-size: 24px; font-weight: bold; text-align: center; color: #10b981;">TOTAL A PAGAR: S/. ${total}</h3>
                 </div>
-            </div>
-            `;
+            </div>`;
         } else {
             const prevR = getVal(`i${id}_prev_r`);
             const currR = getVal(`i${id}_curr_r`);
@@ -610,15 +675,11 @@
             let currDFormatted = currDStr ? currDStr.split('-').reverse().join('/') : "N/A";
 
             htmlContenido = `
-            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #334155; font-size: 14px; padding: 10px;">
-                
-                <!-- Header Principal -->
+            <div id="calculos-captura" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #334155; font-size: 14px; padding: 10px;">
                 <div style="background-color: #0fa968; color: white; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 25px;">
                     <h2 style="margin: 0 0 5px 0; font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">CÁLCULOS MATEMÁTICOS</h2>
                     <p style="margin: 0; font-size: 15px;">Inquilino: <span style="text-transform: uppercase;">${nombre}</span> | Mes: <span style="text-transform: uppercase;">${mes}</span></p>
                 </div>
-
-                <!-- PASO 1 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 1: TIEMPO</div>
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</h3>
@@ -632,8 +693,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- PASO 2 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 2: CONSUMO DIARIO Y TARIFA</div>
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cuánto consumió el inquilino en promedio por cada día?</h3>
@@ -649,8 +708,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- PASO 3 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 3: CARGO AGUA Y ALCANTARILLADO</div>
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿A cuánto dinero equivale ese consumo en el recibo completo?</h3>
@@ -661,8 +718,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- PASO 4 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 4: SERVICIOS COMPARTIDOS</div>
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cómo se dividen los gastos fijos no dependientes del volumen?</h3>
@@ -678,8 +733,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- PASO 5 -->
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;">
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 5: IGV (18%)</div>
                     <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
@@ -688,11 +741,8 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- TOTAL -->
                 <div style="page-break-inside: avoid; background-color: #064e3b; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                     <p style="margin: 0 0 15px 0; color: #a7f3d0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose Final de Conceptos</p>
-                    
                     <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #d1fae5; border-bottom: 1px dashed #047857; padding-bottom: 15px;">
                         <tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr>
                         <tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr>
@@ -702,24 +752,18 @@
                         <tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr>
                         <tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr>
                     </table>
-
                     <h3 style="margin: 0; font-size: 24px; font-weight: bold; text-align: center; color: #10b981;">TOTAL A PAGAR: S/. ${total}</h3>
                 </div>
-            </div>
-            `;
+            </div>`;
         }
 
-        const pageBreak = document.createElement('div');
-        pageBreak.classList.add('html2pdf__page-break');
-        element.appendChild(pageBreak);
+        const tempCont = document.getElementById('pdf-template-container');
+        // Usamos el contenedor maestro que funciona en el de luz, para evitar PDFs en blanco
+        tempCont.innerHTML = htmlContenido;
 
-        const calcDiv = document.createElement('div');
-        calcDiv.innerHTML = htmlContenido;
-        element.appendChild(calcDiv);
-
-        const exportFileName = `RECIBO AGUA ${mes} - ${nombre}.pdf`;
+        const exportFileName = `CÁLCULOS AGUA ${mes} - ${nombre}.pdf`;
         const opt = {
-            margin: [5, 5, 5, 5], 
+            margin: [10, 10, 10, 10], 
             filename: exportFileName,
             image: { type: 'jpeg', quality: 1 },
             html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
@@ -728,22 +772,10 @@
         };
 
         try {
-            const pdfBase64 = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+            const pdfBase64 = await html2pdf().set(opt).from(document.getElementById('calculos-captura')).outputPdf('datauristring');
             await guardarOCompartirPDF(exportFileName, pdfBase64);
         } finally {
-            hPdf.style.display = 'none';
-            lPdf.style.display = 'none';
-            tPdf.style.display = 'none';
-            
-            element.classList.remove('pdf-layout-fix');
-            wrapper.classList.remove('pdf-border-dashed');
-            
-            if (hWeb) hWeb.style.setProperty('display', 'flex', 'important');
-            if (iWeb) iWeb.style.setProperty('display', 'flex', 'important');
-            if (tWeb) tWeb.style.setProperty('display', 'flex', 'important');
-
-            element.removeChild(pageBreak);
-            element.removeChild(calcDiv);
+            tempCont.innerHTML = '';
         }
     }
 
