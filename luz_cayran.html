@@ -190,8 +190,8 @@
             <div class="header-card">
                 <input type="text" id="titulo_i${id}" class="titulo-editable" value="${titulo}" style="color:${colorBorde}; border-color:${colorBorde};" oninput="sincronizarNombre(${id})">
                 <div class="btn-group">
-                    <button class="btn btn-toggle" onclick="toggleCardBody(${id})"> OCULTAR/MOSTRAR </button>
-                    <button class="btn btn-limpiar" onclick="limpiarInquilino(${id})">BORRAR</button>
+                    <button class="btn btn-toggle" onclick="toggleCardBody(${id})">👁️ Ocultar / Mostrar</button>
+                    <button class="btn btn-limpiar" onclick="limpiarInquilino(${id})">Borrar</button>
                 </div>
                 <div class="btn-group" style="margin-top: 5px;">
                     <button class="btn" style="background:${colorBorde}; color:white;" onclick="generarImagenRecibo(${id})">COMPARTIR</button>
@@ -373,7 +373,10 @@
             } catch (err) { console.error('Error con Capacitor Share:', err); }
         }
         const link = document.createElement('a');
-        link.href = pdfBase64Uri; link.download = nombreArchivo; link.click();
+        link.href = pdfBase64Uri; link.download = nombreArchivo; 
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     function calculate() {
@@ -474,7 +477,7 @@
         }
     }
 
-    // --- FUNCIÓN CENTRAL PARA CAPTURAR Y COMPARTIR IMÁGENES ---
+    // --- FUNCIÓN CENTRAL CORREGIDA PARA DISPOSITIVOS MÓVILES ---
     async function capturarYCompartir(elementId, nombreArchivo, title, text) {
         const tempCont = document.getElementById('pdf-template-container');
         try {
@@ -483,31 +486,75 @@
                 useCORS: true, 
                 backgroundColor: '#ffffff' 
             });
-            tempCont.innerHTML = ''; 
             
+            // Extraer la imagen en formato Base64 para el Fallback y para apps Nativas (Capacitor)
+            const base64Uri = canvas.toDataURL('image/png');
+            
+            // 1. SOPORTE PARA APP NATIVA (SI ESTÁ EMPAQUETADO CON CAPACITOR/CORDOVA)
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+                try {
+                    const { Filesystem, Share } = window.Capacitor.Plugins;
+                    const base64Data = base64Uri.split(',')[1];
+                    const savedFile = await Filesystem.writeFile({
+                        path: nombreArchivo, 
+                        data: base64Data, 
+                        directory: 'CACHE'
+                    });
+                    await Share.share({ 
+                        title: title, 
+                        text: text,
+                        url: savedFile.uri, 
+                        dialogTitle: 'Compartir Imagen' 
+                    });
+                    tempCont.innerHTML = '';
+                    return; // Si funcionó, detenemos la ejecución aquí
+                } catch (err) { 
+                    console.error('Error con Capacitor Share:', err); 
+                }
+            }
+
+            // 2. SOPORTE PARA NAVEGADORES WEB MODERNOS (Web Share API con Blob)
             canvas.toBlob(async (blob) => {
-                if (!blob) return;
-                const file = new File([blob], nombreArchivo, { type: 'image/png' });
+                if (!blob) {
+                    tempCont.innerHTML = '';
+                    return;
+                }
                 
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: title,
-                            text: text
-                        });
-                        return; 
-                    } catch (e) {
-                        console.log('Compartir cancelado o falló:', e);
+                let compartidoNativo = false;
+                if (navigator.share) {
+                    const file = new File([blob], nombreArchivo, { type: 'image/png' });
+                    // Comprobamos si el navegador soporta compartir este tipo de archivo
+                    if (typeof navigator.canShare !== 'function' || navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: title,
+                                text: text
+                            });
+                            compartidoNativo = true;
+                        } catch (e) {
+                            console.log('Interacción cancelada o error:', e);
+                            // Si el usuario simplemente canceló la ventana de compartir, no forzamos la descarga
+                            if (e.name === 'AbortError' || e.message.includes('Share canceled')) {
+                                compartidoNativo = true; 
+                            }
+                        }
                     }
-                } 
-                
-                alert("La imagen se descargará para que la puedas enviar manualmente (WhatsApp Web, etc.).");
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = nombreArchivo;
-                link.click();
-                
+                }
+
+                // 3. FALLBACK: DESCARGA TRADICIONAL CORREGIDA PARA MÓVILES
+                if (!compartidoNativo) {
+                    alert("La imagen se descargará para que la puedas enviar manualmente.");
+                    const link = document.createElement('a');
+                    link.href = base64Uri;
+                    link.download = nombreArchivo;
+                    // Es obligatorio agregar el link al documento para que el click() funcione en móviles/WebViews
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
+                tempCont.innerHTML = ''; 
             }, 'image/png');
 
         } catch (err) {
