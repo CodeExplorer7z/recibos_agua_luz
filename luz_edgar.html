@@ -26,24 +26,26 @@
             background-attachment: fixed;
             color: var(--text);
             margin: 0;
-            padding: max(5px, env(safe-area-inset-top)) 5px max(5px, env(safe-area-inset-bottom)) 5px;
+            padding: max(4px, env(safe-area-inset-top)) 4px max(4px, env(safe-area-inset-bottom)) 4px;
             min-height: 100vh;
         }
         
+        /* Contenedor compacto a 2 columnas */
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 10px;
+            gap: 8px;
         }
-        @media (min-width: 900px) { .container { grid-template-columns: 1fr 1fr; } }
+        @media (min-width: 768px) { .container { grid-template-columns: 1fr 1fr; } }
         
         .nav-back-bar {
-            max-width: 1200px;
-            margin: 0 auto 8px auto;
-            padding: 0 5px;
+            max-width: 1000px;
+            margin: 0 auto 6px auto;
+            padding: 0;
         }
+        
         .btn-back {
             display: inline-flex;
             align-items: center;
@@ -53,19 +55,19 @@
             color: white !important;
             border: 1px solid rgba(255,255,255,0.2);
             text-decoration: none;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 4px;
             font-weight: bold;
-            font-size: 0.85rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 0.75rem;
         }
 
+        /* Tarjeta más compacta */
         .card {
             background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(8px);
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            padding: 8px 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             border: 1px solid rgba(255,255,255,0.5);
             transition: backdrop-filter 0.2s;
         }
@@ -73,37 +75,44 @@
         .section-title {
             background: linear-gradient(90deg, #2563eb, #4f46e5);
             color: white;
-            padding: 6px 10px;
-            border-radius: 6px;
+            padding: 3px 6px;
+            border-radius: 4px;
             font-weight: bold;
-            margin: 14px 0 8px 0;
-            font-size: 0.85rem;
+            margin: 8px 0 4px 0;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
         
         .titulo-fijo {
-            font-size: 1.15rem;
+            font-size: 1rem;
             font-weight: 900;
             color: #1e3a8a;
             text-align: center;
             width: 100%;
-            padding: 5px 0;
+            padding: 2px 0;
             margin: 0;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
         
+        /* Campo EDGAR con altura forzada y estilos nativos anulados */
         .titulo-editable {
-            font-size: 1.05rem;
+            font-size: 0.9rem;
             font-weight: bold;
             color: #1d4ed8;
             border: 2px dashed #93c5fd;
             background: #eff6ff;
-            padding: 6px;
-            border-radius: 6px;
+            padding: 0 !important;
+            height: 26px !important;
+            min-height: 26px !important;
+            max-height: 26px !important;
+            line-height: 22px !important;
+            border-radius: 4px;
             width: 100%;
             text-align: center;
             transition: all 0.3s;
+            margin: 0;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
         .titulo-editable:focus {
             border-color: #2563eb;
@@ -114,16 +123,16 @@
         .header-card {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
+            gap: 6px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
         }
 
         .btn-group { 
             display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 6px; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 4px; 
             width: 100%; 
         }
 
@@ -131,20 +140,17 @@
             background: linear-gradient(135deg, #fef08a, #fde047);
             border: none;
             border-left: 4px solid #ca8a04;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            margin-bottom: 10px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            margin-bottom: 6px;
             color: #713f12;
-            line-height: 1.3;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* DISEÑO DE LISTA (IZQUIERDA - DERECHA) */
         .grid-2 { 
             display: flex; 
             flex-direction: column; 
-            gap: 4px; 
+            gap: 2px; 
         }
 
         .form-group {
@@ -152,28 +158,30 @@
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 2px;
-            padding: 6px;
-            border-radius: 6px;
+            margin-bottom: 0;
+            padding: 3px 4px;
+            border-radius: 4px;
             transition: all 0.2s ease;
         }
         
         .form-group label {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 700;
             margin-bottom: 0;
             color: #334155;
             flex: 1;
-            padding-right: 10px;
+            padding-right: 6px;
             text-align: left;
         }
         
+        /* Inputs super compactos */
         input:not(.readonly), select:not(.readonly) {
-            flex: 0 0 150px; 
-            padding: 8px;
+            flex: 0 0 110px; 
+            padding: 2px 4px;
+            height: 26px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: 500;
             background-color: var(--input-fill);
             color: #0f172a;
@@ -197,60 +205,45 @@
         }
 
         .readonly { 
-            flex: 0 0 150px;
+            flex: 0 0 110px;
             background: #e0f2fe; 
             font-weight: bold; 
             color: #0369a1; 
-            padding: 8px;
+            padding: 2px 4px;
+            height: 26px;
             border: 1px solid #bae6fd;
-            border-radius: 6px;
-            font-size: 0.9rem;
+            border-radius: 4px;
+            font-size: 12px;
         }
 
         .btn {
             border: none;
-            padding: 8px;
-            border-radius: 6px;
+            padding: 6px;
+            border-radius: 4px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            font-size: 0.85rem;
+            font-size: 0.7rem;
             color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
             transition: opacity 0.2s, transform 0.1s;
         }
         .btn:active { transform: scale(0.98); }
         
-        .btn-limpiar { background: linear-gradient(135deg, #ef4444, #dc2626); grid-column: 1 / -1; }
+        .btn-limpiar { background: linear-gradient(135deg, #ef4444, #dc2626); }
         .btn-pdf { background: linear-gradient(135deg, #10b981, #059669); }
         .btn-calculos { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .btn-notificar { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+        .btn-notificar { background: linear-gradient(135deg, #a855f7, #7e22ce); grid-column: 1 / -1;}
         
         .caja-total {
             background: linear-gradient(135deg, #1e3a8a, #1d4ed8) !important;
             color: #ffffff !important;
-            font-size: 1.15rem !important;
+            font-size: 1rem !important;
             text-align: center;
             border: none !important;
-            border-radius: 8px !important;
-            padding: 10px !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-
-        @media (max-width: 600px) {
-            .container { gap: 8px; }
-            .card { padding: 10px; border-radius: 8px; }
-            .form-group label { font-size: 0.75rem; }
-            input:not(.readonly), select:not(.readonly), .readonly { 
-                flex: 0 0 120px; 
-                padding: 6px; 
-                font-size: 13px; 
-            }
-            .caja-total { flex: 0 0 120px !important; padding: 8px !important; font-size: 1.1rem !important; }
-            .btn { padding: 8px; font-size: 0.8rem; border-radius: 4px; }
-            .section-title { margin: 12px 0 6px 0; font-size: 0.75rem; padding: 4px 8px; }
-            .info-box { padding: 6px 8px; margin-bottom: 8px; font-size: 0.7rem; }
+            border-radius: 4px !important;
+            padding: 4px !important;
+            height: 30px !important;
         }
 
         /* EFECTO DE SOMBREADO (FOCO MODAL) Y CORRECCIÓN DE Z-INDEX */
@@ -270,13 +263,13 @@
             visibility: visible;
         }
 
-        .form-group.input-focused {
+        .form-group.input-focused, .titulo-editable.input-focused {
             position: relative;
             z-index: 1000;
             background: #ffffff;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4); 
-            transform: scale(1.03); 
-            border-radius: 10px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4); 
+            transform: scale(1.02); 
+            border-radius: 6px; 
         }
 
         /* Tostadas y reportes PDF ocultos */
@@ -346,7 +339,7 @@
     <div class="card" id="main-receipt">
         <div class="header-card">
             <div id="titulo_principal" class="titulo-fijo">RECIBO PRINCIPAL DE LUZ</div>
-            <button class="btn btn-limpiar" onclick="limpiarPrincipal()" style="grid-column: span 1;">Limpiar Datos</button>
+            <button class="btn btn-limpiar" onclick="limpiarPrincipal()" style="width:100%;">Limpiar Datos</button>
         </div>
 
         <div class="info-box">
@@ -372,8 +365,8 @@
         <div class="grid-2">
             <div class="form-group"><label>LECTURA ANTERIOR:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
             <div class="form-group"><label>LECTURA ACTUAL:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>FECHA DE LECTURA ANTERIOR:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
-            <div class="form-group"><label>FECHA DE LECTURA ACTUAL:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
+            <div class="form-group"><label>FECHA LECT. ANTERIOR:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
+            <div class="form-group"><label>FECHA LECT. ACTUAL:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
         </div>
 
         <div class="section-title">Importes del Recibo (S/.)</div>
@@ -385,11 +378,11 @@
             <div class="form-group"><label>INTERÉS COMPENSATORIO:</label><input type="number" id="int_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
             <div class="form-group"><label>REDONDEO ANTERIOR.:</label><input type="number" id="red_ant_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
             <div class="form-group"><label>REDONDEO ACTUAL:</label><input type="number" id="red_act_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>APORTE DE LEY N°28749:</label><input type="text" id="aporte_ley_m" class="readonly" readonly></div>
+            <div class="form-group"><label>APORTE LEY N°28749:</label><input type="text" id="aporte_ley_m" class="readonly" readonly></div>
         </div>
 
-        <div class="form-group" style="margin-top:14px">
-            <label style="color:#1e3a8a; font-size:0.85rem;">TOTAL A PAGAR RECIBO (S/.):</label>
+        <div class="form-group" style="margin-top:8px">
+            <label style="color:#1e3a8a; font-size:0.75rem;">TOTAL RECIBO (S/.):</label>
             <input type="text" id="total_pagar_m" class="readonly caja-total" readonly>
         </div>
     </div>
@@ -409,15 +402,15 @@
             <div class="grid-2">
                 <div class="form-group"><label>LECTURA ANTERIOR:</label><input type="number" id="lec_ant_i1" inputmode="decimal" oninput="calculate()"></div>
                 <div class="form-group"><label>LECTURA ACTUAL:</label><input type="number" id="lec_act_i1" inputmode="decimal" oninput="calculate()"></div>
-                <div class="form-group"><label>FECHA DE LECTURA ANTERIOR:</label><input type="date" id="fec_ant_i1" onchange="calculate()"></div>
-                <div class="form-group"><label>FECHA DE LECTURA ACTUAL:</label><input type="date" id="fec_act_i1" onchange="calculate()"></div>
+                <div class="form-group"><label>FECHA LECT. ANTERIOR:</label><input type="date" id="fec_ant_i1" onchange="calculate()"></div>
+                <div class="form-group"><label>FECHA LECT. ACTUAL:</label><input type="date" id="fec_act_i1" onchange="calculate()"></div>
             </div>
             
             <div style="display: none;">
-                <div class="section-title">DETALLE DE IMPORTES INQUILINO (S/.)</div>
+                <div class="section-title">DETALLE INQUILINO (S/.)</div>
                 <div class="grid-2">
                     <div class="form-group"><label>Cargo energía:</label><input id="ener_i1" class="readonly" readonly></div>
-                    <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>Rep. y Mantenimiento:</label><input id="rep_i1" class="readonly" readonly></div>
                     <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i1" class="readonly" readonly></div>
                     <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i1" class="readonly" readonly></div>
                     <div class="form-group"><label>Interés compensatorio:</label><input id="int_i1" class="readonly" readonly></div>
@@ -427,13 +420,13 @@
                     <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i1" class="readonly" readonly></div>
                 </div>
 
-                <div class="form-group" style="margin-top:14px">
-                    <label style="color:#1e3a8a; font-size:0.85rem;">TOTAL A PAGAR - INQUILINO:</label>
+                <div class="form-group" style="margin-top:8px">
+                    <label style="color:#1e3a8a; font-size:0.75rem;">TOTAL INQUILINO:</label>
                     <input type="text" id="total_pagar_i1" class="readonly caja-total" readonly>
                 </div>
             </div>
 
-            <div class="section-title" style="background: linear-gradient(90deg, #9333ea, #7e22ce); color: white; margin-top:18px;">NOTIFICAR MONTO</div>
+            <div class="section-title" style="background: linear-gradient(90deg, #9333ea, #7e22ce); color: white; margin-top:10px;">NOTIFICAR MONTO</div>
             <form id="notificarForm" onsubmit="enviarNotificacion(event)">
                 <div class="grid-2">
                     <div class="form-group">
@@ -454,11 +447,11 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="monto_notificar">MONTO A PAGAR (S/.):</label>
+                        <label for="monto_notificar">MONTO PAGO (S/.):</label>
                         <input type="number" id="monto_notificar" step="0.01" placeholder="Ej: 65.50" required>
                     </div>
                 </div>
-                <div class="form-group" style="margin-top:10px; display:block;">
+                <div class="form-group" style="margin-top:6px; display:block;">
                     <button type="submit" class="btn btn-notificar" id="btnEnviar">Enviar Notificación</button>
                 </div>
             </form>
@@ -624,8 +617,6 @@
                 const formGroup = this.closest('.form-group');
                 const card = this.closest('.card');
                 
-                // Permitimos que la tarjeta sea tapada por la sombra, pero
-                // removemos su filtro para que NO atrape el z-index de su hijo (.form-group)
                 if (card) {
                     card.style.backdropFilter = 'none';
                     card.style.webkitBackdropFilter = 'none';
@@ -633,6 +624,8 @@
 
                 if (formGroup) {
                     formGroup.classList.add('input-focused');
+                } else if (this.classList.contains('titulo-editable')) {
+                    this.classList.add('input-focused');
                 } else {
                     this.style.position = 'relative';
                     this.style.zIndex = '1000';
@@ -651,6 +644,8 @@
 
                 if (formGroup) {
                     formGroup.classList.remove('input-focused');
+                } else if (this.classList.contains('titulo-editable')) {
+                    this.classList.remove('input-focused');
                 } else {
                     this.style.zIndex = '';
                     this.style.position = '';
