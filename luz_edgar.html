@@ -13,124 +13,177 @@
     <style>
         :root {
             --primary: #2563eb;
-            --bg: #f1f5f9;
-            --card: #ffffff;
             --text: #1e293b;
-            --border: #e2e8f0;
+            --border: #bae6fd;
             --enel-blue: #005fb8;
-            --input-fill: #fff9c4;
+            --input-fill: #f0f9ff;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--bg);
+            background: linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #818cf8 100%);
+            background-attachment: fixed;
             color: var(--text);
             margin: 0;
-            padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px;
+            padding: max(5px, env(safe-area-inset-top)) 5px max(5px, env(safe-area-inset-bottom)) 5px;
+            min-height: 100vh;
         }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 15px;
+            gap: 10px;
         }
         @media (min-width: 900px) { .container { grid-template-columns: 1fr 1fr; } }
         
         .nav-back-bar {
             max-width: 1200px;
-            margin: 0 auto 10px auto;
+            margin: 0 auto 8px auto;
             padding: 0 5px;
         }
         .btn-back {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: #334155;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(4px);
             color: white !important;
+            border: 1px solid rgba(255,255,255,0.2);
             text-decoration: none;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.5);
+            transition: backdrop-filter 0.2s;
         }
+        
         .section-title {
-            background: #e2e8f0;
-            padding: 8px 12px;
+            background: linear-gradient(90deg, #2563eb, #4f46e5);
+            color: white;
+            padding: 6px 10px;
             border-radius: 6px;
             font-weight: bold;
-            margin: 15px 0 10px 0;
-            font-size: 0.9rem;
+            margin: 14px 0 8px 0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
+        
         .titulo-fijo {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary);
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #1e3a8a;
             text-align: center;
             width: 100%;
-            padding: 10px 0;
+            padding: 5px 0;
             margin: 0;
-            border: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
+        
         .titulo-editable {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: bold;
-            color: var(--primary);
-            border: 1px dashed #cbd5e1;
-            padding: 8px;
+            color: #1d4ed8;
+            border: 2px dashed #93c5fd;
+            background: #eff6ff;
+            padding: 6px;
             border-radius: 6px;
             width: 100%;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .titulo-editable:focus {
+            border-color: #2563eb;
+            outline: none;
+            background: #ffffff;
         }
 
         .header-card {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 12px;
-            margin-bottom: 15px;
+            gap: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
         }
 
-        .btn-group { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
+        .btn-group { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 6px; 
+            width: 100%; 
+        }
 
         .info-box {
-            background: #fefce8;
-            border: 1px solid #fef08a;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            margin-bottom: 15px;
-            color: #854d0e;
-            line-height: 1.5;
+            background: linear-gradient(135deg, #fef08a, #fde047);
+            border: none;
+            border-left: 4px solid #ca8a04;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin-bottom: 10px;
+            color: #713f12;
+            line-height: 1.3;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* DISEÑO DE LISTA (IZQUIERDA - DERECHA) */
+        .grid-2 { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
         }
 
         .form-group {
-            margin-bottom: 10px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
         
         .form-group label {
-            font-size: 0.85rem;
-            font-weight: bold;
-            margin-bottom: 4px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            color: #334155;
+            flex: 1;
+            padding-right: 10px;
+            text-align: left;
         }
         
         input:not(.readonly), select:not(.readonly) {
-            padding: 12px;
+            flex: 0 0 150px; 
+            padding: 8px;
             border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 16px; 
-            width: 100%;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
             background-color: var(--input-fill);
+            color: #0f172a;
+            transition: border 0.2s;
+        }
+        
+        input:not(.readonly):focus, select:not(.readonly):focus {
+            border-color: #3b82f6;
+            outline: none;
+            background-color: #ffffff;
         }
 
         input[type=number]::-webkit-inner-spin-button, 
@@ -144,73 +197,110 @@
         }
 
         .readonly { 
-            background: #f8fafc; 
+            flex: 0 0 150px;
+            background: #e0f2fe; 
             font-weight: bold; 
-            color: var(--primary); 
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            width: 100%;
-        }
-
-        .grid-2 { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-        }
-
-        @media (max-width: 600px) {
-            .grid-2 { grid-template-columns: 1fr; }
+            color: #0369a1; 
+            padding: 8px;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
 
         .btn {
             border: none;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            flex: 1;
-            min-width: 80px;
+            width: 100%;
+            font-size: 0.85rem;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: opacity 0.2s, transform 0.1s;
         }
-        .btn-limpiar { background: #ef4444; color: white; }
-        .btn-pdf { background: #10b981; color: white; }
-        .btn-calculos { background: #f59e0b; color: white; }
-        .btn-notificar { background: #742284; color: white; }
-        .btn-notificar:hover { background: #5c1869; color: white; }
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-limpiar { background: linear-gradient(135deg, #ef4444, #dc2626); grid-column: 1 / -1; }
+        .btn-pdf { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-calculos { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .btn-notificar { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+        
+        .caja-total {
+            background: linear-gradient(135deg, #1e3a8a, #1d4ed8) !important;
+            color: #ffffff !important;
+            font-size: 1.15rem !important;
+            text-align: center;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 10px !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
 
+        @media (max-width: 600px) {
+            .container { gap: 8px; }
+            .card { padding: 10px; border-radius: 8px; }
+            .form-group label { font-size: 0.75rem; }
+            input:not(.readonly), select:not(.readonly), .readonly { 
+                flex: 0 0 120px; 
+                padding: 6px; 
+                font-size: 13px; 
+            }
+            .caja-total { flex: 0 0 120px !important; padding: 8px !important; font-size: 1.1rem !important; }
+            .btn { padding: 8px; font-size: 0.8rem; border-radius: 4px; }
+            .section-title { margin: 12px 0 6px 0; font-size: 0.75rem; padding: 4px 8px; }
+            .info-box { padding: 6px 8px; margin-bottom: 8px; font-size: 0.7rem; }
+        }
+
+        /* EFECTO DE SOMBREADO (FOCO MODAL) Y CORRECCIÓN DE Z-INDEX */
+        #focus-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        #focus-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .form-group.input-focused {
+            position: relative;
+            z-index: 1000;
+            background: #ffffff;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4); 
+            transform: scale(1.03); 
+            border-radius: 10px; 
+        }
+
+        /* Tostadas y reportes PDF ocultos */
         #toast {
             visibility: hidden;
-            min-width: 250px;
-            background-color: #10b981;
+            min-width: 200px;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: #fff;
             text-align: center;
             border-radius: 8px;
-            padding: 16px;
+            padding: 12px;
             position: fixed;
-            z-index: 1000;
+            z-index: 2000;
             left: 50%;
-            bottom: 30px;
+            bottom: 20px;
             transform: translateX(-50%);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            font-size: 1rem;
-            font-weight: 600;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            font-size: 0.9rem;
+            font-weight: bold;
             opacity: 0;
             transition: opacity 0.3s ease, bottom 0.3s ease;
         }
-
-        #toast.show {
-            visibility: visible;
-            opacity: 1;
-            bottom: 40px;
-        }
-
-        #pdf-template-container { 
-            position: absolute; 
-            left: -9999px; 
-            top: 0; 
-            width: 750px; 
-        }
+        #toast.show { visibility: visible; opacity: 1; bottom: 30px; }
+        #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
 
         .modo-recibo { font-family: Arial, sans-serif !important; padding: 30px !important; color: #000 !important; background: white !important; }
         .modo-recibo .header-pdf { display: flex; justify-content: space-between; border-bottom: 3px solid var(--enel-blue); padding-bottom: 10px; margin-bottom: 20px; }
@@ -219,42 +309,12 @@
         .modo-recibo .tabla-pdf th { text-align: left; background: #f1f5f9; padding: 8px; border-bottom: 2px solid #cbd5e1; }
         .modo-recibo .tabla-pdf td { padding: 8px; border-bottom: 1px solid #e2e8f0; }
         
-        .pdf-calculos { 
-            font-family: 'Segoe UI', Helvetica, Arial, sans-serif !important; 
-            padding: 25px !important; 
-            color: #1e293b !important; 
-            background: #f8fafc !important; 
-        }
-        .pdf-calculos .main-header {
-            background: linear-gradient(135deg, #1e3a8a, #2563eb);
-            color: white;
-            padding: 14px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
+        .pdf-calculos { font-family: 'Segoe UI', Helvetica, Arial, sans-serif !important; padding: 25px !important; color: #1e293b !important; background: #f8fafc !important; }
+        .pdf-calculos .main-header { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; padding: 14px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
         .pdf-calculos .main-header h2 { margin: 0; font-size: 1.2rem; font-weight: 800; }
         .pdf-calculos .main-header p { margin: 3px 0 0 0; font-size: 0.9rem; opacity: 0.9; }
-        
-        .pdf-calculos .bloque-paso {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            page-break-inside: avoid;
-        }
-        .pdf-calculos .paso-titulo { 
-            display: inline-block;
-            background: #e0f2fe;
-            color: #0369a1;
-            font-weight: 700; 
-            font-size: 0.75rem; 
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
+        .pdf-calculos .bloque-paso { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 15px; margin-bottom: 10px; page-break-inside: avoid; }
+        .pdf-calculos .paso-titulo { display: inline-block; background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; margin-bottom: 5px; text-transform: uppercase; }
         .pdf-calculos .pregunta { font-weight: 700; color: #1e293b; font-size: 0.9rem; margin-bottom: 6px; }
         .pdf-calculos .desarrollo { background: #f1f5f9; border-left: 3px solid #0284c7; padding: 8px 12px; font-size: 0.85rem; line-height: 1.4; color: #334155; border-radius: 0 6px 6px 0; }
         .pdf-calculos .lista-valores { display: table; width: 100%; margin: 4px 0; }
@@ -273,6 +333,8 @@
 </head>
 <body>
 
+<div id="focus-overlay"></div>
+
 <div class="nav-back-bar">
     <a href="./index.html" class="btn-back">&#8592; Menú Principal</a>
 </div>
@@ -284,11 +346,11 @@
     <div class="card" id="main-receipt">
         <div class="header-card">
             <div id="titulo_principal" class="titulo-fijo">RECIBO PRINCIPAL DE LUZ</div>
-            <button class="btn btn-limpiar" onclick="limpiarPrincipal()">Limpiar Datos Principales</button>
+            <button class="btn btn-limpiar" onclick="limpiarPrincipal()" style="grid-column: span 1;">Limpiar Datos</button>
         </div>
 
         <div class="info-box">
-            <b>FACTOR APORTE DE LEY (UIT 2026 - S/. 5500):</b> <span id="detalle_factor" style="font-weight:bold; color:var(--primary)">-</span>
+            <b>FACTOR APORTE (UIT 2026 - S/. 5500):</b> <span id="detalle_factor" style="font-weight:bold; color:#b45309">-</span>
         </div>
 
         <div class="grid-2">
@@ -301,77 +363,81 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>División de cargos compartidos:</label>
+                <label>División de cargos:</label>
                 <input type="number" id="num_inquilinos" value="2" class="readonly" readonly>
             </div>
         </div>
 
         <div class="section-title">LLENAR DATOS DEL RECIBO PRINCIPAL</div>
         <div class="grid-2">
-            <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
-            <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
+            <div class="form-group"><label>LECTURA ANTERIOR:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>LECTURA ACTUAL:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>FECHA DE LECTURA ANTERIOR:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
+            <div class="form-group"><label>FECHA DE LECTURA ACTUAL:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
         </div>
 
         <div class="section-title">Importes del Recibo (S/.)</div>
         <div class="grid-2">
-            <div class="form-group"><label>Tarifa kWh:</label><input type="number" id="tarifa" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Reposición y Mantenimiento:</label><input type="number" id="rep_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Cargo Fijo:</label><input type="number" id="cargo_fijo_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Alumbrado Público:</label><input type="number" id="alum_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Interés compensatorio:</label><input type="number" id="int_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Redondeo anterior:</label><input type="number" id="red_ant_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Redondeo actual:</label><input type="number" id="red_act_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Aporte Ley N°28749:</label><input type="text" id="aporte_ley_m" class="readonly" readonly></div>
+            <div class="form-group"><label>TARIFA kWh:</label><input type="number" id="tarifa" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>REPOSICIÓN Y MANTENIMIENTO:</label><input type="number" id="rep_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>CARGO FIJO:</label><input type="number" id="cargo_fijo_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>ALUMBRADO PÚBLICO:</label><input type="number" id="alum_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>INTERÉS COMPENSATORIO:</label><input type="number" id="int_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>REDONDEO ANTERIOR.:</label><input type="number" id="red_ant_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>REDONDEO ACTUAL:</label><input type="number" id="red_act_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group"><label>APORTE DE LEY N°28749:</label><input type="text" id="aporte_ley_m" class="readonly" readonly></div>
         </div>
 
-        <div class="form-group" style="margin-top:15px">
-            <label>TOTAL A PAGAR RECIBO (S/.):</label>
-            <input type="text" id="total_pagar_m" class="readonly" style="font-size:1.5rem; border:none; background:transparent" readonly>
+        <div class="form-group" style="margin-top:14px">
+            <label style="color:#1e3a8a; font-size:0.85rem;">TOTAL A PAGAR RECIBO (S/.):</label>
+            <input type="text" id="total_pagar_m" class="readonly caja-total" readonly>
         </div>
     </div>
 
     <!-- COLUMNA DERECHA: INQUILINO CON NOTIFICACIÓN -->
     <div id="columna-derecha">
-        <div class="card" id="recibo_i1" style="margin-bottom:20px">
+        <div class="card" id="recibo_i1" style="margin-bottom:10px">
             <div class="header-card">
                 <input type="text" id="titulo_i1" class="titulo-editable" value="EDGAR">
                 <div class="btn-group">
-                    <button class="btn btn-limpiar" onclick="limpiarInquilino(1)">Borrar</button>
-                    <button class="btn btn-pdf" onclick="descargarPDF(1)">Descargar PDF</button>
+                    <button class="btn btn-pdf" onclick="descargarPDF(1)">RECIBO</button>
                     <button class="btn btn-calculos" onclick="descargarCalculosPDF(1)">CÁLCULOS</button>
+                    <button class="btn btn-limpiar" onclick="limpiarInquilino(1)">BORRAR</button>
                 </div>
             </div>
+            
             <div class="grid-2">
-                <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_i1" inputmode="decimal" oninput="calculate()"></div>
-                <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_i1" inputmode="decimal" oninput="calculate()"></div>
-                <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_i1" onchange="calculate()"></div>
-                <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_i1" onchange="calculate()"></div>
+                <div class="form-group"><label>LECTURA ANTERIOR:</label><input type="number" id="lec_ant_i1" inputmode="decimal" oninput="calculate()"></div>
+                <div class="form-group"><label>LECTURA ACTUAL:</label><input type="number" id="lec_act_i1" inputmode="decimal" oninput="calculate()"></div>
+                <div class="form-group"><label>FECHA DE LECTURA ANTERIOR:</label><input type="date" id="fec_ant_i1" onchange="calculate()"></div>
+                <div class="form-group"><label>FECHA DE LECTURA ACTUAL:</label><input type="date" id="fec_act_i1" onchange="calculate()"></div>
             </div>
-            <div class="section-title">DETALLE DE IMPORTES INQUILINO (S/.)</div>
-            <div class="grid-2">
-                <div class="form-group"><label>Cargo energía:</label><input id="ener_i1" class="readonly" readonly></div>
-                <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i1" class="readonly" readonly></div>
-                <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i1" class="readonly" readonly></div>
-                <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i1" class="readonly" readonly></div>
-                <div class="form-group"><label>Interés compensatorio:</label><input id="int_i1" class="readonly" readonly></div>
-                <div class="form-group"><label>IGV (18%):</label><input id="igv_i1" class="readonly" readonly></div>
-                <div class="form-group"><label>Ley N° 28749:</label><input id="aporte_i1" class="readonly" readonly></div>
-                <div class="form-group"><label>Redondeo anterior:</label><input id="red_ant_i1" class="readonly" readonly></div>
-                <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i1" class="readonly" readonly></div>
-            </div>
-            <div class="form-group" style="margin-top:10px">
-                <label>TOTAL A PAGAR - EDGAR:</label>
-                <input type="text" id="total_pagar_i1" class="readonly" style="font-size:1.5rem; border:none; background:transparent" readonly>
+            
+            <div style="display: none;">
+                <div class="section-title">DETALLE DE IMPORTES INQUILINO (S/.)</div>
+                <div class="grid-2">
+                    <div class="form-group"><label>Cargo energía:</label><input id="ener_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>Interés compensatorio:</label><input id="int_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>IGV (18%):</label><input id="igv_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>Ley N° 28749:</label><input id="aporte_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>Redondeo anterior:</label><input id="red_ant_i1" class="readonly" readonly></div>
+                    <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i1" class="readonly" readonly></div>
+                </div>
+
+                <div class="form-group" style="margin-top:14px">
+                    <label style="color:#1e3a8a; font-size:0.85rem;">TOTAL A PAGAR - INQUILINO:</label>
+                    <input type="text" id="total_pagar_i1" class="readonly caja-total" readonly>
+                </div>
             </div>
 
-            <!-- SECCIÓN NOTIFICAR MONTO DE LUZ -->
-            <div class="section-title" style="background:#f3e8ff; color:#742284; margin-top:20px;">NOTIFICAR MONTO DE LUZ</div>
+            <div class="section-title" style="background: linear-gradient(90deg, #9333ea, #7e22ce); color: white; margin-top:18px;">NOTIFICAR MONTO</div>
             <form id="notificarForm" onsubmit="enviarNotificacion(event)">
                 <div class="grid-2">
                     <div class="form-group">
-                        <label for="mes_notificar">Mes a pagar:</label>
+                        <label for="mes_notificar">MES A PAGAR:</label>
                         <select id="mes_notificar" required>
                             <option value="Enero">Enero</option>
                             <option value="Febrero">Febrero</option>
@@ -388,11 +454,11 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="monto_notificar">Monto por pagar (S/.):</label>
-                        <input type="number" id="monto_notificar" step="0.01" placeholder="Ej: 65" required>
+                        <label for="monto_notificar">MONTO A PAGAR (S/.):</label>
+                        <input type="number" id="monto_notificar" step="0.01" placeholder="Ej: 65.50" required>
                     </div>
                 </div>
-                <div class="form-group" style="margin-top:8px;">
+                <div class="form-group" style="margin-top:10px; display:block;">
                     <button type="submit" class="btn btn-notificar" id="btnEnviar">Enviar Notificación</button>
                 </div>
             </form>
@@ -421,7 +487,7 @@
     function mostrarMensajeEmergente(texto, esError = false) {
         const toast = document.getElementById("toast");
         toast.textContent = texto;
-        toast.style.backgroundColor = esError ? "#ef4444" : "#10b981";
+        toast.style.background = esError ? "linear-gradient(135deg, #ef4444, #dc2626)" : "linear-gradient(135deg, #10b981, #059669)";
         toast.className = "show";
         setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
     }
@@ -452,7 +518,7 @@
 
         Promise.all(envios)
             .then(() => {
-                mostrarMensajeEmergente("Correo enviado");
+                mostrarMensajeEmergente("Correo enviado con éxito");
                 document.getElementById("monto_notificar").value = "";
             })
             .catch((error) => {
@@ -548,6 +614,49 @@
                 montoNotificarInput.dataset.manualEdit = "true";
             });
         }
+
+        const overlay = document.getElementById('focus-overlay');
+        const interactableElements = document.querySelectorAll('input:not(.readonly), select:not(.readonly), .titulo-editable');
+        
+        interactableElements.forEach(el => {
+            el.addEventListener('focus', function() {
+                overlay.classList.add('active');
+                const formGroup = this.closest('.form-group');
+                const card = this.closest('.card');
+                
+                // Permitimos que la tarjeta sea tapada por la sombra, pero
+                // removemos su filtro para que NO atrape el z-index de su hijo (.form-group)
+                if (card) {
+                    card.style.backdropFilter = 'none';
+                    card.style.webkitBackdropFilter = 'none';
+                }
+
+                if (formGroup) {
+                    formGroup.classList.add('input-focused');
+                } else {
+                    this.style.position = 'relative';
+                    this.style.zIndex = '1000';
+                }
+            });
+            
+            el.addEventListener('blur', function() {
+                overlay.classList.remove('active');
+                const formGroup = this.closest('.form-group');
+                const card = this.closest('.card');
+                
+                if (card) {
+                    card.style.backdropFilter = '';
+                    card.style.webkitBackdropFilter = '';
+                }
+
+                if (formGroup) {
+                    formGroup.classList.remove('input-focused');
+                } else {
+                    this.style.zIndex = '';
+                    this.style.position = '';
+                }
+            });
+        });
     });
 
     async function guardarOCompartirPDF(nombreArchivo, pdfBase64Uri) {
