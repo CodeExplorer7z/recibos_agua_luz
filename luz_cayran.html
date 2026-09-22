@@ -22,7 +22,8 @@
         .card { background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 20px;}
         .section-title { background: #e0e7ff; padding: 8px 12px; border-radius: 6px; font-weight: bold; margin: 15px 0 10px 0; font-size: 0.9rem; color: #3730a3; }
         .titulo-fijo { font-size: 1.2rem; font-weight: bold; color: var(--primary); text-align: center; width: 100%; padding: 10px 0; margin: 0; border: none; }
-        .titulo-editable { font-size: 1.1rem; font-weight: bold; color: var(--primary); border: 1px dashed #a5b4fc; padding: 8px; border-radius: 6px; width: 100%; }
+        .titulo-editable { font-size: 1.1rem; font-weight: bold; color: var(--primary); border: 1px dashed #a5b4fc; padding: 8px; border-radius: 6px; width: 100%; background: transparent; }
+        .titulo-editable::placeholder { font-weight: normal; opacity: 0.6; }
         .header-card { display: flex; flex-direction: column; gap: 8px; border-bottom: 2px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; }
         .btn-group { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; justify-content: center; }
         .info-box { background: #fefce8; border: 1px solid #fef08a; padding: 12px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 15px; color: #854d0e; line-height: 1.5; }
@@ -38,7 +39,6 @@
         .btn-toggle { background: #475569; color: white; }
         .btn-whatsapp { background: #25D366; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
         
-        /* OPTIMIZACIÓN PARA MÓVILES (VERSIÓN COMPACTA) */
         @media (max-width: 600px) { 
             body { padding: max(5px, env(safe-area-inset-top)) 5px max(5px, env(safe-area-inset-bottom)) 5px; }
             .grid-2 { grid-template-columns: 1fr; gap: 8px; }
@@ -138,14 +138,14 @@
                 <label>MES:</label>
                 <select id="mes_principal" onchange="calculate()">
                     <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option>
-                    <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option selected>AGOSTO</option>
+                    <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option>AGOSTO</option>
                     <option>SETIEMBRE</option><option>OCTUBRE</option><option>NOVIEMBRE</option><option>DICIEMBRE</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>N° INQUILINOS CON MEDIDOR:</label>
                 <select id="num_medidores" onchange="actualizarVista()">
-                    <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
                 </select>
             </div>
         </div>
@@ -203,7 +203,7 @@
         return `
         <div class="card" id="recibo_i${id}" style="border: 2px solid ${colorBorde};">
             <div class="header-card">
-                <input type="text" id="titulo_i${id}" class="titulo-editable" value="${titulo}" style="color:${colorBorde}; border-color:${colorBorde};" oninput="sincronizarNombre(${id})">
+                <input type="text" id="titulo_i${id}" class="titulo-editable" placeholder="${titulo}" style="color:${colorBorde}; border-color:${colorBorde};" oninput="sincronizarNombre(${id})">
                 <div class="btn-group">
                     <button class="btn btn-toggle" onclick="toggleCardBody(${id})">👁️ Ocultar / Mostrar</button>
                     <!-- CAMBIO: Botón BORRAR en mayúscula -->
@@ -271,7 +271,7 @@
     container.innerHTML += `
         <div class="card" id="recibo_i1" style="border: 2px solid #ef4444;">
             <div class="header-card">
-                <input type="text" id="titulo_i1" class="titulo-editable" value="Inquilino sin medidor" style="color:#ef4444; border-color:#fca5a5;">
+                <input type="text" id="titulo_i1" class="titulo-editable" placeholder="Inquilino sin medidor" style="color:#ef4444; border-color:#fca5a5;">
                 <div class="btn-group">
                     <button class="btn btn-toggle" onclick="toggleCardBody(1)">👁️ Ocultar / Mostrar</button>
                     <!-- CAMBIO: Botón BORRAR en mayúscula -->
@@ -638,7 +638,6 @@
                 </div>`;
         }
 
-        // CAMBIO: Formato de nombre de archivo con espacios y mayúsculas
         const nombreArchivo = `RECIBO LUZ ${nombreInq.toUpperCase()} - ${mes}.png`;
         await capturarYCompartir('recibo-captura', nombreArchivo, `Recibo de Luz - ${mes}`, `Hola, adjunto el recibo de luz correspondiente al mes de ${mes}.`);
     }
@@ -767,7 +766,6 @@
                 </div>`;
         }
 
-        // CAMBIO: Formato de nombre de archivo con espacios y caso específico
         const nombreArchivoCalc = `CALCULOS LUZ ${mes} - ${nombreInq}.pdf`;
         html2pdf().set({ 
             margin: [10, 10], 
