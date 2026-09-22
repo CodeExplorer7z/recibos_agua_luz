@@ -32,7 +32,6 @@
         
         .pdf-only-section { display: none; }
         
-        /* Contenedor maestro para renderizar los PDF */
         #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
 
         @media (max-width: 768px) { 
@@ -76,9 +75,10 @@
                 <div class="col-6 col-md-2">
                     <label class="small-label">Mes</label>
                     <select id="m_mes" class="form-select form-select-sm input-editable" onchange="calc()">
+                        <option value="" selected></option>
                         <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option>
-                        <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option selected>AGOSTO</option>
-                        <option>SEPTIEMBRE</option><option>OCTUBRE</option><option>NOVIEMBRE</option><option>DICIEMBRE</option>
+                        <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option>AGOSTO</option>
+                        <option>SETIEMBRE</option><option>OCTUBRE</option><option>NOVIEMBRE</option><option>DICIEMBRE</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-2"><label class="small-label">Lectura Anterior</label><input type="number" id="m_prev_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
@@ -93,10 +93,11 @@
                 <div class="col-6 col-md-2">
                     <label class="small-label text-primary">N° Inq. (Con Medidor)</label>
                     <select id="n_tenants_meter" class="form-select form-select-sm input-editable" style="font-weight: bold; border-color: #3498db !important;" onchange="render()">
+                        <option value="" selected></option>
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
-                        <option value="4" selected>4</option>
+                        <option value="4">4</option>
                     </select>
                     <div class="form-check mt-1">
                         <input class="form-check-input" type="checkbox" id="has_nometer" checked onchange="render()">
@@ -174,7 +175,7 @@
         const mainPrevDateVal = document.getElementById('m_prev_d').value;
         const mesTexto = document.getElementById('m_mes').value || "---";
 
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 1;
+        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
 
@@ -307,7 +308,7 @@
     }
 
     function render() {
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 1;
+        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const grid = document.getElementById('tenants_grid');
         
@@ -337,7 +338,7 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2" id="web_header_${i}">
                             <div class="flex-grow-1" style="min-width: 40%;">
-                                <input type="text" id="i${i}_name" class="tenant-name-input" value="Inquilino #${i}" oninput="calc()">
+                                <input type="text" id="i${i}_name" class="tenant-name-input" value="" placeholder="Inquilino #${i}" oninput="calc()">
                             </div>
                             <div class="d-flex gap-1 action-buttons-container" style="min-width: 50%;">
                                 <button class="btn btn-danger btn-sm fw-bold flex-fill btn-action-mobile" onclick="exportPDF(${i})">RECIBO</button>
@@ -404,7 +405,7 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2" id="web_header_nometer">
                             <div class="flex-grow-1" style="min-width: 40%;">
-                                <input type="text" id="inometer_name" class="tenant-name-input" style="background-color: #e8f8f5 !important; border-color: #1abc9c !important;" value="Inquilino Sin Medidor" oninput="calc()">
+                                <input type="text" id="inometer_name" class="tenant-name-input" style="background-color: #e8f8f5 !important; border-color: #1abc9c !important;" value="" placeholder="Inquilino Sin Medidor" oninput="calc()">
                             </div>
                             <div class="d-flex gap-1 action-buttons-container" style="min-width: 50%;">
                                 <button class="btn btn-danger btn-sm fw-bold flex-fill btn-action-mobile" onclick="exportPDF('nometer')">RECIBO</button>
@@ -455,84 +456,91 @@
     }
 
     // =========================================================================
-    // EXPORTACIÓN DE REPORTE RESUMEN (SIN TABLAS - FORMATO LISTA LIMPIA)
+    // EXPORTACIÓN DE REPORTE RESUMEN (DISEÑO REPLICADO A LA IMAGEN)
     // =========================================================================
     async function exportResumenPDF() {
-        const mes = document.getElementById('m_mes').value || 'MES NO ESPECIFICADO';
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 1;
+        const mes = document.getElementById('m_mes').value || '';
+        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalPrincipalText = document.getElementById('v_total_main').value; 
         
+        // Formatear fechas para el encabezado
+        const formatFecha = (fechaStr) => {
+            if (!fechaStr) return '';
+            const meses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+            const partes = fechaStr.split('-');
+            if (partes.length === 3) return `${parseInt(partes[2], 10)} ${meses[parseInt(partes[1], 10) - 1]}`;
+            return fechaStr;
+        };
+        const fAnt = formatFecha(document.getElementById('m_prev_d').value);
+        const fAct = formatFecha(document.getElementById('m_curr_d').value);
+        const rangoFechas = (fAnt && fAct) ? `LECTURA DESDE (${fAnt} - ${fAct})` : '';
+
         let filasHTML = '';
-        let totalGeneral = 0;
 
         for(let i = 1; i <= nMetered; i++) {
-            const nombreOriginal = document.getElementById(`i${i}_name`) ? document.getElementById(`i${i}_name`).value : `Inquilino #${i}`;
-            const nombre = nombreOriginal.toUpperCase();
+            let nombre = document.getElementById(`i${i}_name`) ? document.getElementById(`i${i}_name`).value.toUpperCase() : `INQUILINO #${i}`;
+            if(nombre.trim() === '') nombre = `INQUILINO #${i}`;
             const diasFctText = document.getElementById(`pdf_dias_${i}`) ? document.getElementById(`pdf_dias_${i}`).innerText.replace('Días facturados: ', '') : '0';
             const totalText = document.getElementById(`i${i}_pdf_total_val`) ? document.getElementById(`i${i}_pdf_total_val`).innerText : '0.00';
             
             filasHTML += `
-                <div style="display: flex; padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px;">
-                    <div style="flex: 2; text-align: left; color: #334155;">${nombre}</div>
-                    <div style="flex: 1; text-align: center; color: #334155;">${diasFctText}</div>
-                    <div style="flex: 1; text-align: right; font-weight: bold; color: #1e293b;">S/. ${totalText}</div>
-                </div>
+                <tr style="border-bottom: 1px solid #d1d5db;">
+                    <td style="text-align: left; padding: 10px 5px; color: #000;">${nombre}</td>
+                    <td style="text-align: center; padding: 10px 5px; color: #000;">${diasFctText}</td>
+                    <td style="text-align: right; padding: 10px 5px; width: 40px; color: #000;">S/.</td>
+                    <td style="text-align: right; padding: 10px 5px; width: 80px; color: #000;">${totalText}</td>
+                </tr>
             `;
-            totalGeneral += parseFloat(totalText) || 0;
         }
 
         if (hasNoMeter) {
-            let nombre = (document.getElementById('inometer_name') ? document.getElementById('inometer_name').value : 'Inquilino Sin Medidor').toUpperCase();
-            nombre = nombre.replace(/\bSIN MEDIDOR\b/gi, '').replace(/\(\)/g, '').trim();
-            if (nombre === '') nombre = 'INQUILINO';
+            let nombre = (document.getElementById('inometer_name') ? document.getElementById('inometer_name').value : 'PROPIETARIO').toUpperCase();
+            if (nombre.trim() === '' || nombre === 'INQUILINO SIN MEDIDOR') nombre = 'PROPIETARIO';
 
             const diasFctText = document.getElementById('pdf_dias_nometer') ? document.getElementById('pdf_dias_nometer').innerText.replace('Días facturados: ', '') : '0';
             const totalText = document.getElementById('inometer_pdf_total_val') ? document.getElementById('inometer_pdf_total_val').innerText : '0.00';
             
             filasHTML += `
-                <div style="display: flex; padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px;">
-                    <div style="flex: 2; text-align: left; color: #334155;">${nombre} <span style="color: #94a3b8; font-size: 0.9em; font-weight: normal; text-transform: none;">(Sin Medidor)</span></div>
-                    <div style="flex: 1; text-align: center; color: #334155;">${diasFctText}</div>
-                    <div style="flex: 1; text-align: right; font-weight: bold; color: #1e293b;">S/. ${totalText}</div>
-                </div>
+                <tr style="border-bottom: 1px solid #d1d5db;">
+                    <td style="text-align: left; padding: 10px 5px; color: #000;">${nombre}</td>
+                    <td style="text-align: center; padding: 10px 5px; color: #000;">${diasFctText}</td>
+                    <td style="text-align: right; padding: 10px 5px; width: 40px; color: #000;">S/.</td>
+                    <td style="text-align: right; padding: 10px 5px; width: 80px; color: #000;">${totalText}</td>
+                </tr>
             `;
-            totalGeneral += parseFloat(totalText) || 0;
         }
 
         const tempCont = document.getElementById('pdf-template-container');
         
         tempCont.innerHTML = `
-            <div id="resumen-captura" style="font-family: Arial, sans-serif; padding: 40px; background: white; color: #334155; width: 750px; box-sizing: border-box;">
+            <div id="resumen-captura" style="font-family: Arial, sans-serif; padding: 40px 60px; background: white; color: #000; width: 750px; box-sizing: border-box;">
                 
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <b style="color: #3498db; font-size: 26px; text-transform: uppercase; display: block; margin-bottom: 6px;">RESUMEN DE COBROS</b>
-                    <span style="font-size: 15px; text-transform: uppercase; color: #64748b; letter-spacing: 1px;">MES: ${mes}</span>
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <div style="font-size: 26px; font-weight: bold; margin-bottom: 8px; color: #000;">RESUMEN DE COBROS - AGUA</div>
+                    <div style="font-size: 20px; color: #7f8c8d; margin-bottom: 8px; text-transform: uppercase;">${mes}</div>
+                    <div style="font-size: 20px; color: #e67e22; font-weight: bold; text-transform: uppercase;">${rangoFechas}</div>
                 </div>
                 
-                <div style="border-bottom: 2px solid #bae6fd; padding: 10px; margin-bottom: 5px; display: flex; font-weight: bold; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">
-                    <div style="flex: 2; text-align: left;">Inquilino</div>
-                    <div style="flex: 1; text-align: center;">Días Facturados</div>
-                    <div style="flex: 1; text-align: right;">Monto a Pagar</div>
-                </div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 19px; font-weight: 500;">
+                    <thead>
+                        <tr style="border-bottom: 3px solid #0070c0;">
+                            <th style="text-align: left; padding: 12px 5px; color: #000;">INQUILINO</th>
+                            <th style="text-align: center; padding: 12px 5px; color: #000;">DIAS FACTURADOS</th>
+                            <th style="text-align: right; padding: 12px 5px; color: #000;" colspan="2">MONTO A PAGAR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filasHTML}
+                    </tbody>
+                </table>
                 
-                <div style="margin-bottom: 20px;">
-                    ${filasHTML}
-                </div>
-                
-                <div style="margin-top: 30px;">
-                    <div style="display: flex; justify-content: space-between; padding: 15px; background-color: #f8fafc; border-radius: 8px; margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: #64748b; font-size: 14px;">TOTAL RECAUDADO (SUMA INQUILINOS)</span>
-                        <b style="color: #1e293b; font-size: 16px;">S/. ${totalGeneral.toFixed(2)}</b>
+                <div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: bold; color: #000;">
+                    <div>TOTAL RECIBO PRINCIPAL</div>
+                    <div style="display: flex; gap: 40px; padding-right: 5px;">
+                        <span>S/.</span>
+                        <span>${totalPrincipalText.replace('S/.', '').trim()}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding: 15px; background-color: #f0f8ff; border-left: 5px solid #3498db; border-radius: 4px;">
-                        <span style="font-weight: bold; color: #2c3e50; font-size: 14px;">TOTAL RECIBO PRINCIPAL</span>
-                        <b style="color: #3498db; font-size: 18px;">S/. ${totalPrincipalText.replace('S/.', '').trim()}</b>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 40px; text-align: center; color: #94a3b8; font-size: 11px;">
-                    Documento generado automáticamente por el Sistema Dinámico de Inquilinos.
                 </div>
             </div>
         `;
@@ -555,17 +563,17 @@
     }
 
     // =========================================================================
-    // EXPORTACIÓN EXCLUSIVA DEL RECIBO PRINCIPAL (RECIBO INDIVIDUAL AZUL CLARO)
+    // EXPORTACIÓN EXCLUSIVA DEL RECIBO PRINCIPAL
     // =========================================================================
     async function exportPDF(id) {
         const tempCont = document.getElementById('pdf-template-container');
         const mes = document.getElementById('m_mes').value;
         const tenantNameInput = document.getElementById(id === 'nometer' ? 'inometer_name' : `i${id}_name`);
-        const nombreInq = tenantNameInput ? tenantNameInput.value : 'Inquilino';
+        const nombreInq = tenantNameInput && tenantNameInput.value ? tenantNameInput.value : 'Inquilino';
         const total_pagar = document.getElementById(id === 'nometer' ? 'inometer_pdf_total_val' : `i${id}_pdf_total_val`).innerText;
 
-        let colorMain = '#3498db'; // Azul claro solicitado
-        let colorFondoTh = '#f0f8ff'; // Fondo celeste claro para cabecera de tabla
+        let colorMain = '#3498db'; 
+        let colorFondoTh = '#f0f8ff'; 
         
         let diasFacturadosTexto = '';
         let lecturasTexto = '';
@@ -669,7 +677,7 @@
     async function exportCalculos(id) {
         const mes = document.getElementById('m_mes').value;
         const tenantNameInput = document.getElementById(id === 'nometer' ? 'inometer_name' : `i${id}_name`);
-        const nombre = tenantNameInput ? tenantNameInput.value : 'Inquilino';
+        const nombre = tenantNameInput && tenantNameInput.value ? tenantNameInput.value : 'Inquilino';
 
         const getVal = (elemId) => parseFloat(document.getElementById(elemId)?.value) || 0;
         const mainPrevR = getVal('m_prev_r');
@@ -693,7 +701,7 @@
         }
         mainDays = mainDays > 0 ? mainDays : 1; 
 
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 1;
+        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
 
@@ -897,7 +905,6 @@
         }
 
         const tempCont = document.getElementById('pdf-template-container');
-        // Usamos el contenedor maestro que funciona en el de luz, para evitar PDFs en blanco
         tempCont.innerHTML = htmlContenido;
 
         const exportFileName = `CÁLCULOS AGUA ${mes} - ${nombre}.pdf`;
