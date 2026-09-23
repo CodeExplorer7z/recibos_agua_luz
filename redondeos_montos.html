@@ -3,182 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Recibos JPG (Letras Grandes)</title>
+    <title>Generador de Recibos (Limpio y Dinámico)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Contenedor ampliado para alojar tipografía gigante sin que se deforme */
+        #render-container {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 960px;
+            background-color: white;
+        }
+        
+        /* Ajustes de tabla para la imagen final */
+        .print-table th { 
+            padding: 24px 12px; 
+            font-size: 30px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            border-bottom: 4px solid #e5e7eb; 
+        }
+        .print-table td { 
+            padding: 36px 12px; 
+            border-bottom: 3px solid #f3f4f6; 
+        }
+        .print-table tr:last-child td { 
+            border-bottom: none; 
+        }
+
+        /* OCULTAR FLECHAS DE LOS INPUTS NUMÉRICOS */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8">
 
-    <div class="max-w-3xl mx-auto space-y-6">
+    <div class="max-w-4xl mx-auto space-y-6">
         
-        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-600">
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">Calculadora de Recibos</h1>
-            <p class="text-gray-600 text-sm">Distribución por Resto Mayor con diseño optimizado (Letras Grandes)</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Calculadora de Cuentas</h1>
+            </div>
+            <p class="text-gray-500 text-sm ml-11">Ingresa los datos para generar el reporte de Agua y Luz.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-                <h2 class="text-lg font-bold text-indigo-700 mb-4 border-b pb-2">1. Kendra y Sonia</h2>
+            <!-- SECCIÓN MONTOS Y CONSUMOS -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-5">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm">1</span> 
+                    Importes y Consumos
+                </h2>
                 
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-1">Total Agua Compartida</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2 text-gray-500">S/</span>
-                        <input type="number" id="agua_compartida" step="0.01" class="w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-blue-800 bg-blue-50" placeholder="0.00" value="6.52" oninput="recalcularAguaActiva()">
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">MARILUZ</h3>
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label>
+                            <input type="number" id="agua_mariluz" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label>
+                            <input type="number" id="m3_mariluz" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label>
+                            <input type="number" id="luz_mariluz" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label>
+                            <input type="number" id="kwh_mariluz" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-gray-600">Estimado Agua Kendra</label>
-                        <input type="number" id="agua_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-200 disabled:text-gray-500 transition-colors" placeholder="(Vacío)" oninput="calcularRestanteAgua('kendra')">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1 text-gray-600">Estimado Agua Sonia</label>
-                        <input type="number" id="agua_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-200 disabled:text-gray-500 transition-colors" placeholder="(Vacío)" oninput="calcularRestanteAgua('sonia')">
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA + SONIA (AGUA)</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label>
+                            <input type="number" id="agua_compartida" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label>
+                            <input type="number" id="m3_compartida" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-2">
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Luz Kendra</label>
-                        <input type="number" id="luz_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0.00" value="18.10">
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA Y SONIA (LUZ)</h3>
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Luz Kendra (S/)</label>
+                            <input type="number" id="luz_kendra" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label>
+                            <input type="number" id="kwh_kendra" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-1">Luz Sonia</label>
-                        <input type="number" id="luz_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0.00" value="20.00">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Luz Sonia (S/)</label>
+                            <input type="number" id="luz_sonia" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label>
+                            <input type="number" id="kwh_sonia" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-                <h2 class="text-lg font-bold text-teal-700 mb-4 border-b pb-2">2. Mariluz</h2>
+            <!-- SECCIÓN FECHAS -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-5">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm">2</span> 
+                    Periodos de Lectura
+                </h2>
                 
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-1">Agua Mariluz</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2 text-gray-500">S/</span>
-                        <input type="number" id="agua_mariluz" step="0.01" class="w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00" value="9.34">
+                <div class="space-y-4">
+                    <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">MARILUZ AGUA</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" id="fecha_inicio_mariluz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_fin_mariluz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                        </div>
                     </div>
-                </div>
 
-                <div class="mb-2">
-                    <label class="block text-sm font-semibold mb-1">Luz Mariluz</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-2 text-gray-500">S/</span>
-                        <input type="number" id="luz_mariluz" step="0.01" class="w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00" value="3.02">
+                    <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">MARILUZ LUZ</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" id="fecha_inicio_mariluz_luz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-amber-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_fin_mariluz_luz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-amber-400 outline-none text-gray-700">
+                        </div>
+                    </div>
+
+                    <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">KENDRA+SONIA AGUA</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" id="fecha_inicio_ks_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_fin_ks_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                        </div>
+                    </div>
+
+                    <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">KENDRA LUZ</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" id="fecha_inicio_kendra_luz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-amber-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_fin_kendra_luz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-amber-400 outline-none text-gray-700">
+                        </div>
+                    </div>
+
+                    <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">SONIA LUZ</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" id="fecha_inicio_sonia_luz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-amber-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_fin_sonia_luz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-amber-400 outline-none text-gray-700">
+                        </div>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <button onclick="generarYDescargarImagen()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition duration-200 flex justify-center items-center text-lg mt-4">
-            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-            Calcular y Descargar Imagen
+        <button onclick="generarYCompartirImagen()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-5 rounded-xl shadow-lg transition duration-200 flex justify-center items-center text-xl">
+            <svg class="w-7 h-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+            Exportar Recibo (Móvil / WhatsApp)
         </button>
 
     </div>
 
-    <!-- CONTENEDOR OCULTO PARA EL RENDERIZADO (Lienzo más ancho para tipografía mayor) -->
-    <div style="position: absolute; left: -9999px; top: -9999px; width: 550px; background-color: #ffffff; padding: 15px;">
-        <div id="recibo_imprimible" class="p-8 border border-gray-200 bg-white shadow-sm" style="border-radius: 20px;">
-            <div class="text-center mb-6 border-b border-gray-100 pb-5">
-                <h2 class="text-3xl font-extrabold uppercase tracking-widest text-gray-800" style="color: #111827;">Liquidación</h2>
-                <p class="text-gray-400 text-sm mt-2 font-medium" id="fecha_recibo"></p>
+    <!-- CONTENEDOR OCULTO PARA EL RENDERIZADO -->
+    <div id="render-container">
+        <div id="recibo_imprimible" class="p-14 bg-white" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+            
+            <div class="border-b-4 border-gray-800 pb-10 mb-10">
+                <h2 class="text-6xl font-black text-gray-900 tracking-tight text-center mb-4 uppercase">Liquidación Mensual</h2>
+                <p class="text-gray-500 font-bold text-3xl text-center">Cuentas de Agua y Energía Eléctrica</p>
+                
+                <div class="mt-12 p-8 bg-slate-50 rounded-2xl flex justify-between items-center border border-slate-200 shadow-sm">
+                    <p class="text-3xl font-black text-gray-500 uppercase tracking-widest">Total a Recaudar</p>
+                    <div class="text-7xl font-black text-blue-600" id="gran_total_recibo">S/ 0</div>
+                </div>
             </div>
 
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 border-b-2 border-gray-200">
-                        <th class="py-4 px-3 font-bold text-gray-600 uppercase text-sm tracking-wider">Inquilino</th>
-                        <th class="py-4 px-3 font-bold text-gray-600 uppercase text-sm tracking-wider text-center">Agua</th>
-                        <th class="py-4 px-3 font-bold text-gray-600 uppercase text-sm tracking-wider text-center">Luz</th>
-                        <th class="py-4 px-3 font-bold text-blue-700 uppercase text-sm tracking-wider text-right">Total</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla_resultados" class="divide-y divide-gray-100"></tbody>
-                <tfoot>
-                    <tr class="bg-blue-50/50 border-t-2 border-blue-200">
-                        <td colspan="3" class="py-5 px-3 font-extrabold text-right text-gray-700 tracking-wide text-lg">TOTAL A PAGAR:</td>
-                        <td class="py-5 px-3 font-black text-blue-700 text-3xl text-right" id="gran_total_redondeado">0</td>
-                    </tr>
-                </tfoot>
-            </table>
-            
-            <div class="mt-8 pt-5 border-t border-dashed border-gray-200 text-sm text-gray-500 text-center leading-relaxed">
-                <p>Monto original (con céntimos): <span id="gran_total_exacto" class="font-semibold text-gray-600">0.00</span></p>
-                <p class="mt-1">El cobro ha sido redondeado y nivelado para facilitar el pago exacto.</p>
+            <div class="rounded-3xl border-4 border-gray-200 overflow-hidden mb-14 shadow-sm" id="tabla_contenedor">
+                <table class="w-full text-center print-table border-collapse bg-white">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="text-left text-gray-600 font-extrabold w-1/3 pl-8">INQUILINO</th>
+                            <th class="text-blue-700 bg-blue-100/60 font-extrabold">AGUA</th>
+                            <th class="text-amber-700 bg-amber-100/60 font-extrabold">LUZ</th>
+                            <th class="text-gray-800 text-right pr-10 font-extrabold">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla_resultados">
+                        <!-- Filas inyectadas por JS -->
+                    </tbody>
+                </table>
             </div>
+
+            <!-- Contenedor Principal de Fechas -->
+            <div id="seccion_fechas_render" class="mb-8">
+                <h3 class="text-3xl font-black text-gray-800 uppercase tracking-wider mb-8 flex items-center border-b-4 border-gray-100 pb-4">
+                    Periodos de Facturación
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-8" id="grid_fechas_render">
+                    <div id="card_mariluz_agua" class="bg-blue-50/40 p-8 rounded-3xl border-2 border-blue-100 flex-col justify-center shadow-sm">
+                        <span class="text-3xl font-black text-blue-800 mb-5 block">💧 MARILUZ AGUA</span>
+                        <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
+                            <span id="lbl_ini_mariluz"></span>
+                            <span class="text-blue-300 mx-2">➔</span>
+                            <span id="lbl_fin_mariluz"></span>
+                        </div>
+                    </div>
+
+                    <div id="card_mariluz_luz" class="bg-amber-50/40 p-8 rounded-3xl border-2 border-amber-100 flex-col justify-center shadow-sm">
+                        <span class="text-3xl font-black text-amber-800 mb-5 block">⚡ MARILUZ LUZ</span>
+                        <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
+                            <span id="lbl_ini_mariluz_luz"></span>
+                            <span class="text-amber-300 mx-2">➔</span>
+                            <span id="lbl_fin_mariluz_luz"></span>
+                        </div>
+                    </div>
+
+                    <div id="card_ks_agua" class="bg-blue-50/40 p-8 rounded-3xl border-2 border-blue-100 flex-col justify-center shadow-sm">
+                        <span class="text-3xl font-black text-blue-800 mb-5 block">💧 KENDRA + SONIA AGUA</span>
+                        <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
+                            <span id="lbl_ini_ks"></span>
+                            <span class="text-blue-300 mx-2">➔</span>
+                            <span id="lbl_fin_ks"></span>
+                        </div>
+                    </div>
+
+                    <div id="card_kendra_luz" class="bg-amber-50/40 p-8 rounded-3xl border-2 border-amber-100 flex-col justify-center shadow-sm">
+                        <span class="text-3xl font-black text-amber-800 mb-5 block">⚡ KENDRA LUZ</span>
+                        <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
+                            <span id="lbl_ini_kl"></span>
+                            <span class="text-amber-300 mx-2">➔</span>
+                            <span id="lbl_fin_kl"></span>
+                        </div>
+                    </div>
+
+                    <div id="card_sonia_luz" class="bg-amber-50/40 p-8 rounded-3xl border-2 border-amber-100 flex-col justify-center shadow-sm">
+                        <span class="text-3xl font-black text-amber-800 mb-5 block">⚡ SONIA LUZ</span>
+                        <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
+                            <span id="lbl_ini_sl"></span>
+                            <span class="text-amber-300 mx-2">➔</span>
+                            <span id="lbl_fin_sl"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t-4 border-dashed border-gray-200 text-center text-2xl text-gray-400 font-bold">
+                * Los cobros han sido redondeados al número entero más cercano para su facilidad.
+            </div>
+
         </div>
     </div>
 
     <script>
-        function calcularRestanteAgua(origen) {
-            const totalAgua = parseFloat(document.getElementById('agua_compartida').value) || 0;
-            const inputKendra = document.getElementById('agua_kendra');
-            const inputSonia = document.getElementById('agua_sonia');
+        // Evitar que la rueda del ratón cambie los números accidentalmente
+        document.addEventListener('DOMContentLoaded', () => {
+            const numberInputs = document.querySelectorAll('input[type=number]');
+            numberInputs.forEach(input => {
+                input.addEventListener('wheel', function(e) {
+                    e.preventDefault();
+                }, { passive: false });
+            });
+        });
 
-            if (origen === 'kendra') {
-                if (inputKendra.value !== '') {
-                    const valKendra = parseFloat(inputKendra.value) || 0;
-                    inputSonia.value = Math.max(0, totalAgua - valKendra).toFixed(2);
-                    inputSonia.disabled = true;
-                } else {
-                    inputSonia.value = '';
-                    inputSonia.disabled = false;
-                }
-            } else if (origen === 'sonia') {
-                if (inputSonia.value !== '') {
-                    const valSonia = parseFloat(inputSonia.value) || 0;
-                    inputKendra.value = Math.max(0, totalAgua - valSonia).toFixed(2);
-                    inputKendra.disabled = true;
-                } else {
-                    inputKendra.value = '';
-                    inputKendra.disabled = false;
-                }
-            }
+        // Convertir formato de fecha de YYYY-MM-DD a D/M/YYYY
+        function formatearFecha(fechaStr) {
+            if (!fechaStr) return '';
+            const partes = fechaStr.split('-');
+            if(partes.length !== 3) return fechaStr; 
+            return `${parseInt(partes[2], 10)}/${parseInt(partes[1], 10)}/${partes[0]}`;
         }
 
-        function recalcularAguaActiva() {
-            const inputKendra = document.getElementById('agua_kendra');
-            const inputSonia = document.getElementById('agua_sonia');
-            if (inputKendra.value !== '' && !inputKendra.disabled) {
-                calcularRestanteAgua('kendra');
-            } else if (inputSonia.value !== '' && !inputSonia.disabled) {
-                calcularRestanteAgua('sonia');
-            }
-        }
-
-        function generarYDescargarImagen() {
-            let totalAgua = parseFloat(document.getElementById('agua_compartida').value) || 0;
-            let valAguaKendra = document.getElementById('agua_kendra').value;
-            let valAguaSonia = document.getElementById('agua_sonia').value;
-
-            let luzKendra = parseFloat(document.getElementById('luz_kendra').value) || 0;
-            let luzSonia = parseFloat(document.getElementById('luz_sonia').value) || 0;
-            let aguaMariluz = parseFloat(document.getElementById('agua_mariluz').value) || 0;
-            let luzMariluz = parseFloat(document.getElementById('luz_mariluz').value) || 0;
-
-            let inquilinos = [];
-
-            if (valAguaKendra === '' && valAguaSonia === '') {
-                inquilinos = [
-                    { orden: 1, nombre: "Mariluz", agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz },
-                    { orden: 2, nombre: "Kendra + Sonia", agua: totalAgua, luz: null, exacto: totalAgua },
-                    { orden: 3, nombre: "Kendra", agua: null, luz: luzKendra, exacto: luzKendra },
-                    { orden: 4, nombre: "Sonia", agua: null, luz: luzSonia, exacto: luzSonia }
-                ];
+        // Configurar qué tarjetas de fechas se muestran en la imagen
+        function configurarTarjetaFecha(idCard, idLblIni, idLblFin, valIni, valFin) {
+            const card = document.getElementById(idCard);
+            if (!valIni && !valFin) {
+                card.style.display = 'none';
+                return 0; // No se muestra
             } else {
-                let aguaK = parseFloat(valAguaKendra) || 0;
-                let aguaS = parseFloat(valAguaSonia) || 0;
-                inquilinos = [
-                    { orden: 1, nombre: "Mariluz", agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz },
-                    { orden: 2, nombre: "Kendra", agua: aguaK, luz: luzKendra, exacto: aguaK + luzKendra },
-                    { orden: 3, nombre: "Sonia", agua: aguaS, luz: luzSonia, exacto: aguaS + luzSonia }
-                ];
+                card.style.display = 'flex';
+                document.getElementById(idLblIni).innerText = formatearFecha(valIni) || '-';
+                document.getElementById(idLblFin).innerText = formatearFecha(valFin) || '-';
+                return 1; // Sí se muestra
             }
+        }
+
+        function calcularRedondeo(inquilinos) {
+            if (!inquilinos || inquilinos.length === 0) return 0;
 
             let sumaEnteros = 0;
             let totalExactoGeneral = 0;
@@ -195,9 +330,7 @@
             let diferenciaDistribuir = totalRedondeadoGeneral - sumaEnteros;
 
             inquilinos.sort((a, b) => {
-                if (Math.abs(b.decimal - a.decimal) < 0.001) {
-                    return a.exacto - b.exacto; 
-                }
+                if (Math.abs(b.decimal - a.decimal) < 0.001) { return a.exacto - b.exacto; }
                 return b.decimal - a.decimal;
             });
 
@@ -211,17 +344,11 @@
                     let baseLuz = Math.floor(inq.luz);
                     let decAgua = inq.agua - baseAgua;
                     let decLuz = inq.luz - baseLuz;
-                    
                     let faltante = inq.pagoFinal - (baseAgua + baseLuz);
                     
                     for (let j = 0; j < faltante; j++) {
-                        if (decAgua >= decLuz) {
-                            baseAgua++;
-                            decAgua = -1; 
-                        } else {
-                            baseLuz++;
-                            decLuz = -1;
-                        }
+                        if (decAgua >= decLuz) { baseAgua++; decAgua = -1; } 
+                        else { baseLuz++; decLuz = -1; }
                     }
                     inq.aguaFinal = baseAgua;
                     inq.luzFinal = baseLuz;
@@ -234,47 +361,128 @@
                 }
             });
 
-            inquilinos.sort((a, b) => a.orden - b.orden);
+            return totalRedondeadoGeneral;
+        }
+
+        async function generarYCompartirImagen() {
+            let aguaMariluz = parseFloat(document.getElementById('agua_mariluz').value) || 0;
+            let luzMariluz = parseFloat(document.getElementById('luz_mariluz').value) || 0;
+            let aguaKS = parseFloat(document.getElementById('agua_compartida').value) || 0;
+            let luzKendra = parseFloat(document.getElementById('luz_kendra').value) || 0;
+            let luzSonia = parseFloat(document.getElementById('luz_sonia').value) || 0;
+
+            let m3Mariluz = document.getElementById('m3_mariluz').value || '';
+            let kwhMariluz = document.getElementById('kwh_mariluz').value || '';
+            let m3KS = document.getElementById('m3_compartida').value || '';
+            let kwhKendra = document.getElementById('kwh_kendra').value || '';
+            let kwhSonia = document.getElementById('kwh_sonia').value || '';
+
+            let inquilinos = [
+                { id: 'mariluz', nombre: "Mariluz", agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz, m3: m3Mariluz, kwh: kwhMariluz },
+                { id: 'ks_agua', nombre: "Kendra + Sonia", agua: aguaKS, luz: null, exacto: aguaKS, m3: m3KS, kwh: '' },
+                { id: 'kendra_luz', nombre: "Kendra", agua: null, luz: luzKendra, exacto: luzKendra, m3: '', kwh: kwhKendra },
+                { id: 'sonia_luz', nombre: "Sonia", agua: null, luz: luzSonia, exacto: luzSonia, m3: '', kwh: kwhSonia }
+            ];
+
+            // FILTRAR INQUILINOS: Solo mantener los que tienen un monto mayor a 0
+            let inquilinosFiltrados = inquilinos.filter(inq => inq.exacto > 0);
+
+            let granTotal = calcularRedondeo(inquilinosFiltrados);
+            
+            let ordenDeseado = ['mariluz', 'ks_agua', 'kendra_luz', 'sonia_luz'];
+            inquilinosFiltrados.sort((a, b) => ordenDeseado.indexOf(a.id) - ordenDeseado.indexOf(b.id));
 
             let tbody = document.getElementById('tabla_resultados');
             tbody.innerHTML = '';
 
-            // Aumento de los textos en la tabla generada (text-xl, text-2xl)
-            inquilinos.forEach(inq => {
-                let textAgua = inq.aguaFinal !== null ? `S/ ${inq.aguaFinal}` : '-';
-                let textLuz = inq.luzFinal !== null ? `S/ ${inq.luzFinal}` : '-';
-
+            inquilinosFiltrados.forEach(inq => {
+                let textAgua = (inq.aguaFinal !== null && inq.aguaFinal > 0) ? `S/ ${inq.aguaFinal}` : ``;
+                let textLuz = (inq.luzFinal !== null && inq.luzFinal > 0) ? `S/ ${inq.luzFinal}` : ``;
+                let textTotal = inq.pagoFinal > 0 ? `S/ ${inq.pagoFinal}` : ``;
+                
+                let textM3 = (inq.m3 !== '' && inq.m3 !== '-' && inq.aguaFinal > 0) ? `${inq.m3} m³` : '';
+                let textKwh = (inq.kwh !== '' && inq.kwh !== '-' && inq.luzFinal > 0) ? `${inq.kwh} KWH` : '';
+                
+                let textExactoHtml = inq.exacto > 0 ? `<div class="text-3xl font-bold text-gray-400">Exacto: S/ ${inq.exacto.toFixed(2)}</div>` : '';
+                
                 tbody.innerHTML += `
                     <tr>
-                        <td class="py-5 px-3 font-bold text-gray-800 text-xl" style="color: #1f2937;">
-                            ${inq.nombre}
-                            <div class="text-sm text-gray-400 font-normal mt-1 tracking-wide">Ref: S/ ${inq.exacto.toFixed(2)}</div>
+                        <td class="text-left pl-8">
+                            <div class="font-black text-gray-900 text-5xl mb-3">${inq.nombre}</div>
+                            ${textExactoHtml}
                         </td>
-                        <td class="py-5 px-3 text-gray-600 text-center font-semibold text-xl" style="color: #4b5563;">${textAgua}</td>
-                        <td class="py-5 px-3 text-gray-600 text-center font-semibold text-xl" style="color: #4b5563;">${textLuz}</td>
-                        <td class="py-5 px-3 font-black text-blue-600 text-right text-2xl" style="color: #2563eb;">S/ ${inq.pagoFinal}</td>
+                        <td class="bg-blue-50/50">
+                            <div class="font-black text-blue-700 text-4xl mb-2">${textAgua}</div>
+                            <div class="text-3xl font-bold text-gray-500">${textM3}</div>
+                        </td>
+                        <td class="bg-amber-50/50">
+                            <div class="font-black text-amber-600 text-4xl mb-2">${textLuz}</div>
+                            <div class="text-3xl font-bold text-gray-500">${textKwh}</div>
+                        </td>
+                        <td class="text-right pr-10 font-black text-gray-900 text-6xl">${textTotal}</td>
                     </tr>
                 `;
             });
 
-            document.getElementById('gran_total_exacto').innerText = `S/ ${totalExactoGeneral.toFixed(2)}`;
-            document.getElementById('gran_total_redondeado').innerText = `S/ ${totalRedondeadoGeneral}`;
+            // Ocultar la tabla entera si no hay ningún inquilino con monto
+            if (inquilinosFiltrados.length === 0) {
+                document.getElementById('tabla_contenedor').style.display = 'none';
+            } else {
+                document.getElementById('tabla_contenedor').style.display = 'block';
+            }
 
-            let opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            document.getElementById('fecha_recibo').innerText = `${new Date().toLocaleDateString('es-ES', opcionesFecha)}`;
+            document.getElementById('gran_total_recibo').innerText = `S/ ${granTotal}`;
+
+            // Configurar dinámicamente qué tarjetas de fecha se renderizan
+            let tarjetasActivas = 0;
+            tarjetasActivas += configurarTarjetaFecha('card_mariluz_agua', 'lbl_ini_mariluz', 'lbl_fin_mariluz', document.getElementById('fecha_inicio_mariluz').value, document.getElementById('fecha_fin_mariluz').value);
+            tarjetasActivas += configurarTarjetaFecha('card_mariluz_luz', 'lbl_ini_mariluz_luz', 'lbl_fin_mariluz_luz', document.getElementById('fecha_inicio_mariluz_luz').value, document.getElementById('fecha_fin_mariluz_luz').value);
+            tarjetasActivas += configurarTarjetaFecha('card_ks_agua', 'lbl_ini_ks', 'lbl_fin_ks', document.getElementById('fecha_inicio_ks_agua').value, document.getElementById('fecha_fin_ks_agua').value);
+            tarjetasActivas += configurarTarjetaFecha('card_kendra_luz', 'lbl_ini_kl', 'lbl_fin_kl', document.getElementById('fecha_inicio_kendra_luz').value, document.getElementById('fecha_fin_kendra_luz').value);
+            tarjetasActivas += configurarTarjetaFecha('card_sonia_luz', 'lbl_ini_sl', 'lbl_fin_sl', document.getElementById('fecha_inicio_sonia_luz').value, document.getElementById('fecha_fin_sonia_luz').value);
+
+            // Ocultar bloque entero si no hay fechas
+            if (tarjetasActivas === 0) {
+                document.getElementById('seccion_fechas_render').style.display = 'none';
+            } else {
+                document.getElementById('seccion_fechas_render').style.display = 'block';
+            }
 
             const elemento = document.getElementById('recibo_imprimible');
             
-            html2canvas(elemento, { 
-                scale: 3, 
-                backgroundColor: '#ffffff',
-                logging: false
-            }).then(canvas => {
-                let enlace = document.createElement('a');
-                enlace.download = 'Liquidacion_Recibo_Grande.jpg';
-                enlace.href = canvas.toDataURL('image/jpeg', 0.98);
-                enlace.click();
-            });
+            try {
+                const canvas = await html2canvas(elemento, { 
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+
+                canvas.toBlob(async (blob) => {
+                    const archivo = new File([blob], 'Liquidacion_Servicios.jpg', { type: 'image/jpeg' });
+                    
+                    if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                        try {
+                            await navigator.share({
+                                files: [archivo],
+                                title: 'Liquidación de Servicios',
+                                text: 'Adjunto el reporte de cuentas de agua y luz correspondiente.'
+                            });
+                        } catch (error) {
+                            console.log('Compartir cancelado por el usuario.', error);
+                        }
+                    } else {
+                        let enlace = document.createElement('a');
+                        enlace.download = 'Liquidacion_Servicios.jpg';
+                        enlace.href = canvas.toDataURL('image/jpeg', 0.98);
+                        enlace.click();
+                        alert("Tu dispositivo no soporta envío directo. La imagen se ha descargado a tus archivos.");
+                    }
+                }, 'image/jpeg', 0.95);
+
+            } catch (error) {
+                console.error("Error en renderizado:", error);
+                alert("Ocurrió un error al intentar generar la imagen.");
+            }
         }
     </script>
 </body>
