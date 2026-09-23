@@ -386,7 +386,6 @@
 
             // FILTRAR INQUILINOS: Solo mantener los que tienen un monto mayor a 0
             let inquilinosFiltrados = inquilinos.filter(inq => inq.exacto > 0);
-
             let granTotal = calcularRedondeo(inquilinosFiltrados);
             
             let ordenDeseado = ['mariluz', 'ks_agua', 'kendra_luz', 'sonia_luz'];
@@ -461,21 +460,28 @@
                     const archivo = new File([blob], 'Liquidacion_Servicios.jpg', { type: 'image/jpeg' });
                     
                     if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                        // Navegadores nativos (Chrome, Safari, etc.)
                         try {
                             await navigator.share({
                                 files: [archivo],
                                 title: 'Liquidación de Servicios',
-                                text: 'Adjunto el reporte de cuentas de agua y luz correspondiente.'
+                                text: 'Adjunto el reporte de cuentas de agua y luz.'
                             });
                         } catch (error) {
-                            console.log('Compartir cancelado por el usuario.', error);
+                            console.log('Compartir cancelado o no soportado totalmente.', error);
                         }
                     } else {
+                        // Flujo modificado para Aplicaciones Android/WebView
                         let enlace = document.createElement('a');
                         enlace.download = 'Liquidacion_Servicios.jpg';
                         enlace.href = canvas.toDataURL('image/jpeg', 0.98);
-                        enlace.click();
-                        alert("Tu dispositivo no soporta envío directo. La imagen se ha descargado a tus archivos.");
+                        enlace.click(); // Descarga la imagen silenciosamente
+                        
+                        // Redirigir a WhatsApp después de medio segundo
+                        setTimeout(() => {
+                            let mensaje = encodeURIComponent("¡Hola! Ya descargué la liquidación de los servicios. Te la adjunto por aquí:");
+                            window.location.href = `https://wa.me/?text=${mensaje}`;
+                        }, 500);
                     }
                 }, 'image/jpeg', 0.95);
 
