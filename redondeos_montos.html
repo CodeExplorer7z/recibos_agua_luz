@@ -47,14 +47,34 @@
 
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">Calculadora de Cuentas</h1>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-800">Calculadora de Cuentas</h1>
+                <p class="text-gray-500 text-sm sm:ml-11">Ingresa los datos para generar el reporte de Agua y Luz.</p>
             </div>
-            <p class="text-gray-500 text-sm ml-11">Ingresa los datos para generar el reporte de Agua y Luz.</p>
+            
+            <!-- Contenedor de botones de Importación JSON -->
+            <div class="flex flex-col sm:flex-row gap-2">
+                <div>
+                    <input type="file" id="input_json_agua" accept=".json" class="hidden" onchange="importarJsonAgua(event)">
+                    <button onclick="document.getElementById('input_json_agua').click()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        IMPORTAR JSON AGUA
+                    </button>
+                </div>
+                <div>
+                    <input type="file" id="input_json_luz" accept=".json" class="hidden" onchange="importarJsonLuz(event)">
+                    <button onclick="document.getElementById('input_json_luz').click()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        IMPORTAR JSON LUZ
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -280,7 +300,6 @@
     </div>
 
     <script>
-        // Evitar que la rueda del ratón cambie los números accidentalmente
         document.addEventListener('DOMContentLoaded', () => {
             const numberInputs = document.querySelectorAll('input[type=number]');
             numberInputs.forEach(input => {
@@ -290,7 +309,93 @@
             });
         });
 
-        // Convertir formato de fecha de YYYY-MM-DD a D/M/YYYY
+        // NUEVA FUNCIÓN: Lógica para importar y mapear el JSON de agua
+        function importarJsonAgua(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const datos = JSON.parse(e.target.result);
+                    
+                    datos.forEach(inq => {
+                        const nombreLower = inq.nombre.toLowerCase();
+                        
+                        // Validar Mariluz
+                        if (nombreLower.includes('mariluz')) {
+                            document.getElementById('agua_mariluz').value = inq.monto_pagar.toFixed(2);
+                            document.getElementById('m3_mariluz').value = inq.consumo_m3;
+                            document.getElementById('fecha_inicio_mariluz').value = inq.fecha_inicio;
+                            document.getElementById('fecha_fin_mariluz').value = inq.fecha_fin;
+                        } 
+                        // Validar KENDRA + SONIA (Compartido de Agua)
+                        else if (nombreLower.includes('kendra') && nombreLower.includes('sonia')) {
+                            document.getElementById('agua_compartida').value = inq.monto_pagar.toFixed(2);
+                            document.getElementById('m3_compartida').value = inq.consumo_m3;
+                            document.getElementById('fecha_inicio_ks_agua').value = inq.fecha_inicio;
+                            document.getElementById('fecha_fin_ks_agua').value = inq.fecha_fin;
+                        }
+                    });
+
+                    alert("¡Los datos de agua fueron importados y mapeados correctamente!");
+                    
+                } catch (err) {
+                    console.error(err);
+                    alert("Ocurrió un error al leer el archivo JSON de agua. Asegúrate de subir el archivo correcto.");
+                }
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Lógica existente para importar y mapear el JSON de luz
+        function importarJsonLuz(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const datos = JSON.parse(e.target.result);
+                    
+                    datos.forEach(inq => {
+                        const nombreLower = inq.nombre.toLowerCase();
+                        
+                        if (nombreLower.includes('mariluz')) {
+                            document.getElementById('luz_mariluz').value = inq.monto_pagar.toFixed(2);
+                            document.getElementById('kwh_mariluz').value = inq.kwh_real;
+                            document.getElementById('fecha_inicio_mariluz_luz').value = inq.fecha_inicio;
+                            document.getElementById('fecha_fin_mariluz_luz').value = inq.fecha_fin;
+                        } 
+                        else if (nombreLower.includes('kendra')) {
+                            document.getElementById('luz_kendra').value = inq.monto_pagar.toFixed(2);
+                            document.getElementById('kwh_kendra').value = inq.kwh_real;
+                            document.getElementById('fecha_inicio_kendra_luz').value = inq.fecha_inicio;
+                            document.getElementById('fecha_fin_kendra_luz').value = inq.fecha_fin;
+                        } 
+                        else if (nombreLower.includes('sonia')) {
+                            document.getElementById('luz_sonia').value = inq.monto_pagar.toFixed(2);
+                            document.getElementById('kwh_sonia').value = inq.kwh_real;
+                            document.getElementById('fecha_inicio_sonia_luz').value = inq.fecha_inicio;
+                            document.getElementById('fecha_fin_sonia_luz').value = inq.fecha_fin;
+                        }
+                    });
+
+                    alert("¡Los datos de luz fueron importados y mapeados correctamente!");
+                    
+                } catch (err) {
+                    console.error(err);
+                    alert("Ocurrió un error al leer el archivo JSON de luz. Asegúrate de que sea el archivo correcto.");
+                }
+                
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+
         function formatearFecha(fechaStr) {
             if (!fechaStr) return '';
             const partes = fechaStr.split('-');
@@ -298,17 +403,16 @@
             return `${parseInt(partes[2], 10)}/${parseInt(partes[1], 10)}/${partes[0]}`;
         }
 
-        // Configurar qué tarjetas de fechas se muestran en la imagen
         function configurarTarjetaFecha(idCard, idLblIni, idLblFin, valIni, valFin) {
             const card = document.getElementById(idCard);
             if (!valIni && !valFin) {
                 card.style.display = 'none';
-                return 0; // No se muestra
+                return 0;
             } else {
                 card.style.display = 'flex';
                 document.getElementById(idLblIni).innerText = formatearFecha(valIni) || '-';
                 document.getElementById(idLblFin).innerText = formatearFecha(valFin) || '-';
-                return 1; // Sí se muestra
+                return 1;
             }
         }
 
@@ -384,7 +488,6 @@
                 { id: 'sonia_luz', nombre: "Sonia", agua: null, luz: luzSonia, exacto: luzSonia, m3: '', kwh: kwhSonia }
             ];
 
-            // FILTRAR INQUILINOS: Solo mantener los que tienen un monto mayor a 0
             let inquilinosFiltrados = inquilinos.filter(inq => inq.exacto > 0);
             let granTotal = calcularRedondeo(inquilinosFiltrados);
             
@@ -423,7 +526,6 @@
                 `;
             });
 
-            // Ocultar la tabla entera si no hay ningún inquilino con monto
             if (inquilinosFiltrados.length === 0) {
                 document.getElementById('tabla_contenedor').style.display = 'none';
             } else {
@@ -432,7 +534,6 @@
 
             document.getElementById('gran_total_recibo').innerText = `S/ ${granTotal}`;
 
-            // Configurar dinámicamente qué tarjetas de fecha se renderizan
             let tarjetasActivas = 0;
             tarjetasActivas += configurarTarjetaFecha('card_mariluz_agua', 'lbl_ini_mariluz', 'lbl_fin_mariluz', document.getElementById('fecha_inicio_mariluz').value, document.getElementById('fecha_fin_mariluz').value);
             tarjetasActivas += configurarTarjetaFecha('card_mariluz_luz', 'lbl_ini_mariluz_luz', 'lbl_fin_mariluz_luz', document.getElementById('fecha_inicio_mariluz_luz').value, document.getElementById('fecha_fin_mariluz_luz').value);
@@ -440,7 +541,6 @@
             tarjetasActivas += configurarTarjetaFecha('card_kendra_luz', 'lbl_ini_kl', 'lbl_fin_kl', document.getElementById('fecha_inicio_kendra_luz').value, document.getElementById('fecha_fin_kendra_luz').value);
             tarjetasActivas += configurarTarjetaFecha('card_sonia_luz', 'lbl_ini_sl', 'lbl_fin_sl', document.getElementById('fecha_inicio_sonia_luz').value, document.getElementById('fecha_fin_sonia_luz').value);
 
-            // Ocultar bloque entero si no hay fechas
             if (tarjetasActivas === 0) {
                 document.getElementById('seccion_fechas_render').style.display = 'none';
             } else {
@@ -460,7 +560,6 @@
                     const archivo = new File([blob], 'Liquidacion_Servicios.jpg', { type: 'image/jpeg' });
                     
                     if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
-                        // Navegadores nativos (Chrome, Safari, etc.)
                         try {
                             await navigator.share({
                                 files: [archivo],
@@ -471,13 +570,11 @@
                             console.log('Compartir cancelado o no soportado totalmente.', error);
                         }
                     } else {
-                        // Flujo modificado para Aplicaciones Android/WebView
                         let enlace = document.createElement('a');
                         enlace.download = 'Liquidacion_Servicios.jpg';
                         enlace.href = canvas.toDataURL('image/jpeg', 0.98);
-                        enlace.click(); // Descarga la imagen silenciosamente
+                        enlace.click(); 
                         
-                        // Redirigir a WhatsApp después de medio segundo
                         setTimeout(() => {
                             let mensaje = encodeURIComponent("¡Hola! Ya descargué la liquidación de los servicios. Te la adjunto por aquí:");
                             window.location.href = `https://wa.me/?text=${mensaje}`;
