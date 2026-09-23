@@ -109,8 +109,9 @@
                 <div class="col-6 col-md-2"><label class="small-label">Redondeo Actual</label><input type="number" id="v_red_act" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                 <div class="col-6 col-md-2"><label class="small-label">Total Recibo Principal</label><input type="text" id="v_total_main" class="form-control form-control-sm input-total-main" value="S/. 0.00" readonly></div>
                 
-                <div class="col-6 col-md-2 d-flex align-items-end">
-                    <button class="btn btn-sm w-100 fw-bold shadow-sm" style="background-color: var(--blue-dark); color: white; border-radius: 6px; height: 31px; border: none; font-size: 0.85rem;" onclick="exportResumenPDF()">RESUMEN</button>
+                <div class="col-6 col-md-2 d-flex align-items-end gap-1">
+                    <button class="btn btn-sm w-50 fw-bold shadow-sm" style="background-color: var(--blue-dark); color: white; border-radius: 6px; height: 31px; border: none; font-size: 0.75rem;" onclick="exportResumenPDF()">RESUMEN</button>
+                    <button class="btn btn-sm w-50 fw-bold shadow-sm" style="background-color: #0ea5e9; color: white; border-radius: 6px; height: 31px; border: none; font-size: 0.75rem;" onclick="exportarJSONAgua()">JSON</button>
                 </div>
             </div>
         </div>
@@ -167,6 +168,90 @@
         link.href = pdfBase64Uri;
         link.download = nombreArchivo;
         link.click();
+    }
+
+    // =========================================================================
+    // NUEVA FUNCIÓN: EXPORTAR JSON AGUA
+    // =========================================================================
+    function exportarJSONAgua() {
+        const mCurrDStr = document.getElementById('m_curr_d').value;
+        if (!mCurrDStr) {
+            alert("Es necesario ingresar la Fecha Actual del recibo principal para realizar la exportación.");
+            return;
+        }
+
+        const mes = document.getElementById('m_mes').value || 'MES';
+        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
+        const hasNoMeter = document.getElementById('has_nometer').checked;
+        
+        let datosExportar = [];
+
+        const formatoYYYYMMDD = (fechaObj) => {
+            if(!fechaObj || isNaN(fechaObj)) return "";
+            const y = fechaObj.getFullYear();
+            const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
+            const d = String(fechaObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        const calcularFechaInicio = (fechaFinStr, diasFacturados) => {
+            const endDate = new Date(fechaFinStr + "T00:00:00");
+            if (isNaN(endDate)) return "";
+            const startDate = new Date(endDate.getTime() - (diasFacturados - 1) * 86400000);
+            return formatoYYYYMMDD(startDate);
+        };
+
+        for (let i = 1; i <= nMetered; i++) {
+            const elName = document.getElementById(`i${i}_name`);
+            if (!elName) continue;
+            let nombreInq = elName.value || `Inquilino #${i}`;
+            
+            const txtDias = document.getElementById(`pdf_dias_${i}`).innerText; 
+            const diasFacturar = parseInt(txtDias.replace('Días facturados: ', '')) || 0;
+            
+            const cCons = parseFloat(document.getElementById(`i${i}_res_cons`).innerText) || 0;
+            const cTotal = parseFloat(document.getElementById(`i${i}_pdf_total_val`).innerText) || 0;
+
+            datosExportar.push({
+                nombre: nombreInq,
+                consumo_m3: cCons,
+                dias_facturados: diasFacturar,
+                monto_pagar: cTotal,
+                fecha_inicio: calcularFechaInicio(mCurrDStr, diasFacturar),
+                fecha_fin: mCurrDStr
+            });
+        }
+
+        if (hasNoMeter) {
+            const elName = document.getElementById('inometer_name');
+            let nombreInq = elName ? elName.value : 'Inquilino Sin Medidor';
+            if (!nombreInq) nombreInq = 'Inquilino Sin Medidor';
+            
+            const txtDias = document.getElementById('pdf_dias_nometer').innerText; 
+            const diasFacturar = parseInt(txtDias.replace('Días facturados: ', '')) || 0;
+            
+            const cCons = parseFloat(document.getElementById('inometer_res_cons').innerText) || 0;
+            const cTotal = parseFloat(document.getElementById('inometer_pdf_total_val').innerText) || 0;
+
+            datosExportar.push({
+                nombre: nombreInq,
+                consumo_m3: cCons,
+                dias_facturados: diasFacturar,
+                monto_pagar: cTotal,
+                fecha_inicio: calcularFechaInicio(mCurrDStr, diasFacturar),
+                fecha_fin: mCurrDStr
+            });
+        }
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosExportar, null, 2));
+        const nombreArchivo = `exportacion_agua_${mes.toLowerCase()}.json`;
+        
+        const anchorDescarga = document.createElement('a');
+        anchorDescarga.setAttribute("href", dataStr);
+        anchorDescarga.setAttribute("download", nombreArchivo);
+        document.body.appendChild(anchorDescarga);
+        anchorDescarga.click();
+        anchorDescarga.remove();
     }
 
     function calc() {
@@ -769,7 +854,7 @@
                     <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">Impuesto sobre los servicios básicos</h3>
                     <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
                         <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; font-style: italic; color: #64748b; font-size: 13px;">
-                            Fórmula: 18% x (S/. ${cWater} + S/. ${cSewer} + S/. ${cFixed})
+                            Fórmula: 18% x (S/. ${cWater} + S/. ${cSewer} + S/.${cFixed})
                         </div>
                         <div style="font-size: 14px; color: #0f172a;">
                             <strong>Operación:</strong> = <strong style="color: #0fa968;">S/. ${cIgv}</strong>
@@ -848,8 +933,8 @@
                             Fórmula: (Lectura Actual - Lectura Anterior) ÷ Número de días transcurridos
                         </div>
                         <div style="font-size: 14px; color: #0f172a;">
-                            <strong>Operación:</strong> (${currR.toFixed(2)} - ${prevR.toFixed(2)}) ÷ ${iDays} días = <strong>${iDaily.toFixed(4)} m³/día.</strong><br><br>
-                            <strong>Consumo del Mes:</strong> ${iDaily.toFixed(4)} x ${billedDays} días = <strong style="color: #0fa968;">${cCons} m³</strong><br>
+                            <strong>Operación:</strong> (${currR.toFixed(2)} -${prevR.toFixed(2)}) ÷ ${iDays} días = <strong>${iDaily.toFixed(4)} m³/día.</strong><br><br>
+                            <strong>Consumo del Mes:</strong> ${iDaily.toFixed(4)} x${billedDays} días = <strong style="color: #0fa968;">${cCons} m³</strong><br>
                             <span style="color:#64748b; font-size: 13px; display:inline-block; margin-top:5px;">Tarifa Agua: S/. ${tAgua.toFixed(4)} por m³</span><br>
                             <span style="color:#64748b; font-size: 13px;">Tarifa Alcantarillado: S/. ${tDesague.toFixed(4)} por m³</span>
                         </div>
@@ -873,10 +958,10 @@
                             Fórmula: (Monto Total ÷ ${mainDays} días) ÷ ${totalTenants} inquilinos × ${billedDays} días cobrados.
                         </div>
                         <div style="font-size: 14px; color: #0f172a; line-height: 1.6;">
-                            • <strong>Cargo Fijo:</strong> S/. ${vFixed.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cFixed}</strong><br>
-                            • <strong>Mora:</strong> S/. ${vMora.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cMora}</strong><br>
-                            • <strong>Redondeo Ant.:</strong> S/. ${vRedAnt.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cRedAnt}</strong><br>
-                            • <strong>Redondeo Act.:</strong> S/. ${vRedAct.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/. ${cRedAct}</strong>
+                            • <strong>Cargo Fijo:</strong> S/. ${vFixed.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cFixed}</strong><br>
+                            • <strong>Mora:</strong> S/. ${vMora.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cMora}</strong><br>
+                            • <strong>Redondeo Ant.:</strong> S/. ${vRedAnt.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cRedAnt}</strong><br>
+                            • <strong>Redondeo Act.:</strong> S/. ${vRedAct.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cRedAct}</strong>
                         </div>
                     </div>
                 </div>
@@ -884,7 +969,7 @@
                     <div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 5: IGV (18%)</div>
                     <div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;">
                         <div style="font-size: 14px; color: #0f172a;">
-                            <strong>Operación:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/. ${cFixed}) = <strong style="color: #0fa968;">S/. ${cIgv}</strong>
+                            <strong>Operación:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/.${cFixed}) = <strong style="color: #0fa968;">S/. ${cIgv}</strong>
                         </div>
                     </div>
                 </div>
@@ -907,7 +992,7 @@
         const tempCont = document.getElementById('pdf-template-container');
         tempCont.innerHTML = htmlContenido;
 
-        const exportFileName = `CÁLCULOS AGUA ${mes} - ${nombre}.pdf`;
+        const exportFileName = `CÁLCULOS AGUA ${mes} -${nombre}.pdf`;
         const opt = {
             margin: [10, 10, 10, 10], 
             filename: exportFileName,
