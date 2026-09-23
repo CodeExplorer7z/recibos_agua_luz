@@ -36,6 +36,7 @@
         .btn { border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; font-size: 0.9rem; flex: 1; }
         .btn-limpiar { background: #ef4444; color: white; }
         .btn-resumen { background: #6366f1; color: white; }
+        .btn-json { background: #10b981; color: white; } /* Nuevo color para el botón JSON */
         .btn-toggle { background: #475569; color: white; }
         .btn-whatsapp { background: #25D366; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
         
@@ -124,9 +125,11 @@
             <div id="ocr_status" style="display:none; background: #ede9fe; color: #6d28d9; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; text-align: center; margin-top: 10px;"></div>
         </div>
 
+        <!-- MODIFICACIÓN: Se añadió el botón para exportar JSON -->
         <div class="btn-group" style="margin-bottom: 15px; justify-content: space-between;">
             <button class="btn btn-limpiar" style="flex: 1;" onclick="limpiarPrincipal()">🗑️ Limpiar Datos</button>
             <button id="btn-descargar-resumen" class="btn btn-resumen" style="flex: 1; display: none;" onclick="descargarResumenPDF()">📊 DESCARGAR RESUMEN</button>
+            <button id="btn-exportar-json" class="btn btn-json" style="flex: 1; display: none;" onclick="exportarJSON()">📥 EXPORTAR JSON</button>
         </div>
 
         <div class="info-box">
@@ -484,12 +487,115 @@
             setVal('total_pagar_i1', total_i1);
         }
 
+        // MODIFICACIÓN: Mostrar/ocultar los botones al mismo tiempo
         const btnResumen = document.getElementById('btn-descargar-resumen');
+        const btnExportarJson = document.getElementById('btn-exportar-json');
+        
         if (verificarDatosCompletos()) {
             btnResumen.style.display = 'block';
+            if (btnExportarJson) btnExportarJson.style.display = 'block';
         } else {
             btnResumen.style.display = 'none';
+            if (btnExportarJson) btnExportarJson.style.display = 'none';
         }
+    }
+
+    // MODIFICACIÓN: Función principal para exportar el JSON
+    function exportarJSON() {
+        const f1m_val = document.getElementById('fec_act_m').value;
+        if (!f1m_val) {
+            alert("Es necesario tener la fecha actual del recibo principal completada.");
+            return;
+        }
+
+        let f2m_val = document.getElementById('fec_ant_m').value;
+        let d_f1m = parseDateLocal(f1m_val);
+        let d_f2m = parseDateLocal(f2m_val);
+        let dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
+
+        const numMedidores = parseInt(document.getElementById('num_medidores').value);
+        const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
+        const mes = document.getElementById('mes_principal').value;
+        
+        let datosExportar = [];
+
+        // Función para dar formato a la fecha YYYY-MM-DD
+        const formatoYYYYMMDD = (fechaObj) => {
+            if(!fechaObj || isNaN(fechaObj)) return "";
+            const y = fechaObj.getFullYear();
+            const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
+            const d = String(fechaObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        // Calcula la fecha inicio: FechaFinal - DiasFacturados + 1
+        const calcularFechaInicio = (fechaFinStr, diasTotales) => {
+            const endDate = parseDateLocal(fechaFinStr);
+            if (!endDate) return "";
+            const startDate = new Date(endDate.getTime() - (diasTotales - 1) * 86400000);
+            return formatoYYYYMMDD(startDate);
+        };
+
+        // En caso del inquilino sin medidor
+        if (hasSinMedidor) {
+            const nombreI1 = document.getElementById('titulo_i1').value || 'Inquilino sin medidor';
+            const kwhI1 = window._i1_cache ? parseFloat(window._i1_cache.kwh.toFixed(2)) : 0;
+            const totalI1 = parseFloat(document.getElementById('total_pagar_i1').value) || 0;
+            const fechaFin = f1m_val;
+            const fechaInicio = calcularFechaInicio(fechaFin, dm);
+
+            datosExportar.push({
+                nombre: nombreI1,
+                kwh_real: kwhI1,
+                dias_facturados: dm,
+                monto_pagar: totalI1,
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin
+            });
+        }
+
+        // Para los inquilinos con medidor
+        for (let i = 2; i <= (numMedidores + 1); i++) {
+            const nombreInq = document.getElementById(`titulo_i${i}`).value || `Inquilino ${i-1}`;
+            
+            const lAnt = getVal(`lec_ant_i${i}`);
+            const lAct = getVal(`lec_act_i${i}`);
+            const f1i = document.getElementById(`fec_act_i${i}`).value; 
+            const f2i = document.getElementById(`fec_ant_i${i}`).value;
+            const di_lectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
+            
+            const ki = Math.max(0, lAct - lAnt);
+            const kd = di_lectura > 0 ? (ki / di_lectura) : 0;
+
+            const modo = document.getElementById(`modo_dias_i${i}`).value;
+            let dias_facturar = modo === 'recibo' ? dm : parseInt(getVal(`dias_vividos_i${i}`));
+            
+            const kwhConsumidoReal = parseFloat((kd * dias_facturar).toFixed(2));
+            const totalInq = parseFloat(document.getElementById(`total_pagar_i${i}`).value) || 0;
+            
+            const fechaFin = f1m_val;
+            const fechaInicio = calcularFechaInicio(fechaFin, dias_facturar);
+
+            datosExportar.push({
+                nombre: nombreInq,
+                kwh_real: kwhConsumidoReal,
+                dias_facturados: dias_facturar,
+                monto_pagar: totalInq,
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin
+            });
+        }
+
+        // Transformar y descargar
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosExportar, null, 2));
+        const nombreArchivo = `exportacion_luz_${mes.toLowerCase()}.json`;
+        
+        const anchorDescarga = document.createElement('a');
+        anchorDescarga.setAttribute("href", dataStr);
+        anchorDescarga.setAttribute("download", nombreArchivo);
+        document.body.appendChild(anchorDescarga);
+        anchorDescarga.click();
+        anchorDescarga.remove();
     }
 
     async function capturarYCompartir(elementId, nombreArchivo, title, text) {
