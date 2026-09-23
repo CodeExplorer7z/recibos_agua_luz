@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Recibos JPG (Letras Grandes)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8">
+
+    <div class="max-w-3xl mx-auto space-y-6">
+        
+        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-600">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Calculadora de Recibos</h1>
+            <p class="text-gray-600 text-sm">Distribución por Resto Mayor con diseño optimizado (Letras Grandes)</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-lg font-bold text-indigo-700 mb-4 border-b pb-2">1. Kendra y Sonia</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1">Total Agua Compartida</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">S/</span>
+                        <input type="number" id="agua_compartida" step="0.01" class="w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-blue-800 bg-blue-50" placeholder="0.00" value="6.52" oninput="recalcularAguaActiva()">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-gray-600">Estimado Agua Kendra</label>
+                        <input type="number" id="agua_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-200 disabled:text-gray-500 transition-colors" placeholder="(Vacío)" oninput="calcularRestanteAgua('kendra')">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-gray-600">Estimado Agua Sonia</label>
+                        <input type="number" id="agua_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-gray-200 disabled:text-gray-500 transition-colors" placeholder="(Vacío)" oninput="calcularRestanteAgua('sonia')">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-2">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Luz Kendra</label>
+                        <input type="number" id="luz_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0.00" value="18.10">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Luz Sonia</label>
+                        <input type="number" id="luz_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0.00" value="20.00">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                <h2 class="text-lg font-bold text-teal-700 mb-4 border-b pb-2">2. Mariluz</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1">Agua Mariluz</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">S/</span>
+                        <input type="number" id="agua_mariluz" step="0.01" class="w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00" value="9.34">
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="block text-sm font-semibold mb-1">Luz Mariluz</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">S/</span>
+                        <input type="number" id="luz_mariluz" step="0.01" class="w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00" value="3.02">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <button onclick="generarYDescargarImagen()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg transition duration-200 flex justify-center items-center text-lg mt-4">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            Calcular y Descargar Imagen
+        </button>
+
+    </div>
+
+    <!-- CONTENEDOR OCULTO PARA EL RENDERIZADO (Lienzo más ancho para tipografía mayor) -->
+    <div style="position: absolute; left: -9999px; top: -9999px; width: 550px; background-color: #ffffff; padding: 15px;">
+        <div id="recibo_imprimible" class="p-8 border border-gray-200 bg-white shadow-sm" style="border-radius: 20px;">
+            <div class="text-center mb-6 border-b border-gray-100 pb-5">
+                <h2 class="text-3xl font-extrabold uppercase tracking-widest text-gray-800" style="color: #111827;">Liquidación</h2>
+                <p class="text-gray-400 text-sm mt-2 font-medium" id="fecha_recibo"></p>
+            </div>
+
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b-2 border-gray-200">
+                        <th class="py-4 px-3 font-bold text-gray-600 uppercase text-sm tracking-wider">Inquilino</th>
+                        <th class="py-4 px-3 font-bold text-gray-600 uppercase text-sm tracking-wider text-center">Agua</th>
+                        <th class="py-4 px-3 font-bold text-gray-600 uppercase text-sm tracking-wider text-center">Luz</th>
+                        <th class="py-4 px-3 font-bold text-blue-700 uppercase text-sm tracking-wider text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla_resultados" class="divide-y divide-gray-100"></tbody>
+                <tfoot>
+                    <tr class="bg-blue-50/50 border-t-2 border-blue-200">
+                        <td colspan="3" class="py-5 px-3 font-extrabold text-right text-gray-700 tracking-wide text-lg">TOTAL A PAGAR:</td>
+                        <td class="py-5 px-3 font-black text-blue-700 text-3xl text-right" id="gran_total_redondeado">0</td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="mt-8 pt-5 border-t border-dashed border-gray-200 text-sm text-gray-500 text-center leading-relaxed">
+                <p>Monto original (con céntimos): <span id="gran_total_exacto" class="font-semibold text-gray-600">0.00</span></p>
+                <p class="mt-1">El cobro ha sido redondeado y nivelado para facilitar el pago exacto.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calcularRestanteAgua(origen) {
+            const totalAgua = parseFloat(document.getElementById('agua_compartida').value) || 0;
+            const inputKendra = document.getElementById('agua_kendra');
+            const inputSonia = document.getElementById('agua_sonia');
+
+            if (origen === 'kendra') {
+                if (inputKendra.value !== '') {
+                    const valKendra = parseFloat(inputKendra.value) || 0;
+                    inputSonia.value = Math.max(0, totalAgua - valKendra).toFixed(2);
+                    inputSonia.disabled = true;
+                } else {
+                    inputSonia.value = '';
+                    inputSonia.disabled = false;
+                }
+            } else if (origen === 'sonia') {
+                if (inputSonia.value !== '') {
+                    const valSonia = parseFloat(inputSonia.value) || 0;
+                    inputKendra.value = Math.max(0, totalAgua - valSonia).toFixed(2);
+                    inputKendra.disabled = true;
+                } else {
+                    inputKendra.value = '';
+                    inputKendra.disabled = false;
+                }
+            }
+        }
+
+        function recalcularAguaActiva() {
+            const inputKendra = document.getElementById('agua_kendra');
+            const inputSonia = document.getElementById('agua_sonia');
+            if (inputKendra.value !== '' && !inputKendra.disabled) {
+                calcularRestanteAgua('kendra');
+            } else if (inputSonia.value !== '' && !inputSonia.disabled) {
+                calcularRestanteAgua('sonia');
+            }
+        }
+
+        function generarYDescargarImagen() {
+            let totalAgua = parseFloat(document.getElementById('agua_compartida').value) || 0;
+            let valAguaKendra = document.getElementById('agua_kendra').value;
+            let valAguaSonia = document.getElementById('agua_sonia').value;
+
+            let luzKendra = parseFloat(document.getElementById('luz_kendra').value) || 0;
+            let luzSonia = parseFloat(document.getElementById('luz_sonia').value) || 0;
+            let aguaMariluz = parseFloat(document.getElementById('agua_mariluz').value) || 0;
+            let luzMariluz = parseFloat(document.getElementById('luz_mariluz').value) || 0;
+
+            let inquilinos = [];
+
+            if (valAguaKendra === '' && valAguaSonia === '') {
+                inquilinos = [
+                    { orden: 1, nombre: "Mariluz", agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz },
+                    { orden: 2, nombre: "Kendra + Sonia", agua: totalAgua, luz: null, exacto: totalAgua },
+                    { orden: 3, nombre: "Kendra", agua: null, luz: luzKendra, exacto: luzKendra },
+                    { orden: 4, nombre: "Sonia", agua: null, luz: luzSonia, exacto: luzSonia }
+                ];
+            } else {
+                let aguaK = parseFloat(valAguaKendra) || 0;
+                let aguaS = parseFloat(valAguaSonia) || 0;
+                inquilinos = [
+                    { orden: 1, nombre: "Mariluz", agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz },
+                    { orden: 2, nombre: "Kendra", agua: aguaK, luz: luzKendra, exacto: aguaK + luzKendra },
+                    { orden: 3, nombre: "Sonia", agua: aguaS, luz: luzSonia, exacto: aguaS + luzSonia }
+                ];
+            }
+
+            let sumaEnteros = 0;
+            let totalExactoGeneral = 0;
+
+            inquilinos.forEach(inq => {
+                totalExactoGeneral += inq.exacto;
+                inq.entero = Math.floor(inq.exacto);
+                inq.decimal = inq.exacto - inq.entero;
+                inq.pagoFinal = inq.entero;
+                sumaEnteros += inq.entero;
+            });
+
+            let totalRedondeadoGeneral = Math.ceil(totalExactoGeneral);
+            let diferenciaDistribuir = totalRedondeadoGeneral - sumaEnteros;
+
+            inquilinos.sort((a, b) => {
+                if (Math.abs(b.decimal - a.decimal) < 0.001) {
+                    return a.exacto - b.exacto; 
+                }
+                return b.decimal - a.decimal;
+            });
+
+            for (let i = 0; i < diferenciaDistribuir; i++) {
+                inquilinos[i % inquilinos.length].pagoFinal += 1;
+            }
+
+            inquilinos.forEach(inq => {
+                if (inq.agua !== null && inq.luz !== null) {
+                    let baseAgua = Math.floor(inq.agua);
+                    let baseLuz = Math.floor(inq.luz);
+                    let decAgua = inq.agua - baseAgua;
+                    let decLuz = inq.luz - baseLuz;
+                    
+                    let faltante = inq.pagoFinal - (baseAgua + baseLuz);
+                    
+                    for (let j = 0; j < faltante; j++) {
+                        if (decAgua >= decLuz) {
+                            baseAgua++;
+                            decAgua = -1; 
+                        } else {
+                            baseLuz++;
+                            decLuz = -1;
+                        }
+                    }
+                    inq.aguaFinal = baseAgua;
+                    inq.luzFinal = baseLuz;
+                } else if (inq.agua !== null) {
+                    inq.aguaFinal = inq.pagoFinal;
+                    inq.luzFinal = null;
+                } else if (inq.luz !== null) {
+                    inq.aguaFinal = null;
+                    inq.luzFinal = inq.pagoFinal;
+                }
+            });
+
+            inquilinos.sort((a, b) => a.orden - b.orden);
+
+            let tbody = document.getElementById('tabla_resultados');
+            tbody.innerHTML = '';
+
+            // Aumento de los textos en la tabla generada (text-xl, text-2xl)
+            inquilinos.forEach(inq => {
+                let textAgua = inq.aguaFinal !== null ? `S/ ${inq.aguaFinal}` : '-';
+                let textLuz = inq.luzFinal !== null ? `S/ ${inq.luzFinal}` : '-';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="py-5 px-3 font-bold text-gray-800 text-xl" style="color: #1f2937;">
+                            ${inq.nombre}
+                            <div class="text-sm text-gray-400 font-normal mt-1 tracking-wide">Ref: S/ ${inq.exacto.toFixed(2)}</div>
+                        </td>
+                        <td class="py-5 px-3 text-gray-600 text-center font-semibold text-xl" style="color: #4b5563;">${textAgua}</td>
+                        <td class="py-5 px-3 text-gray-600 text-center font-semibold text-xl" style="color: #4b5563;">${textLuz}</td>
+                        <td class="py-5 px-3 font-black text-blue-600 text-right text-2xl" style="color: #2563eb;">S/ ${inq.pagoFinal}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('gran_total_exacto').innerText = `S/ ${totalExactoGeneral.toFixed(2)}`;
+            document.getElementById('gran_total_redondeado').innerText = `S/ ${totalRedondeadoGeneral}`;
+
+            let opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('fecha_recibo').innerText = `${new Date().toLocaleDateString('es-ES', opcionesFecha)}`;
+
+            const elemento = document.getElementById('recibo_imprimible');
+            
+            html2canvas(elemento, { 
+                scale: 3, 
+                backgroundColor: '#ffffff',
+                logging: false
+            }).then(canvas => {
+                let enlace = document.createElement('a');
+                enlace.download = 'Liquidacion_Recibo_Grande.jpg';
+                enlace.href = canvas.toDataURL('image/jpeg', 0.98);
+                enlace.click();
+            });
+        }
+    </script>
+</body>
+</html>
