@@ -794,8 +794,16 @@
             };
         }
 
-        function guardarSesion() {
+        async function guardarSesion() {
+            const boton = (typeof event !== 'undefined' && event && event.currentTarget) ? event.currentTarget : null;
+            const textoOriginal = boton ? boton.textContent : '';
+
             try {
+                if (boton) {
+                    boton.disabled = true;
+                    boton.textContent = 'GENERANDO SESIÓN...';
+                }
+
                 procesarCalculosGlobales();
                 const datosSesion = obtenerDatosSesion();
                 const mesOriginal = document.getElementById('mes_cobro').value.trim() || 'SIN MES';
@@ -804,19 +812,84 @@
                     .replace(/[\\/:*?"<>|]+/g, '-')
                     .replace(/\s+/g, ' ');
                 const nombreArchivo = `CUENTA FINAL INQUILINOS-${mesArchivo}.json`;
-                const blob = new Blob([JSON.stringify(datosSesion, null, 2)], { type: 'application/json;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
+                const jsonTexto = JSON.stringify(datosSesion, null, 2);
+
+                // 1) APP ANDROID / CAPACITOR: mismo enfoque que ya funciona con las boletas.
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+                    try {
+                        const { Filesystem, Share } = window.Capacitor.Plugins;
+
+                        if (Filesystem && Share) {
+                            // Filesystem.writeFile recibe base64 cuando no se especifica encoding.
+                            const bytes = new TextEncoder().encode(jsonTexto);
+                            let binario = '';
+                            const tamBloque = 0x8000;
+                            for (let i = 0; i < bytes.length; i += tamBloque) {
+                                binario += String.fromCharCode(...bytes.subarray(i, i + tamBloque));
+                            }
+                            const base64Data = btoa(binario);
+
+                            const savedFile = await Filesystem.writeFile({
+                                path: nombreArchivo,
+                                data: base64Data,
+                                directory: 'CACHE'
+                            });
+
+                            await Share.share({
+                                title: nombreArchivo,
+                                text: 'Copia de seguridad de la sesión de Cuenta Final Inquilinos.',
+                                url: savedFile.uri,
+                                dialogTitle: 'Guardar o compartir sesión'
+                            });
+                            return;
+                        }
+                    } catch (errCapacitor) {
+                        console.error('Error al compartir sesión con Capacitor:', errCapacitor);
+                    }
+                }
+
+                // 2) ANDROID / NAVEGADOR MÓVIL: Web Share API con el JSON como archivo.
+                const blob = new Blob([jsonTexto], { type: 'application/json;charset=utf-8' });
+                const archivo = new File([blob], nombreArchivo, { type: 'application/json' });
+
+                if (navigator.share) {
+                    const puedeCompartir = typeof navigator.canShare !== 'function' || navigator.canShare({ files: [archivo] });
+                    if (puedeCompartir) {
+                        try {
+                            await navigator.share({
+                                files: [archivo],
+                                title: nombreArchivo,
+                                text: 'Copia de seguridad de la sesión de Cuenta Final Inquilinos.'
+                            });
+                            return;
+                        } catch (errShare) {
+                            const mensaje = String(errShare && errShare.message ? errShare.message : '').toLowerCase();
+                            if (errShare && (errShare.name === 'AbortError' || mensaje.includes('canceled') || mensaje.includes('cancelled'))) {
+                                return;
+                            }
+                            console.error('Error al compartir sesión con Web Share:', errShare);
+                        }
+                    }
+                }
+
+                // 3) PC / NAVEGADORES SIN SHARE: descarga tradicional.
+                const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonTexto);
                 const enlace = document.createElement('a');
-                enlace.href = url;
+                enlace.href = dataUri;
                 enlace.download = nombreArchivo;
                 enlace.style.display = 'none';
                 document.body.appendChild(enlace);
                 enlace.click();
                 enlace.remove();
-                setTimeout(() => URL.revokeObjectURL(url), 1500);
+
             } catch (error) {
-                console.error('Error al guardar sesión:', error);
-                alert('No se pudo guardar la sesión.');
+                console.error('Error al guardar/compartir sesión:', error);
+                alert('No se pudo generar la copia de seguridad de la sesión.\n\n' + (error && error.message ? error.message : error));
+            } finally {
+                if (boton) {
+                    boton.disabled = false;
+                    boton.textContent = textoOriginal || 'GUARDAR SESIÓN';
+                }
             }
         }
 
