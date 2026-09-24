@@ -90,10 +90,11 @@
 
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div class="grid grid-cols-2 gap-4 mb-2">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                     </div>
+                    <p id="aviso_agua_kendra" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto de KENDRA + SONIA.</p>
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -102,10 +103,11 @@
 
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <h3 class="font-bold text-gray-700 mb-3 text-sm">SONIA</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div class="grid grid-cols-2 gap-4 mb-2">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                     </div>
+                    <p id="aviso_agua_sonia" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto de KENDRA + SONIA.</p>
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -173,7 +175,7 @@
                     <h2 class="text-md font-black text-blue-800 uppercase tracking-wide">
                         Distribución de Agua Compartida
                     </h2>
-                    <p class="text-xs text-blue-600 mb-2">Ingresa el valor para Kendra o Sonia y el otro se calculará automáticamente según el Total Redondeado.</p>
+                    <p class="text-xs text-blue-600 mb-2">Ingresa el valor histórico/de referencia para Kendra o Sonia. El valor de la otra se calculará automáticamente restándolo del Total Compartido Redondeado. Mientras este modo esté activo, el agua individual de ambas queda bloqueada y fuera de las boletas.</p>
                     
                     <div class="bg-white p-3 rounded-lg border border-blue-100 mb-3 text-center">
                         <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Ya Redondeado)</span>
@@ -182,11 +184,11 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Paga Kendra (S/)</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Valor compartido Kendra (S/)</label>
                             <input type="number" id="prorrateo_kendra" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('kendra')">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Paga Sonia (S/)</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Valor compartido Sonia (S/)</label>
                             <input type="number" id="prorrateo_sonia" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('sonia')">
                         </div>
                     </div>
@@ -315,7 +317,9 @@
 
     <script>
         let datosRedondeados = { mariluz: { agua: 0, luz: 0 }, ks_agua: { agua: 0 }, kendra: { agua: 0, luz: 0 }, sonia: { agua: 0, luz: 0 } };
-        let comparteAgua = false; 
+        let comparteAgua = false;
+        let ultimaFuenteProrrateo = null;
+        let ultimoTotalCompartidoRedondeado = null; 
 
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('input[type=number]').forEach(input => { input.addEventListener('wheel', e => e.preventDefault(), { passive: false }); });
@@ -464,20 +468,55 @@
             return totalRedondeadoGeneral;
         }
 
+        function actualizarModoAguaCompartida(activo) {
+            const idsIndividuales = [
+                'agua_kendra', 'm3_kendra', 'fecha_inicio_kendra_agua', 'fecha_fin_kendra_agua',
+                'agua_sonia', 'm3_sonia', 'fecha_inicio_sonia_agua', 'fecha_fin_sonia_agua'
+            ];
+
+            idsIndividuales.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.disabled = activo;
+                el.classList.toggle('bg-gray-200', activo);
+                el.classList.toggle('text-gray-400', activo);
+                el.classList.toggle('cursor-not-allowed', activo);
+                el.classList.toggle('opacity-70', activo);
+            });
+
+            document.getElementById('aviso_agua_kendra').classList.toggle('hidden', !activo);
+            document.getElementById('aviso_agua_sonia').classList.toggle('hidden', !activo);
+        }
+
         function procesarCalculosGlobales() {
             let aguaMariluz = parseFloat(document.getElementById('agua_mariluz').value) || 0;
             let luzMariluz = parseFloat(document.getElementById('luz_mariluz').value) || 0;
             let aguaKS = parseFloat(document.getElementById('agua_compartida').value) || 0;
-            let aguaKendra = parseFloat(document.getElementById('agua_kendra').value) || 0;
             let luzKendra = parseFloat(document.getElementById('luz_kendra').value) || 0;
-            let aguaSonia = parseFloat(document.getElementById('agua_sonia').value) || 0;
             let luzSonia = parseFloat(document.getElementById('luz_sonia').value) || 0;
+
+            // MODOS EXCLUYENTES:
+            // Si existe agua compartida KENDRA+SONIA, los importes individuales de agua
+            // de Kendra y Sonia se ignoran por completo, aunque contengan valores antiguos.
+            comparteAgua = (aguaKS > 0);
+            actualizarModoAguaCompartida(comparteAgua);
+
+            let aguaKendra = comparteAgua ? 0 : (parseFloat(document.getElementById('agua_kendra').value) || 0);
+            let aguaSonia = comparteAgua ? 0 : (parseFloat(document.getElementById('agua_sonia').value) || 0);
+
+            // Reiniciar valores redondeados para evitar que queden restos de un cálculo anterior.
+            datosRedondeados = {
+                mariluz: { agua: 0, luz: 0 },
+                ks_agua: { agua: 0 },
+                kendra: { agua: 0, luz: 0 },
+                sonia: { agua: 0, luz: 0 }
+            };
 
             let inquilinos = [
                 { id: 'mariluz', nombre: "Mariluz", agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz, m3: document.getElementById('m3_mariluz').value, kwh: document.getElementById('kwh_mariluz').value },
                 { id: 'ks_agua', nombre: "Kendra + Sonia", agua: aguaKS, luz: null, exacto: aguaKS, m3: document.getElementById('m3_compartida').value, kwh: '' },
-                { id: 'kendra', nombre: "Kendra", agua: aguaKendra, luz: luzKendra, exacto: aguaKendra + luzKendra, m3: document.getElementById('m3_kendra').value, kwh: document.getElementById('kwh_kendra').value },
-                { id: 'sonia', nombre: "Sonia", agua: aguaSonia, luz: luzSonia, exacto: aguaSonia + luzSonia, m3: document.getElementById('m3_sonia').value, kwh: document.getElementById('kwh_sonia').value }
+                { id: 'kendra', nombre: "Kendra", agua: aguaKendra, luz: luzKendra, exacto: aguaKendra + luzKendra, m3: comparteAgua ? '' : document.getElementById('m3_kendra').value, kwh: document.getElementById('kwh_kendra').value },
+                { id: 'sonia', nombre: "Sonia", agua: aguaSonia, luz: luzSonia, exacto: aguaSonia + luzSonia, m3: comparteAgua ? '' : document.getElementById('m3_sonia').value, kwh: document.getElementById('kwh_sonia').value }
             ];
 
             let inquilinosFiltrados = inquilinos.filter(inq => inq.exacto > 0);
@@ -490,15 +529,30 @@
                 if (inq.id === 'sonia') datosRedondeados.sonia = { agua: inq.aguaFinal || 0, luz: inq.luzFinal || 0 };
             });
 
-            comparteAgua = (aguaKS > 0);
             if (comparteAgua) {
                 document.getElementById('bloque_prorrateo').style.display = 'block';
-                document.getElementById('prorrateo_total_text').innerText = `S/ ${datosRedondeados.ks_agua.agua}`;
-                calcularProrrateo('kendra', true);
+                const totalCompartido = datosRedondeados.ks_agua.agua;
+                document.getElementById('prorrateo_total_text').innerText = `S/ ${totalCompartido}`;
+
+                // Si cambia el total compartido (por ejemplo al importar un nuevo JSON),
+                // conserva el valor histórico que el usuario haya elegido como referencia
+                // y recalcula el complemento. Si aún no se ha elegido una referencia,
+                // deja ambos campos vacíos para evitar asignaciones automáticas incorrectas.
+                if (ultimoTotalCompartidoRedondeado !== totalCompartido) {
+                    if (ultimaFuenteProrrateo) {
+                        calcularProrrateo(ultimaFuenteProrrateo, true);
+                    } else {
+                        document.getElementById('prorrateo_kendra').value = '';
+                        document.getElementById('prorrateo_sonia').value = '';
+                    }
+                    ultimoTotalCompartidoRedondeado = totalCompartido;
+                }
             } else {
                 document.getElementById('bloque_prorrateo').style.display = 'none';
                 document.getElementById('prorrateo_kendra').value = '';
                 document.getElementById('prorrateo_sonia').value = '';
+                ultimaFuenteProrrateo = null;
+                ultimoTotalCompartidoRedondeado = null;
             }
 
             actualizarTablaGeneral(inquilinosFiltrados, granTotal);
@@ -506,19 +560,37 @@
         }
 
         function calcularProrrateo(fuente, autoRun = false) {
-            let totalDistribuir = datosRedondeados.ks_agua.agua;
-            let valK = document.getElementById('prorrateo_kendra');
-            let valS = document.getElementById('prorrateo_sonia');
+            if (!comparteAgua) return;
+
+            const totalDistribuir = datosRedondeados.ks_agua.agua;
+            const valK = document.getElementById('prorrateo_kendra');
+            const valS = document.getElementById('prorrateo_sonia');
+
             if (fuente === 'kendra') {
-                let k = parseInt(valK.value) || 0;
-                if (k > totalDistribuir) { k = totalDistribuir; valK.value = k; }
-                valS.value = totalDistribuir - k;
+                if (valK.value === '') {
+                    valS.value = '';
+                    ultimaFuenteProrrateo = null;
+                } else {
+                    let k = Math.round(parseFloat(valK.value) || 0);
+                    k = Math.max(0, Math.min(k, totalDistribuir));
+                    valK.value = k;
+                    valS.value = totalDistribuir - k;
+                    ultimaFuenteProrrateo = 'kendra';
+                }
             } else if (fuente === 'sonia') {
-                let s = parseInt(valS.value) || 0;
-                if (s > totalDistribuir) { s = totalDistribuir; valS.value = s; }
-                valK.value = totalDistribuir - s;
+                if (valS.value === '') {
+                    valK.value = '';
+                    ultimaFuenteProrrateo = null;
+                } else {
+                    let s = Math.round(parseFloat(valS.value) || 0);
+                    s = Math.max(0, Math.min(s, totalDistribuir));
+                    valS.value = s;
+                    valK.value = totalDistribuir - s;
+                    ultimaFuenteProrrateo = 'sonia';
+                }
             }
-            if(!autoRun) generarBoletas(); 
+
+            if (!autoRun) generarBoletas();
         }
 
         function formatearFechaBol(fechaStr) {
