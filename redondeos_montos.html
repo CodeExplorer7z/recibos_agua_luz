@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Recibos y Boletas</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -28,6 +29,24 @@
         .col-periodo { text-align: left; }
         .col-dias { text-align: center; }
         .col-consumo { text-align: right; min-width: 50px; }
+
+        /* Contenedor temporal para generar/compartir las boletas como imagen. */
+        #boleta-template-container {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 420px;
+            padding: 0;
+            margin: 0;
+            background: #ffffff;
+            pointer-events: none;
+        }
+        #boleta-template-container .boleta-card {
+            width: 360px !important;
+            max-width: 360px !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8" oninput="procesarCalculosGlobales()">
@@ -269,6 +288,9 @@
         </div>
 
     </div>
+
+    <!-- Plantilla temporal fuera de pantalla, igual al patrón usado por luz_cayran -->
+    <div id="boleta-template-container"></div>
 
     <script>
         let datosRedondeados = { mariluz: { agua: 0, luz: 0 }, ks_agua: { agua: 0 }, kendra: { agua: 0, luz: 0 }, sonia: { agua: 0, luz: 0 } };
@@ -608,158 +630,143 @@
                 generarFilaDetalle('LUZ', document.getElementById('fecha_inicio_sonia_luz').value, document.getElementById('fecha_fin_sonia_luz').value, document.getElementById('kwh_sonia').value, 'KWH');
         }
 
-        function copiarEstilosParaCaptura(origen, clon) {
-            const estilo = window.getComputedStyle(origen);
-            let css = '';
-            for (let i = 0; i < estilo.length; i++) {
-                const propiedad = estilo[i];
-                const valor = estilo.getPropertyValue(propiedad);
-                const prioridad = estilo.getPropertyPriority(propiedad);
-                css += `${propiedad}:${valor}${prioridad ? ' !important' : ''};`;
-            }
-            clon.setAttribute('style', css);
-
-            const hijosOrigen = origen.children;
-            const hijosClon = clon.children;
-            for (let i = 0; i < hijosOrigen.length; i++) {
-                copiarEstilosParaCaptura(hijosOrigen[i], hijosClon[i]);
-            }
-        }
-
-        async function crearPngDeElemento(elemento, escala = 3) {
-            if (document.fonts && document.fonts.ready) {
-                try { await document.fonts.ready; } catch (_) {}
-            }
-
-            const rect = elemento.getBoundingClientRect();
-            const ancho = Math.ceil(rect.width);
-            const alto = Math.ceil(rect.height);
-            if (!ancho || !alto) throw new Error('La boleta no tiene dimensiones válidas.');
-
-            const clon = elemento.cloneNode(true);
-            copiarEstilosParaCaptura(elemento, clon);
-            clon.style.margin = '0';
-            clon.style.transform = 'none';
-            clon.style.width = `${ancho}px`;
-            clon.style.height = `${alto}px`;
-            clon.style.boxSizing = 'border-box';
-
-            const contenedorXhtml = document.createElement('div');
-            contenedorXhtml.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-            contenedorXhtml.style.width = `${ancho}px`;
-            contenedorXhtml.style.height = `${alto}px`;
-            contenedorXhtml.style.margin = '0';
-            contenedorXhtml.style.padding = '0';
-            contenedorXhtml.style.background = '#ffffff';
-            contenedorXhtml.appendChild(clon);
-
-            const xhtml = new XMLSerializer().serializeToString(contenedorXhtml);
-            const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${ancho}" height="${alto}" viewBox="0 0 ${ancho} ${alto}">
-  <foreignObject x="0" y="0" width="100%" height="100%">${xhtml}</foreignObject>
-</svg>`;
-
-            const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-            const svgUrl = URL.createObjectURL(svgBlob);
+        async function capturarYCompartirBoleta(elementId, nombreArchivo, titulo, textoCompartir) {
+            const tempCont = document.getElementById('boleta-template-container');
 
             try {
-                const imagen = new Image();
-                await new Promise((resolve, reject) => {
-                    imagen.onload = resolve;
-                    imagen.onerror = () => reject(new Error('El navegador no pudo renderizar la boleta.'));
-                    imagen.src = svgUrl;
+                if (typeof html2canvas !== 'function') {
+                    throw new Error('No se pudo cargar html2canvas. Verifica que el dispositivo tenga conexión a Internet al abrir este HTML.');
+                }
+
+                const elemento = document.getElementById(elementId);
+                if (!elemento) throw new Error('No se encontró la plantilla temporal de la boleta.');
+
+                // Mismo método probado en luz_cayran: HTML -> html2canvas -> PNG.
+                const canvas = await html2canvas(elemento, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
                 });
 
-                const canvas = document.createElement('canvas');
-                canvas.width = Math.max(1, Math.round(ancho * escala));
-                canvas.height = Math.max(1, Math.round(alto * escala));
-                const ctx = canvas.getContext('2d');
-                if (!ctx) throw new Error('No se pudo crear el lienzo de imagen.');
+                const base64Uri = canvas.toDataURL('image/png');
 
-                ctx.setTransform(escala, 0, 0, escala, 0, 0);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, ancho, alto);
-                ctx.drawImage(imagen, 0, 0, ancho, alto);
+                // Compatibilidad con una app empaquetada mediante Capacitor, igual que luz_cayran.
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+                    try {
+                        const { Filesystem, Share } = window.Capacitor.Plugins;
+                        const base64Data = base64Uri.split(',')[1];
+                        const savedFile = await Filesystem.writeFile({
+                            path: nombreArchivo,
+                            data: base64Data,
+                            directory: 'CACHE'
+                        });
 
-                return await new Promise((resolve, reject) => {
-                    canvas.toBlob(blob => {
-                        if (blob) resolve(blob);
-                        else reject(new Error('No se pudo convertir la boleta a PNG.'));
-                    }, 'image/png', 1);
-                });
+                        await Share.share({
+                            title: titulo,
+                            text: textoCompartir,
+                            url: savedFile.uri,
+                            dialogTitle: 'Compartir Boleta'
+                        });
+                        return;
+                    } catch (errCapacitor) {
+                        console.error('Error con Capacitor Share:', errCapacitor);
+                    }
+                }
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                if (!blob) throw new Error('No se pudo convertir la boleta en una imagen PNG.');
+
+                // En móviles compatibles abre el menú Compartir (WhatsApp, correo, etc.).
+                let compartidoNativo = false;
+                if (navigator.share) {
+                    const archivo = new File([blob], nombreArchivo, { type: 'image/png' });
+                    const puedeCompartir = typeof navigator.canShare !== 'function' || navigator.canShare({ files: [archivo] });
+
+                    if (puedeCompartir) {
+                        try {
+                            await navigator.share({
+                                files: [archivo],
+                                title: titulo,
+                                text: textoCompartir
+                            });
+                            compartidoNativo = true;
+                        } catch (errShare) {
+                            console.log('Compartir cancelado o no disponible:', errShare);
+                            // Si el usuario cerró voluntariamente el menú, no iniciar otra descarga.
+                            if (errShare && (errShare.name === 'AbortError' || String(errShare.message || '').toLowerCase().includes('canceled') || String(errShare.message || '').toLowerCase().includes('cancelled'))) {
+                                compartidoNativo = true;
+                            }
+                        }
+                    }
+                }
+
+                // En PC/navegadores sin compartir archivos: descarga directa.
+                if (!compartidoNativo) {
+                    const enlace = document.createElement('a');
+                    enlace.href = base64Uri;
+                    enlace.download = nombreArchivo;
+                    enlace.style.display = 'none';
+                    document.body.appendChild(enlace);
+                    enlace.click();
+                    document.body.removeChild(enlace);
+                }
+            } catch (error) {
+                console.error('Error capturando/compartiendo boleta:', error);
+                alert('Hubo un error al generar la imagen de la boleta.\n\n' + (error && error.message ? error.message : error));
             } finally {
-                URL.revokeObjectURL(svgUrl);
+                if (tempCont) tempCont.innerHTML = '';
             }
-        }
-
-        function descargarBlob(blob, nombreArchivo) {
-            const url = URL.createObjectURL(blob);
-            const enlace = document.createElement('a');
-            enlace.href = url;
-            enlace.download = nombreArchivo;
-            enlace.rel = 'noopener';
-            enlace.style.position = 'fixed';
-            enlace.style.left = '-9999px';
-            enlace.style.top = '-9999px';
-            document.body.appendChild(enlace);
-            enlace.click();
-            setTimeout(() => {
-                enlace.remove();
-                URL.revokeObjectURL(url);
-            }, 3000);
         }
 
         async function descargarBoleta(boton, idElemento, nombreBase) {
-            const boleta = document.getElementById(idElemento);
-            if (!boleta) {
-                alert('No se encontró la boleta para descargar.');
+            const original = document.getElementById(idElemento);
+            const tempCont = document.getElementById('boleta-template-container');
+
+            if (!original || !tempCont) {
+                alert('No se encontró la boleta para generar la imagen.');
                 return;
             }
 
             procesarCalculosGlobales();
 
-            const mes = (document.getElementById('mes_cobro').value.trim() || 'MES')
-                .toUpperCase()
-                .replace(/[\/:*?"<>|]+/g, '-')
-                .replace(/\s+/g, '_');
-            const nombreArchivo = `${nombreBase}_${mes}.png`;
-
-            const textoOriginal = boton ? boton.textContent : '';
+            const textoOriginal = boton ? boton.textContent : 'Descargar Boleta';
             if (boton) {
                 boton.disabled = true;
-                boton.textContent = 'Generando PNG...';
+                boton.textContent = 'GENERANDO...';
             }
 
             try {
-                let manejadorArchivo = null;
-                if ('showSaveFilePicker' in window && window.isSecureContext) {
-                    try {
-                        manejadorArchivo = await window.showSaveFilePicker({
-                            suggestedName: nombreArchivo,
-                            types: [{
-                                description: 'Imagen PNG',
-                                accept: { 'image/png': ['.png'] }
-                            }]
-                        });
-                    } catch (errorPicker) {
-                        if (errorPicker && errorPicker.name === 'AbortError') return;
-                        manejadorArchivo = null;
-                    }
-                }
+                // Igual que luz_cayran: se prepara una plantilla independiente fuera de pantalla.
+                tempCont.innerHTML = '';
+                const clon = original.cloneNode(true);
+                clon.id = 'boleta-captura';
 
-                const escala = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
-                const blob = await crearPngDeElemento(boleta, escala);
+                // Evitar IDs duplicados dentro de la copia; la captura ya contiene los textos calculados.
+                clon.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+                tempCont.appendChild(clon);
 
-                if (manejadorArchivo) {
-                    const writable = await manejadorArchivo.createWritable();
-                    await writable.write(blob);
-                    await writable.close();
-                } else {
-                    descargarBlob(blob, nombreArchivo);
-                }
+                // Dar al navegador un ciclo de render para calcular correctamente tamaño y fuentes.
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+                const mesVisible = (document.getElementById('mes_cobro').value.trim() || 'MES').toUpperCase();
+                const mesArchivo = mesVisible
+                    .replace(/[\\/:*?"<>|]+/g, '-')
+                    .replace(/\s+/g, '_');
+                const nombreArchivo = `${nombreBase}_${mesArchivo}.png`;
+
+                await capturarYCompartirBoleta(
+                    'boleta-captura',
+                    nombreArchivo,
+                    `Boleta de servicios - ${mesVisible}`,
+                    `Adjunto la boleta de servicios correspondiente al mes de ${mesVisible}.`
+                );
             } catch (error) {
-                console.error('Error al descargar la boleta:', error);
-                alert('No se pudo generar la boleta en PNG. Detalle: ' + (error && error.message ? error.message : error));
+                console.error('Error preparando la boleta:', error);
+                alert('No se pudo preparar la boleta.\n\n' + (error && error.message ? error.message : error));
+                tempCont.innerHTML = '';
             } finally {
                 if (boton) {
                     boton.disabled = false;
