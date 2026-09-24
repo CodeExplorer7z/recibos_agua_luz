@@ -14,21 +14,28 @@
         .boleta-wrapper { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 360px; }
         .boleta-card { background: white; width: 100%; padding: 20px; position: relative; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; }
         .boleta-header { background-color: #fef0c7; border: 1px solid #e0c888; border-radius: 6px; text-align: center; padding: 10px 5px; margin-bottom: 18px; }
-        .boleta-header span { display: block; font-size: 0.85rem; font-weight: bold; color: #000; text-transform: uppercase; margin-bottom: 3px; }
+        .boleta-header > span { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: nowrap; white-space: nowrap; font-size: 0.95rem; font-weight: 800; color: #000; text-transform: uppercase; margin-bottom: 3px; }
+        .boleta-header > span .txt-mes { display: inline !important; font-size: inherit; font-weight: 900; margin: 0; white-space: nowrap; }
         .boleta-header h3 { margin: 0; font-size: 1.55rem; text-transform: uppercase; color: #000; font-weight: 900;}
-        .boleta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1.2rem; font-weight: bold; color: #000; }
+        .boleta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1.22rem; font-weight: bold; color: #000; }
+        .boleta-row > div:last-child { font-size: 1.42rem; font-weight: 900; line-height: 1; }
         .icon-text { display: flex; align-items: center; gap: 8px; }
         .icon { font-size: 1.4rem; }
         .divider { height: 1px; background-color: #8ba7b0; margin: 15px 0; }
         .boleta-total { text-align: center; }
         .boleta-total span { display: block; font-weight: bold; font-size: 1.05rem; color: #000; }
         .boleta-total h2 { font-size: 2.6rem; margin: 0; color: #000; font-weight: 900;}
-        .boleta-detalles { margin-top: 18px; padding-top: 12px; border-top: 1px dashed #cbd5e0; font-size: 0.68rem; color: #718096; display: flex; flex-direction: column; gap: 8px; font-family: Arial, sans-serif;}
-        .detalle-fila { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; text-transform: uppercase; font-weight: bold;}
-        .detalle-fila span { white-space: nowrap; }
+        .boleta-detalles { margin-top: 18px; padding-top: 12px; border-top: 1px dashed #cbd5e0; font-size: 0.66rem; line-height: 1.35; color: #4b5563; display: flex; flex-direction: column; gap: 10px; font-family: Arial, sans-serif; width: 100%; }
+        .detalle-fila { display: grid; grid-template-columns: minmax(0, 1.28fr) minmax(0, 1.12fr) minmax(50px, 0.72fr); column-gap: 8px; align-items: center; width: 100%; text-transform: uppercase; font-weight: 700; }
+        .detalle-fila span { white-space: nowrap; min-width: 0; }
         .col-periodo { text-align: left; }
-        .col-dias { text-align: center; }
-        .col-consumo { text-align: right; min-width: 50px; }
+        .col-dias { text-align: center; padding: 0 2px; }
+        .col-consumo { text-align: right; min-width: 0; }
+        @media (max-width: 420px) {
+            .boleta-detalles { font-size: 0.61rem; gap: 9px; }
+            .detalle-fila { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.08fr) minmax(46px, 0.7fr); column-gap: 6px; }
+            .col-dias { padding: 0 1px; }
+        }
 
         /* Contenedor temporal para generar/compartir las boletas como imagen. */
         #boleta-template-container {
