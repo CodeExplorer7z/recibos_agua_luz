@@ -58,7 +58,6 @@
                 <p class="text-gray-500 text-sm sm:ml-11">Ingresa los datos para generar el reporte de Agua y Luz.</p>
             </div>
             
-            <!-- Contenedor de botones de Importación JSON -->
             <div class="flex flex-col sm:flex-row gap-2">
                 <div>
                     <input type="file" id="input_json_agua" accept=".json" class="hidden" onchange="importarJsonAgua(event)">
@@ -86,6 +85,7 @@
                     Importes y Consumos
                 </h2>
                 
+                <!-- BLOQUE MARILUZ -->
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <h3 class="font-bold text-gray-700 mb-3 text-sm">MARILUZ</h3>
                     <div class="grid grid-cols-2 gap-4 mb-3">
@@ -110,8 +110,59 @@
                     </div>
                 </div>
 
+                <!-- BLOQUE KENDRA INDIVIDUAL -->
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA + SONIA (AGUA)</h3>
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA</h3>
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label>
+                            <input type="number" id="agua_kendra" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label>
+                            <input type="number" id="m3_kendra" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label>
+                            <input type="number" id="luz_kendra" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label>
+                            <input type="number" id="kwh_kendra" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE SONIA INDIVIDUAL -->
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">SONIA</h3>
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label>
+                            <input type="number" id="agua_sonia" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label>
+                            <input type="number" id="m3_sonia" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label>
+                            <input type="number" id="luz_sonia" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label>
+                            <input type="number" id="kwh_sonia" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAMPO ORIGINAL INTACTO (KENDRA + SONIA COMPARTIDO) -->
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA+SONIA</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label>
@@ -123,30 +174,7 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA Y SONIA (LUZ)</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">Luz Kendra (S/)</label>
-                            <input type="number" id="luz_kendra" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label>
-                            <input type="number" id="kwh_kendra" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">Luz Sonia (S/)</label>
-                            <input type="number" id="luz_sonia" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label>
-                            <input type="number" id="kwh_sonia" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="">
-                        </div>
-                    </div>
-                </div>
+                
             </div>
 
             <!-- SECCIÓN FECHAS -->
@@ -174,10 +202,10 @@
                     </div>
 
                     <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                        <label class="block text-xs font-bold text-gray-600 mb-2">KENDRA+SONIA AGUA</label>
+                        <label class="block text-xs font-bold text-gray-600 mb-2">KENDRA AGUA</label>
                         <div class="grid grid-cols-2 gap-3">
-                            <input type="date" id="fecha_inicio_ks_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
-                            <input type="date" id="fecha_fin_ks_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_inicio_kendra_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_fin_kendra_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
                         </div>
                     </div>
 
@@ -190,10 +218,27 @@
                     </div>
 
                     <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">SONIA AGUA</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" id="fecha_inicio_sonia_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_fin_sonia_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                        </div>
+                    </div>
+
+                    <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
                         <label class="block text-xs font-bold text-gray-600 mb-2">SONIA LUZ</label>
                         <div class="grid grid-cols-2 gap-3">
                             <input type="date" id="fecha_inicio_sonia_luz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-amber-400 outline-none text-gray-700">
                             <input type="date" id="fecha_fin_sonia_luz" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-amber-400 outline-none text-gray-700">
+                        </div>
+                    </div>
+
+                    <!-- CAMPO ORIGINAL DE FECHA INTACTO (KENDRA + SONIA COMPARTIDO) -->
+                    <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <label class="block text-xs font-bold text-gray-600 mb-2">KENDRA+SONIA AGUA</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" id="fecha_inicio_ks_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
+                            <input type="date" id="fecha_fin_ks_agua" class="w-full px-3 py-1.5 text-sm border rounded bg-white focus:ring-2 focus:ring-blue-400 outline-none text-gray-700">
                         </div>
                     </div>
                 </div>
@@ -263,12 +308,12 @@
                         </div>
                     </div>
 
-                    <div id="card_ks_agua" class="bg-blue-50/40 p-8 rounded-3xl border-2 border-blue-100 flex-col justify-center shadow-sm">
-                        <span class="text-3xl font-black text-blue-800 mb-5 block">💧 KENDRA + SONIA AGUA</span>
+                    <div id="card_kendra_agua" class="bg-blue-50/40 p-8 rounded-3xl border-2 border-blue-100 flex-col justify-center shadow-sm">
+                        <span class="text-3xl font-black text-blue-800 mb-5 block">💧 KENDRA AGUA</span>
                         <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
-                            <span id="lbl_ini_ks"></span>
+                            <span id="lbl_ini_ka"></span>
                             <span class="text-blue-300 mx-2">➔</span>
-                            <span id="lbl_fin_ks"></span>
+                            <span id="lbl_fin_ka"></span>
                         </div>
                     </div>
 
@@ -281,12 +326,30 @@
                         </div>
                     </div>
 
+                    <div id="card_sonia_agua" class="bg-blue-50/40 p-8 rounded-3xl border-2 border-blue-100 flex-col justify-center shadow-sm">
+                        <span class="text-3xl font-black text-blue-800 mb-5 block">💧 SONIA AGUA</span>
+                        <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
+                            <span id="lbl_ini_sa"></span>
+                            <span class="text-blue-300 mx-2">➔</span>
+                            <span id="lbl_fin_sa"></span>
+                        </div>
+                    </div>
+
                     <div id="card_sonia_luz" class="bg-amber-50/40 p-8 rounded-3xl border-2 border-amber-100 flex-col justify-center shadow-sm">
                         <span class="text-3xl font-black text-amber-800 mb-5 block">⚡ SONIA LUZ</span>
                         <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
                             <span id="lbl_ini_sl"></span>
                             <span class="text-amber-300 mx-2">➔</span>
                             <span id="lbl_fin_sl"></span>
+                        </div>
+                    </div>
+                    
+                    <div id="card_ks_agua" class="bg-blue-50/40 p-8 rounded-3xl border-2 border-blue-100 flex-col justify-center shadow-sm">
+                        <span class="text-3xl font-black text-blue-800 mb-5 block">💧 KENDRA + SONIA AGUA</span>
+                        <div class="flex justify-between items-center text-3xl font-bold text-gray-700">
+                            <span id="lbl_ini_ks"></span>
+                            <span class="text-blue-300 mx-2">➔</span>
+                            <span id="lbl_fin_ks"></span>
                         </div>
                     </div>
                 </div>
@@ -309,7 +372,6 @@
             });
         });
 
-        // NUEVA FUNCIÓN: Lógica para importar y mapear el JSON de agua
         function importarJsonAgua(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -322,19 +384,29 @@
                     datos.forEach(inq => {
                         const nombreLower = inq.nombre.toLowerCase();
                         
-                        // Validar Mariluz
                         if (nombreLower.includes('mariluz')) {
                             document.getElementById('agua_mariluz').value = inq.monto_pagar.toFixed(2);
                             document.getElementById('m3_mariluz').value = inq.consumo_m3;
                             document.getElementById('fecha_inicio_mariluz').value = inq.fecha_inicio;
                             document.getElementById('fecha_fin_mariluz').value = inq.fecha_fin;
                         } 
-                        // Validar KENDRA + SONIA (Compartido de Agua)
                         else if (nombreLower.includes('kendra') && nombreLower.includes('sonia')) {
                             document.getElementById('agua_compartida').value = inq.monto_pagar.toFixed(2);
                             document.getElementById('m3_compartida').value = inq.consumo_m3;
                             document.getElementById('fecha_inicio_ks_agua').value = inq.fecha_inicio;
                             document.getElementById('fecha_fin_ks_agua').value = inq.fecha_fin;
+                        }
+                        else if (nombreLower.includes('kendra')) {
+                            document.getElementById('agua_kendra').value = inq.monto_pagar.toFixed(2);
+                            document.getElementById('m3_kendra').value = inq.consumo_m3;
+                            document.getElementById('fecha_inicio_kendra_agua').value = inq.fecha_inicio;
+                            document.getElementById('fecha_fin_kendra_agua').value = inq.fecha_fin;
+                        }
+                        else if (nombreLower.includes('sonia')) {
+                            document.getElementById('agua_sonia').value = inq.monto_pagar.toFixed(2);
+                            document.getElementById('m3_sonia').value = inq.consumo_m3;
+                            document.getElementById('fecha_inicio_sonia_agua').value = inq.fecha_inicio;
+                            document.getElementById('fecha_fin_sonia_agua').value = inq.fecha_fin;
                         }
                     });
 
@@ -350,7 +422,6 @@
             reader.readAsText(file);
         }
 
-        // Lógica existente para importar y mapear el JSON de luz
         function importarJsonLuz(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -471,27 +542,37 @@
         async function generarYCompartirImagen() {
             let aguaMariluz = parseFloat(document.getElementById('agua_mariluz').value) || 0;
             let luzMariluz = parseFloat(document.getElementById('luz_mariluz').value) || 0;
+            
             let aguaKS = parseFloat(document.getElementById('agua_compartida').value) || 0;
+
+            let aguaKendra = parseFloat(document.getElementById('agua_kendra').value) || 0;
             let luzKendra = parseFloat(document.getElementById('luz_kendra').value) || 0;
+            
+            let aguaSonia = parseFloat(document.getElementById('agua_sonia').value) || 0;
             let luzSonia = parseFloat(document.getElementById('luz_sonia').value) || 0;
 
             let m3Mariluz = document.getElementById('m3_mariluz').value || '';
             let kwhMariluz = document.getElementById('kwh_mariluz').value || '';
+            
             let m3KS = document.getElementById('m3_compartida').value || '';
+
+            let m3Kendra = document.getElementById('m3_kendra').value || '';
             let kwhKendra = document.getElementById('kwh_kendra').value || '';
+            
+            let m3Sonia = document.getElementById('m3_sonia').value || '';
             let kwhSonia = document.getElementById('kwh_sonia').value || '';
 
             let inquilinos = [
                 { id: 'mariluz', nombre: "Mariluz", agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz, m3: m3Mariluz, kwh: kwhMariluz },
                 { id: 'ks_agua', nombre: "Kendra + Sonia", agua: aguaKS, luz: null, exacto: aguaKS, m3: m3KS, kwh: '' },
-                { id: 'kendra_luz', nombre: "Kendra", agua: null, luz: luzKendra, exacto: luzKendra, m3: '', kwh: kwhKendra },
-                { id: 'sonia_luz', nombre: "Sonia", agua: null, luz: luzSonia, exacto: luzSonia, m3: '', kwh: kwhSonia }
+                { id: 'kendra', nombre: "Kendra", agua: aguaKendra, luz: luzKendra, exacto: aguaKendra + luzKendra, m3: m3Kendra, kwh: kwhKendra },
+                { id: 'sonia', nombre: "Sonia", agua: aguaSonia, luz: luzSonia, exacto: aguaSonia + luzSonia, m3: m3Sonia, kwh: kwhSonia }
             ];
 
             let inquilinosFiltrados = inquilinos.filter(inq => inq.exacto > 0);
             let granTotal = calcularRedondeo(inquilinosFiltrados);
             
-            let ordenDeseado = ['mariluz', 'ks_agua', 'kendra_luz', 'sonia_luz'];
+            let ordenDeseado = ['mariluz', 'ks_agua', 'kendra', 'sonia'];
             inquilinosFiltrados.sort((a, b) => ordenDeseado.indexOf(a.id) - ordenDeseado.indexOf(b.id));
 
             let tbody = document.getElementById('tabla_resultados');
@@ -537,7 +618,12 @@
             let tarjetasActivas = 0;
             tarjetasActivas += configurarTarjetaFecha('card_mariluz_agua', 'lbl_ini_mariluz', 'lbl_fin_mariluz', document.getElementById('fecha_inicio_mariluz').value, document.getElementById('fecha_fin_mariluz').value);
             tarjetasActivas += configurarTarjetaFecha('card_mariluz_luz', 'lbl_ini_mariluz_luz', 'lbl_fin_mariluz_luz', document.getElementById('fecha_inicio_mariluz_luz').value, document.getElementById('fecha_fin_mariluz_luz').value);
+            
             tarjetasActivas += configurarTarjetaFecha('card_ks_agua', 'lbl_ini_ks', 'lbl_fin_ks', document.getElementById('fecha_inicio_ks_agua').value, document.getElementById('fecha_fin_ks_agua').value);
+            
+            tarjetasActivas += configurarTarjetaFecha('card_kendra_agua', 'lbl_ini_ka', 'lbl_fin_ka', document.getElementById('fecha_inicio_kendra_agua').value, document.getElementById('fecha_fin_kendra_agua').value);
+            tarjetasActivas += configurarTarjetaFecha('card_sonia_agua', 'lbl_ini_sa', 'lbl_fin_sa', document.getElementById('fecha_inicio_sonia_agua').value, document.getElementById('fecha_fin_sonia_agua').value);
+            
             tarjetasActivas += configurarTarjetaFecha('card_kendra_luz', 'lbl_ini_kl', 'lbl_fin_kl', document.getElementById('fecha_inicio_kendra_luz').value, document.getElementById('fecha_fin_kendra_luz').value);
             tarjetasActivas += configurarTarjetaFecha('card_sonia_luz', 'lbl_ini_sl', 'lbl_fin_sl', document.getElementById('fecha_inicio_sonia_luz').value, document.getElementById('fecha_fin_sonia_luz').value);
 
