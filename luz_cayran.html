@@ -99,7 +99,7 @@
 <div class="nav-back-bar d-flex justify-content-between align-items-center">
     <a href="./index.html" class="btn-back">&#8592; Menú Principal</a>
     <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-success fw-bold text-white shadow-sm" style="border-radius: 6px; padding: 8px 14px; font-size: 0.9rem;" onclick="guardarEstadoAppLuz()">📥 Guardar Datos</button>
+        <button class="btn btn-sm btn-success fw-bold text-white shadow-sm" style="border-radius: 6px; padding: 8px 14px; font-size: 0.9rem;" onclick="guardarEstadoAppLuz()">📥 GUARDAR JSON ÚNICO</button>
         <button class="btn btn-sm btn-secondary fw-bold text-white shadow-sm" style="border-radius: 6px; padding: 8px 14px; font-size: 0.9rem;" onclick="document.getElementById('file_import_luz').click()">📤 Importar Datos</button>
         <input type="file" id="file_import_luz" accept=".json" style="display: none;" onchange="cargarEstadoAppLuz(event)">
     </div>
@@ -133,7 +133,6 @@
         <div class="btn-group" style="margin-bottom: 15px; justify-content: space-between;">
             <button class="btn btn-limpiar" style="flex: 1;" onclick="limpiarPrincipal()">🗑️ Limpiar Datos</button>
             <button id="btn-descargar-resumen" class="btn btn-resumen" style="flex: 1; display: none;" onclick="descargarResumenPDF()">📊 DESCARGAR RESUMEN</button>
-            <button id="btn-exportar-json" class="btn btn-json" style="flex: 1; display: none;" onclick="exportarJSON()">📥 EXPORTAR JSON</button>
         </div>
 
         <div class="info-box">
@@ -210,32 +209,21 @@
     // NUEVAS FUNCIONES: GUARDAR Y CARGAR ESTADO (SESIÓN) PARA LUZ
     // =========================================================================
 
+    // -------------------------------------------------------------------------
+    // UN SOLO JSON PARA TODO
+    // El botón superior "Guardar JSON único" descarga el único archivo de datos.
+    // Ese JSON sirve para:
+    //   1) restaurar por completo esta web Luz Cayrán;
+    //   2) importar los datos necesarios en redondeos_montos.
+    // -------------------------------------------------------------------------
     function guardarEstadoAppLuz() {
-        const estado = {};
-        const inputs = document.querySelectorAll('input, select');
-        
-        inputs.forEach(input => {
-            if (input.id && input.type !== 'file' && input.type !== 'button') {
-                if (input.type === 'checkbox') {
-                    estado[input.id] = input.checked;
-                } else {
-                    estado[input.id] = input.value;
-                }
-            }
-        });
-
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estado));
-        const mes = document.getElementById('mes_principal').value || 'SESION';
-        const nombreArchivo = `datos_guardados_luz_${mes.toLowerCase()}.json`;
-
-        const anchorDescarga = document.createElement('a');
-        anchorDescarga.setAttribute("href", dataStr);
-        anchorDescarga.setAttribute("download", nombreArchivo);
-        document.body.appendChild(anchorDescarga);
-        anchorDescarga.click();
-        anchorDescarga.remove();
+        exportarJSON();
     }
 
+    // Carga compatible con tres generaciones:
+    // 1) JSON ÚNICO v3 (formato actual y recomendado).
+    // 2) JSON completo v2 (array) de versiones anteriores.
+    // 3) JSON antiguo de "Guardar Datos" (objeto con IDs de inputs).
     function cargarEstadoAppLuz(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -243,48 +231,187 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const estado = JSON.parse(e.target.result);
+                const datos = JSON.parse(e.target.result);
 
-                // 1. Restaurar primero las variables que definen la estructura visual
-                if (estado['num_medidores'] !== undefined) {
-                    document.getElementById('num_medidores').value = estado['num_medidores'];
-                }
-                if (estado['has_sin_medidor'] !== undefined) {
-                    document.getElementById('has_sin_medidor').checked = estado['has_sin_medidor'];
-                }
-
-                // 2. Ejecutar actualizarVista para mostrar/ocultar las cajas correspondientes
-                actualizarVista();
-
-                // 3. Volcar el resto de los datos guardados en los campos
-                for (const id in estado) {
-                    const elemento = document.getElementById(id);
-                    if (elemento && id !== 'num_medidores' && id !== 'has_sin_medidor') {
-                        if (elemento.type === 'checkbox') {
-                            elemento.checked = estado[id];
-                        } else {
-                            elemento.value = estado[id];
-                        }
-                    }
+                // Formato unificado v3: contiene una copia exacta del estado de
+                // la app y, a la vez, datos estructurados para redondeos_montos.
+                if (datos && typeof datos === 'object' && !Array.isArray(datos) &&
+                    datos.schema === 'luz_cayran_unificado' && datos.estado_app) {
+                    cargarEstadoLegacyLuz(datos.estado_app);
+                    const mesTxt = String(datos.mes_cobro || datos.mes || '').trim().toUpperCase();
+                    alert(`¡JSON único${mesTxt ? ' (' + mesTxt + ')' : ''} restaurado correctamente!`);
+                } else if (Array.isArray(datos)) {
+                    // Compatibilidad con exportaciones v2 anteriores.
+                    cargarExportacionCompletaLuz(datos);
+                } else if (datos && typeof datos === 'object') {
+                    // Compatibilidad con antiguos archivos de "Guardar Datos".
+                    cargarEstadoLegacyLuz(datos);
+                    alert("¡Datos de sesión antiguos restaurados correctamente!");
+                } else {
+                    throw new Error("Formato JSON no reconocido.");
                 }
 
-                // 4. Comprobar modos manuales/automáticos para inquilinos
-                for(let i = 2; i <= 5; i++) {
-                    if(document.getElementById(`modo_dias_i${i}`)) {
-                        toggleModoDias(i, false);
-                    }
-                }
-
-                // 5. Recalcular las matemáticas para actualizar los textos de los totales
-                calculate();
-                
                 event.target.value = "";
             } catch (error) {
-                alert("Error al leer el archivo JSON. Asegúrate de que sea un archivo de guardado válido.");
+                alert("Error al leer el archivo JSON. Asegúrate de que sea un archivo generado por Luz Cayrán.");
                 console.error(error);
+                event.target.value = "";
             }
         };
         reader.readAsText(file);
+    }
+
+    function cargarEstadoLegacyLuz(estado) {
+        // Restaurar primero las variables que definen la estructura visual.
+        if (estado['num_medidores'] !== undefined) {
+            document.getElementById('num_medidores').value = estado['num_medidores'];
+        }
+        if (estado['has_sin_medidor'] !== undefined) {
+            document.getElementById('has_sin_medidor').checked = estado['has_sin_medidor'];
+        }
+
+        actualizarVista();
+
+        // Volcar el resto de datos por ID, igual que en el formato original.
+        for (const id in estado) {
+            const elemento = document.getElementById(id);
+            if (elemento && id !== 'num_medidores' && id !== 'has_sin_medidor') {
+                if (elemento.type === 'checkbox') {
+                    elemento.checked = estado[id];
+                } else {
+                    elemento.value = estado[id];
+                }
+            }
+        }
+
+        for (let i = 2; i <= 5; i++) {
+            if (document.getElementById(`modo_dias_i${i}`)) {
+                toggleModoDias(i, false);
+            }
+        }
+
+        calculate();
+    }
+
+    function cargarExportacionCompletaLuz(datos) {
+        const metadata = datos.find(r => r && r.tipo_registro === 'metadata') || null;
+        const reciboPrincipal = datos.find(r => r && r.tipo_registro === 'recibo_principal') || null;
+        const inquilinos = datos.filter(r => r && r.tipo_registro === 'inquilino');
+
+        if (!reciboPrincipal || inquilinos.length === 0) {
+            throw new Error("Este JSON no contiene el recibo principal y los inquilinos necesarios para restaurar Luz Cayrán.");
+        }
+
+        const conMedidor = inquilinos.filter(r => r.con_medidor !== false);
+        const sinMedidor = inquilinos.find(r => r.con_medidor === false) || null;
+
+        // 1. Restaurar la estructura de la pantalla.
+        let numMedidores = metadata && metadata.configuracion
+            ? parseInt(metadata.configuracion.num_medidores)
+            : conMedidor.length;
+
+        if (!Number.isFinite(numMedidores)) numMedidores = conMedidor.length;
+        numMedidores = Math.min(4, Math.max(1, numMedidores || 1));
+
+        let hasSinMedidor;
+        if (metadata && metadata.configuracion && typeof metadata.configuracion.inquilino_sin_medidor === 'boolean') {
+            hasSinMedidor = metadata.configuracion.inquilino_sin_medidor;
+        } else {
+            hasSinMedidor = !!sinMedidor;
+        }
+
+        document.getElementById('num_medidores').value = String(numMedidores);
+        document.getElementById('has_sin_medidor').checked = hasSinMedidor;
+        actualizarVista();
+
+        // 2. Mes de cobro. Se acepta cualquiera de las ubicaciones previstas.
+        const mesImportado =
+            (metadata && (metadata.mes_cobro || metadata.mes || (metadata.periodo && metadata.periodo.mes))) ||
+            reciboPrincipal.mes_cobro || reciboPrincipal.mes ||
+            (inquilinos[0] && (inquilinos[0].mes_cobro || inquilinos[0].mes)) || '';
+
+        if (mesImportado) {
+            const selectMes = document.getElementById('mes_principal');
+            const mesNormalizado = String(mesImportado).trim().toUpperCase();
+            const opcion = Array.from(selectMes.options).find(opt => opt.value.toUpperCase() === mesNormalizado || opt.text.toUpperCase() === mesNormalizado);
+            if (opcion) selectMes.value = opcion.value;
+        }
+
+        // 3. Datos del recibo principal.
+        const lecturasM = reciboPrincipal.lecturas || {};
+        const importesM = reciboPrincipal.importes || {};
+
+        asignarValorLuz('lec_ant_m', lecturasM.lectura_anterior);
+        asignarValorLuz('lec_act_m', lecturasM.lectura_actual);
+        asignarValorLuz('fec_ant_m', lecturasM.fecha_lectura_anterior || reciboPrincipal.fecha_inicio || '');
+        asignarValorLuz('fec_act_m', lecturasM.fecha_lectura_actual || reciboPrincipal.fecha_fin || '');
+        asignarValorLuz('tarifa', reciboPrincipal.tarifa_kwh);
+        asignarValorLuz('rep_m', importesM.reposicion_mantenimiento);
+        asignarValorLuz('cargo_fijo_m', importesM.cargo_fijo);
+        asignarValorLuz('alum_m', importesM.alumbrado_publico);
+        asignarValorLuz('int_m', importesM.interes_compensatorio);
+        asignarValorLuz('red_ant_m', importesM.redondeo_anterior);
+        asignarValorLuz('red_act_m', importesM.redondeo_actual);
+
+        // 4. Limpiar primero los medidores dinámicos para evitar que queden
+        // datos de una importación anterior en tarjetas no utilizadas.
+        for (let i = 2; i <= 5; i++) {
+            asignarValorLuz(`titulo_i${i}`, '');
+            asignarValorLuz(`lec_ant_i${i}`, '');
+            asignarValorLuz(`lec_act_i${i}`, '');
+            asignarValorLuz(`fec_ant_i${i}`, '');
+            asignarValorLuz(`fec_act_i${i}`, '');
+            asignarValorLuz(`modo_dias_i${i}`, 'recibo');
+            asignarValorLuz(`dias_vividos_i${i}`, '');
+        }
+        asignarValorLuz('titulo_i1', '');
+
+        // 5. Inquilino sin medidor.
+        if (hasSinMedidor && sinMedidor) {
+            asignarValorLuz('titulo_i1', sinMedidor.nombre || 'Inquilino sin medidor');
+        }
+
+        // 6. Inquilinos con medidor. Para archivos nuevos se usa id_interno;
+        // para los ya exportados con esquema 2.0 se conserva el orden del array.
+        conMedidor.forEach((inq, indice) => {
+            let i = parseInt(inq.id_interno);
+            if (!Number.isFinite(i) || i < 2 || i > 5) i = indice + 2;
+            if (i > 5) return;
+
+            const lecturas = inq.lecturas || {};
+            asignarValorLuz(`titulo_i${i}`, inq.nombre || `Inquilino ${i - 1}`);
+            asignarValorLuz(`lec_ant_i${i}`, lecturas.lectura_anterior);
+            asignarValorLuz(`lec_act_i${i}`, lecturas.lectura_actual);
+            asignarValorLuz(`fec_ant_i${i}`, lecturas.fecha_lectura_anterior || '');
+            asignarValorLuz(`fec_act_i${i}`, lecturas.fecha_lectura_actual || '');
+
+            const modo = inq.modo_dias === 'manual' ? 'manual' : 'recibo';
+            asignarValorLuz(`modo_dias_i${i}`, modo);
+            if (inq.dias_facturados !== undefined && inq.dias_facturados !== null) {
+                asignarValorLuz(`dias_vividos_i${i}`, inq.dias_facturados);
+            }
+            toggleModoDias(i, false);
+        });
+
+        // 7. Recalcular a partir de los datos originales. Los resultados calculados
+        // del JSON sirven como histórico, pero la interfaz siempre vuelve a obtenerlos
+        // mediante la lógica vigente de Luz Cayrán.
+        calculate();
+
+        const mesTexto = mesImportado ? ` (${String(mesImportado).toUpperCase()})` : '';
+        alert(`¡Archivo completo de LUZ${mesTexto} restaurado correctamente!`);
+    }
+
+    function asignarValorLuz(id, valor) {
+        if (valor === undefined || valor === null) return;
+        const elemento = document.getElementById(id);
+        if (!elemento) return;
+
+        if (elemento.type === 'checkbox') {
+            elemento.checked = !!valor;
+        } else {
+            elemento.value = valor;
+        }
     }
 
     function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault, alertBg) {
@@ -571,37 +698,60 @@
         }
 
         const btnResumen = document.getElementById('btn-descargar-resumen');
-        const btnExportarJson = document.getElementById('btn-exportar-json');
         
         if (verificarDatosCompletos()) {
             btnResumen.style.display = 'block';
-            if (btnExportarJson) btnExportarJson.style.display = 'block';
         } else {
             btnResumen.style.display = 'none';
-            if (btnExportarJson) btnExportarJson.style.display = 'none';
         }
     }
 
     function exportarJSON() {
+        // Asegurar que todos los cálculos visibles e internos estén actualizados
+        // justo antes de construir el archivo histórico.
+        calculate();
+
         const f1m_val = document.getElementById('fec_act_m').value;
         if (!f1m_val) {
             alert("Es necesario tener la fecha actual del recibo principal completada.");
             return;
         }
 
-        let f2m_val = document.getElementById('fec_ant_m').value;
-        let d_f1m = parseDateLocal(f1m_val);
-        let d_f2m = parseDateLocal(f2m_val);
-        let dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
+        const f2m_val = document.getElementById('fec_ant_m').value;
+        const d_f1m = parseDateLocal(f1m_val);
+        const d_f2m = parseDateLocal(f2m_val);
+        const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
-        const numMedidores = parseInt(document.getElementById('num_medidores').value);
+        const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
         const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
-        const mes = document.getElementById('mes_principal').value;
-        
-        let datosExportar = [];
+        const totalInquilinosReales = numMedidores + (hasSinMedidor ? 1 : 0);
+        const n = totalInquilinosReales > 0 ? totalInquilinosReales : 1;
+
+        // MES: se guarda explícitamente con dos nombres para facilitar la
+        // compatibilidad futura con redondeos_montos (su campo se llama mes_cobro).
+        const mes = document.getElementById('mes_principal').value || '';
+        const mesCobro = mes;
+        const anio = d_f1m ? d_f1m.getFullYear() : null;
+
+        const factorLey = (2 * UIT_VIGENTE) / 1000000;
+        const tarifa = getVal('tarifa');
+        const km = Math.max(0, getVal('lec_act_m') - getVal('lec_ant_m'));
+        const energiaPrincipal = km * tarifa;
+        const subtotalPrincipal = getVal('rep_m') + getVal('cargo_fijo_m') + energiaPrincipal + getVal('alum_m') + getVal('int_m');
+        const igvPrincipal = subtotalPrincipal * 0.18;
+        const aporteLeyPrincipal = km * factorLey;
+        const totalPrincipal = getVal('total_pagar_m');
+
+        // Mantener números como números (no como texto) y conservar precisión
+        // suficiente para futuros análisis.
+        const numero = (valor, decimales = 6) => {
+            const n = Number(valor);
+            if (!Number.isFinite(n)) return 0;
+            return Number(n.toFixed(decimales));
+        };
 
         const formatoYYYYMMDD = (fechaObj) => {
-            if(!fechaObj || isNaN(fechaObj)) return "";
+            if (!fechaObj || isNaN(fechaObj)) return "";
             const y = fechaObj.getFullYear();
             const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
             const d = String(fechaObj.getDate()).padStart(2, '0');
@@ -610,62 +760,269 @@
 
         const calcularFechaInicio = (fechaFinStr, diasTotales) => {
             const endDate = parseDateLocal(fechaFinStr);
-            if (!endDate) return "";
+            if (!endDate || !diasTotales || diasTotales < 1) return "";
             const startDate = new Date(endDate.getTime() - (diasTotales - 1) * 86400000);
             return formatoYYYYMMDD(startDate);
         };
 
+        // La raíz continúa siendo un ARRAY para no romper el importador actual
+        // de redondeos_montos. Los registros no reconocidos por nombre simplemente
+        // serán ignorados por esa web hasta que la adaptemos al esquema v2.
+        const datosExportar = [];
+
+        datosExportar.push({
+            tipo_registro: "metadata",
+            schema: "luz_cayran",
+            schema_version: "2.0",
+            mes: mes,
+            mes_cobro: mesCobro,
+            anio: anio,
+            periodo: {
+                mes: mes,
+                anio: anio
+            },
+            fecha_exportacion: new Date().toISOString(),
+            configuracion: {
+                num_medidores: numMedidores,
+                inquilino_sin_medidor: hasSinMedidor,
+                total_inquilinos: totalInquilinosReales,
+                uit_vigente: numero(UIT_VIGENTE, 2),
+                factor_aporte_ley: numero(factorLey, 8),
+                igv_porcentaje: 18
+            }
+        });
+
+        datosExportar.push({
+            tipo_registro: "recibo_principal",
+            mes: mes,
+            mes_cobro: mesCobro,
+            anio: anio,
+            fecha_inicio: f2m_val || "",
+            fecha_fin: f1m_val || "",
+            dias_recibo: dm,
+            lecturas: {
+                lectura_anterior: numero(getVal('lec_ant_m')),
+                lectura_actual: numero(getVal('lec_act_m')),
+                fecha_lectura_anterior: f2m_val || "",
+                fecha_lectura_actual: f1m_val || "",
+                consumo_kwh: numero(km)
+            },
+            tarifa_kwh: numero(tarifa),
+            importes: {
+                energia: numero(energiaPrincipal),
+                reposicion_mantenimiento: numero(getVal('rep_m')),
+                cargo_fijo: numero(getVal('cargo_fijo_m')),
+                alumbrado_publico: numero(getVal('alum_m')),
+                interes_compensatorio: numero(getVal('int_m')),
+                subtotal_antes_igv: numero(subtotalPrincipal),
+                igv: numero(igvPrincipal),
+                aporte_ley_28749: numero(aporteLeyPrincipal),
+                redondeo_anterior: numero(getVal('red_ant_m')),
+                redondeo_actual: numero(getVal('red_act_m')),
+                total_pagar: numero(totalPrincipal)
+            }
+        });
+
+        let sumaKwhMedidores = 0;
+        let sumaKwhDistribuidos = 0;
+        let sumaMontosInquilinos = 0;
+
         if (hasSinMedidor) {
             const nombreI1 = document.getElementById('titulo_i1').value || 'Inquilino sin medidor';
-            const kwhI1 = window._i1_cache ? parseFloat(window._i1_cache.kwh.toFixed(2)) : 0;
-            const totalI1 = parseFloat(document.getElementById('total_pagar_i1').value) || 0;
+            const c = window._i1_cache || {
+                kwh: 0, ener: 0, rep: 0, cf: 0, alum: 0, int: 0,
+                igv: 0, aporte: 0, red_ant: 0, red_act: 0, total: 0
+            };
+            const kwhI1 = numero(c.kwh, 2);
+            const totalI1 = numero(getVal('total_pagar_i1'), 2);
             const fechaFin = f1m_val;
             const fechaInicio = calcularFechaInicio(fechaFin, dm);
 
+            sumaKwhDistribuidos += kwhI1;
+            sumaMontosInquilinos += totalI1;
+
             datosExportar.push({
+                tipo_registro: "inquilino",
+                mes: mes,
+                mes_cobro: mesCobro,
+                anio: anio,
                 nombre: nombreI1,
+                id_interno: 1,
+                con_medidor: false,
+
+                // CAMPOS LEGACY: se mantienen exactamente para redondeos_montos.
                 kwh_real: kwhI1,
                 dias_facturados: dm,
                 monto_pagar: totalI1,
                 fecha_inicio: fechaInicio,
-                fecha_fin: fechaFin
+                fecha_fin: fechaFin,
+
+                metodo_calculo: "diferencia_recibo_principal_menos_inquilinos_con_medidor",
+                lecturas: null,
+                consumo: {
+                    kwh_real: kwhI1,
+                    dias_facturados: dm
+                },
+                calculos: {
+                    energia: numero(c.ener),
+                    reposicion_mantenimiento: numero(c.rep),
+                    cargo_fijo: numero(c.cf),
+                    alumbrado_publico: numero(c.alum),
+                    interes_compensatorio: numero(c.int),
+                    subtotal_antes_igv: numero(c.ener + c.rep + c.cf + c.alum + c.int),
+                    igv: numero(c.igv),
+                    aporte_ley_28749: numero(c.aporte),
+                    redondeo_anterior: numero(c.red_ant),
+                    redondeo_actual: numero(c.red_act),
+                    total_pagar: totalI1
+                }
             });
         }
 
         for (let i = 2; i <= (numMedidores + 1); i++) {
-            const nombreInq = document.getElementById(`titulo_i${i}`).value || `Inquilino ${i-1}`;
-            
+            const nombreInq = document.getElementById(`titulo_i${i}`).value || `Inquilino ${i - 1}`;
+
             const lAnt = getVal(`lec_ant_i${i}`);
             const lAct = getVal(`lec_act_i${i}`);
-            const f1i = document.getElementById(`fec_act_i${i}`).value; 
+            const f1i = document.getElementById(`fec_act_i${i}`).value;
             const f2i = document.getElementById(`fec_ant_i${i}`).value;
-            const di_lectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
-            
-            const ki = Math.max(0, lAct - lAnt);
-            const kd = di_lectura > 0 ? (ki / di_lectura) : 0;
+            const diLectura = (f1i && f2i)
+                ? Math.max(1, Math.floor((new Date(f1i + 'T00:00:00') - new Date(f2i + 'T00:00:00')) / 864e5) + 1)
+                : 0;
+
+            const consumoMedidor = Math.max(0, lAct - lAnt);
+            const consumoDiario = diLectura > 0 ? (consumoMedidor / diLectura) : 0;
 
             const modo = document.getElementById(`modo_dias_i${i}`).value;
-            let dias_facturar = modo === 'recibo' ? dm : parseInt(getVal(`dias_vividos_i${i}`));
-            
-            const kwhConsumidoReal = parseFloat((kd * dias_facturar).toFixed(2));
-            const totalInq = parseFloat(document.getElementById(`total_pagar_i${i}`).value) || 0;
-            
+            const diasFacturar = modo === 'recibo' ? dm : Math.max(0, parseInt(getVal(`dias_vividos_i${i}`)) || 0);
+            const kwhConsumidoReal = numero(consumoDiario * diasFacturar, 2);
+            const totalInq = numero(getVal(`total_pagar_i${i}`), 2);
+
             const fechaFin = f1m_val;
-            const fechaInicio = calcularFechaInicio(fechaFin, dias_facturar);
+            const fechaInicio = calcularFechaInicio(fechaFin, diasFacturar);
+
+            const energia = getVal(`ener_i${i}`);
+            const rep = getVal(`rep_i${i}`);
+            const cf = getVal(`cf_i${i}`);
+            const alum = getVal(`alum_i${i}`);
+            const interes = getVal(`int_i${i}`);
+            const igv = getVal(`igv_i${i}`);
+            const aporte = getVal(`aporte_i${i}`);
+            const redAnt = getVal(`red_ant_i${i}`);
+            const redAct = getVal(`red_act_i${i}`);
+
+            sumaKwhMedidores += kwhConsumidoReal;
+            sumaKwhDistribuidos += kwhConsumidoReal;
+            sumaMontosInquilinos += totalInq;
 
             datosExportar.push({
+                tipo_registro: "inquilino",
+                mes: mes,
+                mes_cobro: mesCobro,
+                anio: anio,
                 nombre: nombreInq,
+                id_interno: i,
+                con_medidor: true,
+
+                // CAMPOS LEGACY: se mantienen exactamente para redondeos_montos.
                 kwh_real: kwhConsumidoReal,
-                dias_facturados: dias_facturar,
+                dias_facturados: diasFacturar,
                 monto_pagar: totalInq,
                 fecha_inicio: fechaInicio,
-                fecha_fin: fechaFin
+                fecha_fin: fechaFin,
+
+                modo_dias: modo,
+                lecturas: {
+                    lectura_anterior: numero(lAnt),
+                    lectura_actual: numero(lAct),
+                    fecha_lectura_anterior: f2i || "",
+                    fecha_lectura_actual: f1i || "",
+                    dias_entre_lecturas: diLectura,
+                    consumo_medidor_kwh: numero(consumoMedidor),
+                    consumo_diario_kwh: numero(consumoDiario)
+                },
+                consumo: {
+                    kwh_real: kwhConsumidoReal,
+                    dias_facturados: diasFacturar,
+                    periodo_facturado_inicio: fechaInicio,
+                    periodo_facturado_fin: fechaFin
+                },
+                calculos: {
+                    tarifa_kwh: numero(tarifa),
+                    energia: numero(energia),
+                    reposicion_mantenimiento: numero(rep),
+                    cargo_fijo: numero(cf),
+                    alumbrado_publico: numero(alum),
+                    interes_compensatorio: numero(interes),
+                    subtotal_antes_igv: numero(energia + rep + cf + alum + interes),
+                    igv: numero(igv),
+                    aporte_ley_28749: numero(aporte),
+                    redondeo_anterior: numero(redAnt),
+                    redondeo_actual: numero(redAct),
+                    total_pagar: totalInq
+                }
             });
         }
 
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosExportar, null, 2));
-        const nombreArchivo = `exportacion_luz_${mes.toLowerCase()}.json`;
-        
+        const kwhSinMedidor = hasSinMedidor && window._i1_cache ? numero(window._i1_cache.kwh, 2) : 0;
+
+        datosExportar.push({
+            tipo_registro: "resumen",
+            mes: mes,
+            mes_cobro: mesCobro,
+            anio: anio,
+            consumo_total_recibo_kwh: numero(km, 2),
+            consumo_inquilinos_con_medidor_kwh: numero(sumaKwhMedidores, 2),
+            consumo_inquilino_sin_medidor_kwh: kwhSinMedidor,
+            consumo_total_distribuido_kwh: numero(sumaKwhDistribuidos, 2),
+            diferencia_consumo_kwh: numero(km - sumaKwhDistribuidos, 2),
+            total_recibo_principal: numero(totalPrincipal, 2),
+            total_distribuido_inquilinos: numero(sumaMontosInquilinos, 2),
+            diferencia_montos: numero(totalPrincipal - sumaMontosInquilinos, 2),
+            cantidad_inquilinos: totalInquilinosReales
+        });
+
+        // ---------------------------------------------------------------------
+        // FORMATO JSON ÚNICO v3
+        // "estado_app" permite restaurar exactamente Luz Cayrán.
+        // "inquilinos" mantiene los campos que redondeos_montos necesita.
+        // El resto queda disponible para análisis histórico futuro.
+        // ---------------------------------------------------------------------
+        const estadoApp = {};
+        document.querySelectorAll('input, select').forEach(input => {
+            if (input.id && input.type !== 'file' && input.type !== 'button') {
+                estadoApp[input.id] = input.type === 'checkbox' ? input.checked : input.value;
+            }
+        });
+
+        const metadata = datosExportar.find(r => r && r.tipo_registro === 'metadata') || {};
+        const reciboPrincipal = datosExportar.find(r => r && r.tipo_registro === 'recibo_principal') || {};
+        const inquilinosExportados = datosExportar.filter(r => r && r.tipo_registro === 'inquilino');
+        const resumen = datosExportar.find(r => r && r.tipo_registro === 'resumen') || {};
+
+        const jsonUnificado = {
+            schema: 'luz_cayran_unificado',
+            schema_version: '3.0',
+            tipo: 'luz',
+            mes: mes,
+            mes_cobro: mesCobro,
+            anio: anio,
+            periodo: { mes: mes, anio: anio },
+            fecha_exportacion: metadata.fecha_exportacion || new Date().toISOString(),
+
+            // Para reabrir exactamente el trabajo en Luz Cayrán.
+            estado_app: estadoApp,
+
+            // Para análisis y para otras webs.
+            configuracion: metadata.configuracion || {},
+            recibo_principal: reciboPrincipal,
+            inquilinos: inquilinosExportados,
+            resumen: resumen
+        };
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonUnificado, null, 2));
+        const nombreArchivo = `luz_${mes ? mes.toLowerCase() : 'sin_mes'}_${anio || 'sin_anio'}.json`;
+
         const anchorDescarga = document.createElement('a');
         anchorDescarga.setAttribute("href", dataStr);
         anchorDescarga.setAttribute("download", nombreArchivo);
