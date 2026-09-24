@@ -57,8 +57,14 @@
 </head>
 <body>
 
-<div class="nav-back-bar">
+<div class="nav-back-bar d-flex justify-content-between align-items-center">
     <a href="./index.html" class="btn-back">&#8592; Menú Principal</a>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-success fw-bold text-white shadow-sm" style="border-radius: 6px;" onclick="guardarEstadoApp()">📥 Guardar Datos</button>
+        <button class="btn btn-sm btn-secondary fw-bold text-white shadow-sm" style="border-radius: 6px;" onclick="document.getElementById('file_import').click()">📤 Importar Datos</button>
+        <!-- Input oculto para seleccionar el archivo JSON -->
+        <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
+    </div>
 </div>
 
 <div id="pdf-template-container"></div>
@@ -252,6 +258,93 @@
         document.body.appendChild(anchorDescarga);
         anchorDescarga.click();
         anchorDescarga.remove();
+    }
+
+    // =========================================================================
+    // NUEVAS FUNCIONES: GUARDAR Y CARGAR ESTADO (SESIÓN)
+    // =========================================================================
+
+    function guardarEstadoApp() {
+        const estado = {};
+        // Captura todos los inputs y selects de la página
+        const inputs = document.querySelectorAll('input, select');
+        
+        inputs.forEach(input => {
+            // Excluimos inputs irrelevantes o el input de archivo
+            if (input.id && input.type !== 'file' && input.type !== 'button') {
+                if (input.type === 'checkbox') {
+                    estado[input.id] = input.checked;
+                } else {
+                    estado[input.id] = input.value;
+                }
+            }
+        });
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estado));
+        const mes = document.getElementById('m_mes').value || 'SESION';
+        const nombreArchivo = `datos_guardados_agua_${mes.toLowerCase()}.json`;
+
+        const anchorDescarga = document.createElement('a');
+        anchorDescarga.setAttribute("href", dataStr);
+        anchorDescarga.setAttribute("download", nombreArchivo);
+        document.body.appendChild(anchorDescarga);
+        anchorDescarga.click();
+        anchorDescarga.remove();
+    }
+
+    function cargarEstadoApp(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const estado = JSON.parse(e.target.result);
+
+                // 1. Restaurar primero las variables que definen la estructura del DOM
+                if (estado['n_tenants_meter'] !== undefined) {
+                    document.getElementById('n_tenants_meter').value = estado['n_tenants_meter'];
+                }
+                if (estado['has_nometer'] !== undefined) {
+                    document.getElementById('has_nometer').checked = estado['has_nometer'];
+                }
+
+                // 2. Renderizar las cajas de los inquilinos con la cantidad correcta
+                render();
+
+                // 3. Volcar el resto de los datos guardados en los campos generados
+                for (const id in estado) {
+                    const elemento = document.getElementById(id);
+                    // Evitamos sobreescribir los estructurales que ya asignamos
+                    if (elemento && id !== 'n_tenants_meter' && id !== 'has_nometer') {
+                        if (elemento.type === 'checkbox') {
+                            elemento.checked = estado[id];
+                        } else {
+                            elemento.value = estado[id];
+                        }
+                    }
+                }
+
+                // 4. Comprobar si algún inquilino tenía el modo de cálculo "manual" y activarlo
+                const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
+                for(let i = 1; i <= nMetered; i++) {
+                    if(document.getElementById(`i${i}_calc_mode`)) {
+                        toggleMode(i, false);
+                    }
+                }
+
+                // 5. Recalcular las matemáticas para actualizar los textos de los totales
+                calc();
+                
+                // Limpiar el input file por si deseas volver a importar el mismo archivo después
+                event.target.value = "";
+                
+            } catch (error) {
+                alert("Error al leer el archivo JSON. Asegúrate de que sea un archivo de guardado válido.");
+                console.error(error);
+            }
+        };
+        reader.readAsText(file);
     }
 
     function calc() {
