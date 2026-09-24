@@ -36,7 +36,7 @@
         .btn { border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; font-size: 0.9rem; flex: 1; }
         .btn-limpiar { background: #ef4444; color: white; }
         .btn-resumen { background: #6366f1; color: white; }
-        .btn-json { background: #10b981; color: white; } /* Nuevo color para el botón JSON */
+        .btn-json { background: #10b981; color: white; } 
         .btn-toggle { background: #475569; color: white; }
         .btn-whatsapp { background: #25D366; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
         
@@ -96,8 +96,13 @@
 </head>
 <body>
 
-<div class="nav-back-bar">
+<div class="nav-back-bar d-flex justify-content-between align-items-center">
     <a href="./index.html" class="btn-back">&#8592; Menú Principal</a>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-success fw-bold text-white shadow-sm" style="border-radius: 6px; padding: 8px 14px; font-size: 0.9rem;" onclick="guardarEstadoAppLuz()">📥 Guardar Datos</button>
+        <button class="btn btn-sm btn-secondary fw-bold text-white shadow-sm" style="border-radius: 6px; padding: 8px 14px; font-size: 0.9rem;" onclick="document.getElementById('file_import_luz').click()">📤 Importar Datos</button>
+        <input type="file" id="file_import_luz" accept=".json" style="display: none;" onchange="cargarEstadoAppLuz(event)">
+    </div>
 </div>
 
 <div id="pdf-template-container"></div> 
@@ -125,7 +130,6 @@
             <div id="ocr_status" style="display:none; background: #ede9fe; color: #6d28d9; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; text-align: center; margin-top: 10px;"></div>
         </div>
 
-        <!-- MODIFICACIÓN: Se añadió el botón para exportar JSON -->
         <div class="btn-group" style="margin-bottom: 15px; justify-content: space-between;">
             <button class="btn btn-limpiar" style="flex: 1;" onclick="limpiarPrincipal()">🗑️ Limpiar Datos</button>
             <button id="btn-descargar-resumen" class="btn btn-resumen" style="flex: 1; display: none;" onclick="descargarResumenPDF()">📊 DESCARGAR RESUMEN</button>
@@ -202,6 +206,87 @@
         return isNaN(d) ? null : d;
     }
 
+    // =========================================================================
+    // NUEVAS FUNCIONES: GUARDAR Y CARGAR ESTADO (SESIÓN) PARA LUZ
+    // =========================================================================
+
+    function guardarEstadoAppLuz() {
+        const estado = {};
+        const inputs = document.querySelectorAll('input, select');
+        
+        inputs.forEach(input => {
+            if (input.id && input.type !== 'file' && input.type !== 'button') {
+                if (input.type === 'checkbox') {
+                    estado[input.id] = input.checked;
+                } else {
+                    estado[input.id] = input.value;
+                }
+            }
+        });
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estado));
+        const mes = document.getElementById('mes_principal').value || 'SESION';
+        const nombreArchivo = `datos_guardados_luz_${mes.toLowerCase()}.json`;
+
+        const anchorDescarga = document.createElement('a');
+        anchorDescarga.setAttribute("href", dataStr);
+        anchorDescarga.setAttribute("download", nombreArchivo);
+        document.body.appendChild(anchorDescarga);
+        anchorDescarga.click();
+        anchorDescarga.remove();
+    }
+
+    function cargarEstadoAppLuz(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const estado = JSON.parse(e.target.result);
+
+                // 1. Restaurar primero las variables que definen la estructura visual
+                if (estado['num_medidores'] !== undefined) {
+                    document.getElementById('num_medidores').value = estado['num_medidores'];
+                }
+                if (estado['has_sin_medidor'] !== undefined) {
+                    document.getElementById('has_sin_medidor').checked = estado['has_sin_medidor'];
+                }
+
+                // 2. Ejecutar actualizarVista para mostrar/ocultar las cajas correspondientes
+                actualizarVista();
+
+                // 3. Volcar el resto de los datos guardados en los campos
+                for (const id in estado) {
+                    const elemento = document.getElementById(id);
+                    if (elemento && id !== 'num_medidores' && id !== 'has_sin_medidor') {
+                        if (elemento.type === 'checkbox') {
+                            elemento.checked = estado[id];
+                        } else {
+                            elemento.value = estado[id];
+                        }
+                    }
+                }
+
+                // 4. Comprobar modos manuales/automáticos para inquilinos
+                for(let i = 2; i <= 5; i++) {
+                    if(document.getElementById(`modo_dias_i${i}`)) {
+                        toggleModoDias(i, false);
+                    }
+                }
+
+                // 5. Recalcular las matemáticas para actualizar los textos de los totales
+                calculate();
+                
+                event.target.value = "";
+            } catch (error) {
+                alert("Error al leer el archivo JSON. Asegúrate de que sea un archivo de guardado válido.");
+                console.error(error);
+            }
+        };
+        reader.readAsText(file);
+    }
+
     function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault, alertBg) {
         return `
         <div class="card" id="recibo_i${id}" style="border: 2px solid ${colorBorde};">
@@ -209,7 +294,6 @@
                 <input type="text" id="titulo_i${id}" class="titulo-editable" placeholder="${titulo}" style="color:${colorBorde}; border-color:${colorBorde};" oninput="sincronizarNombre(${id})">
                 <div class="btn-group">
                     <button class="btn btn-toggle" onclick="toggleCardBody(${id})">👁️ Ocultar / Mostrar</button>
-                    <!-- CAMBIO: Botón BORRAR en mayúscula -->
                     <button class="btn btn-limpiar" onclick="limpiarInquilino(${id})">BORRAR</button>
                 </div>
                 <div class="btn-group" style="margin-top: 5px;">
@@ -277,7 +361,6 @@
                 <input type="text" id="titulo_i1" class="titulo-editable" placeholder="Inquilino sin medidor" style="color:#ef4444; border-color:#fca5a5;">
                 <div class="btn-group">
                     <button class="btn btn-toggle" onclick="toggleCardBody(1)">👁️ Ocultar / Mostrar</button>
-                    <!-- CAMBIO: Botón BORRAR en mayúscula -->
                     <button class="btn btn-limpiar" onclick="limpiarInquilino(1)">BORRAR</button>
                 </div>
                 <div class="btn-group" style="margin-top: 5px;">
@@ -487,7 +570,6 @@
             setVal('total_pagar_i1', total_i1);
         }
 
-        // MODIFICACIÓN: Mostrar/ocultar los botones al mismo tiempo
         const btnResumen = document.getElementById('btn-descargar-resumen');
         const btnExportarJson = document.getElementById('btn-exportar-json');
         
@@ -500,7 +582,6 @@
         }
     }
 
-    // MODIFICACIÓN: Función principal para exportar el JSON
     function exportarJSON() {
         const f1m_val = document.getElementById('fec_act_m').value;
         if (!f1m_val) {
@@ -519,7 +600,6 @@
         
         let datosExportar = [];
 
-        // Función para dar formato a la fecha YYYY-MM-DD
         const formatoYYYYMMDD = (fechaObj) => {
             if(!fechaObj || isNaN(fechaObj)) return "";
             const y = fechaObj.getFullYear();
@@ -528,7 +608,6 @@
             return `${y}-${m}-${d}`;
         };
 
-        // Calcula la fecha inicio: FechaFinal - DiasFacturados + 1
         const calcularFechaInicio = (fechaFinStr, diasTotales) => {
             const endDate = parseDateLocal(fechaFinStr);
             if (!endDate) return "";
@@ -536,7 +615,6 @@
             return formatoYYYYMMDD(startDate);
         };
 
-        // En caso del inquilino sin medidor
         if (hasSinMedidor) {
             const nombreI1 = document.getElementById('titulo_i1').value || 'Inquilino sin medidor';
             const kwhI1 = window._i1_cache ? parseFloat(window._i1_cache.kwh.toFixed(2)) : 0;
@@ -554,7 +632,6 @@
             });
         }
 
-        // Para los inquilinos con medidor
         for (let i = 2; i <= (numMedidores + 1); i++) {
             const nombreInq = document.getElementById(`titulo_i${i}`).value || `Inquilino ${i-1}`;
             
@@ -586,7 +663,6 @@
             });
         }
 
-        // Transformar y descargar
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosExportar, null, 2));
         const nombreArchivo = `exportacion_luz_${mes.toLowerCase()}.json`;
         
