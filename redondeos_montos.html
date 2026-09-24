@@ -79,12 +79,12 @@
                     </button>
                 </div>
                 <div>
-                    <button type="button" onclick="guardarSesion()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
+                    <button type="button" onclick="guardarSesion(this)" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
                         GUARDAR SESIÓN
                     </button>
                 </div>
                 <div>
-                    <input type="file" id="input_sesion" accept=".json,application/json" class="hidden" onchange="importarSesion(event)">
+                    <input type="file" id="input_sesion" accept=".json,application/json,text/plain" class="hidden" onchange="importarSesion(event)">
                     <button type="button" onclick="document.getElementById('input_sesion').click()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
                         IMPORTAR SESIÓN
                     </button>
@@ -794,17 +794,22 @@
             };
         }
 
-        async function guardarSesion() {
-            const boton = (typeof event !== 'undefined' && event && event.currentTarget) ? event.currentTarget : null;
+        function textoABase64Utf8(texto) {
+            // Compatible también con WebView Android antiguas que no implementan TextEncoder.
+            return btoa(unescape(encodeURIComponent(texto)));
+        }
+
+        async function guardarSesion(boton = null) {
             const textoOriginal = boton ? boton.textContent : '';
 
             try {
                 if (boton) {
                     boton.disabled = true;
-                    boton.textContent = 'GENERANDO SESIÓN...';
+                    boton.textContent = 'GUARDANDO SESIÓN...';
                 }
 
                 procesarCalculosGlobales();
+
                 const datosSesion = obtenerDatosSesion();
                 const mesOriginal = document.getElementById('mes_cobro').value.trim() || 'SIN MES';
                 const mesArchivo = mesOriginal
@@ -814,77 +819,155 @@
                 const nombreArchivo = `CUENTA FINAL INQUILINOS-${mesArchivo}.json`;
                 const jsonTexto = JSON.stringify(datosSesion, null, 2);
 
-                // 1) APP ANDROID / CAPACITOR: mismo enfoque que ya funciona con las boletas.
-                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+                // ==============================================================
+                // MÉTODO 1 - APP ANDROID / CAPACITOR:
+                // Guardar físicamente en DOCUMENTS. No depende del atributo
+                // HTML "download" ni de que Android acepte application/json.
+                // ==============================================================
+                const plugins = window.Capacitor && window.Capacitor.Plugins
+                    ? window.Capacitor.Plugins
+                    : null;
+
+                if (plugins && plugins.Filesystem) {
                     try {
-                        const { Filesystem, Share } = window.Capacitor.Plugins;
+                        const Filesystem = plugins.Filesystem;
+                        const base64Data = textoABase64Utf8(jsonTexto);
 
-                        if (Filesystem && Share) {
-                            // Filesystem.writeFile recibe base64 cuando no se especifica encoding.
-                            const bytes = new TextEncoder().encode(jsonTexto);
-                            let binario = '';
-                            const tamBloque = 0x8000;
-                            for (let i = 0; i < bytes.length; i += tamBloque) {
-                                binario += String.fromCharCode(...bytes.subarray(i, i + tamBloque));
+                        // Primero intentamos DOCUMENTS (archivo persistente).
+                        const guardado = await Filesystem.writeFile({
+                            path: nombreArchivo,
+                            data: base64Data,
+                            directory: 'DOCUMENTS',
+                            recursive: true
+                        });
+
+                        // Si existe Share, abrimos el selector de Android usando
+                        // el URI del archivo ya guardado. Aunque el usuario cancele,
+                        // el respaldo permanece escrito en DOCUMENTS.
+                        if (plugins.Share) {
+                            try {
+                                await plugins.Share.share({
+                                    title: nombreArchivo,
+                                    text: 'Copia de seguridad de Cuenta Final Inquilinos',
+                                    url: guardado.uri,
+                                    dialogTitle: 'Compartir o guardar respaldo'
+                                });
+                            } catch (errorShareNativo) {
+                                console.warn('El archivo se guardó, pero Android no abrió Compartir:', errorShareNativo);
+                                alert(`Sesión guardada correctamente como:\n${nombreArchivo}\n\nEl archivo quedó almacenado en DOCUMENTS.`);
                             }
-                            const base64Data = btoa(binario);
+                        } else {
+                            alert(`Sesión guardada correctamente como:\n${nombreArchivo}\n\nEl archivo quedó almacenado en DOCUMENTS.`);
+                        }
+                        return;
+                    } catch (errorDocuments) {
+                        console.warn('No se pudo escribir en DOCUMENTS:', errorDocuments);
 
-                            const savedFile = await Filesystem.writeFile({
+                        // Segundo intento nativo: CACHE + Share, por si la WebView
+                        // no tiene permiso para DOCUMENTS pero sí para su caché.
+                        try {
+                            const Filesystem = plugins.Filesystem;
+                            const base64Data = textoABase64Utf8(jsonTexto);
+                            const temporal = await Filesystem.writeFile({
                                 path: nombreArchivo,
                                 data: base64Data,
-                                directory: 'CACHE'
+                                directory: 'CACHE',
+                                recursive: true
                             });
 
-                            await Share.share({
-                                title: nombreArchivo,
-                                text: 'Copia de seguridad de la sesión de Cuenta Final Inquilinos.',
-                                url: savedFile.uri,
-                                dialogTitle: 'Guardar o compartir sesión'
-                            });
-                            return;
-                        }
-                    } catch (errCapacitor) {
-                        console.error('Error al compartir sesión con Capacitor:', errCapacitor);
-                    }
-                }
-
-                // 2) ANDROID / NAVEGADOR MÓVIL: Web Share API con el JSON como archivo.
-                const blob = new Blob([jsonTexto], { type: 'application/json;charset=utf-8' });
-                const archivo = new File([blob], nombreArchivo, { type: 'application/json' });
-
-                if (navigator.share) {
-                    const puedeCompartir = typeof navigator.canShare !== 'function' || navigator.canShare({ files: [archivo] });
-                    if (puedeCompartir) {
-                        try {
-                            await navigator.share({
-                                files: [archivo],
-                                title: nombreArchivo,
-                                text: 'Copia de seguridad de la sesión de Cuenta Final Inquilinos.'
-                            });
-                            return;
-                        } catch (errShare) {
-                            const mensaje = String(errShare && errShare.message ? errShare.message : '').toLowerCase();
-                            if (errShare && (errShare.name === 'AbortError' || mensaje.includes('canceled') || mensaje.includes('cancelled'))) {
+                            if (plugins.Share) {
+                                await plugins.Share.share({
+                                    title: nombreArchivo,
+                                    text: 'Copia de seguridad de Cuenta Final Inquilinos',
+                                    url: temporal.uri,
+                                    dialogTitle: 'Guardar respaldo'
+                                });
                                 return;
                             }
-                            console.error('Error al compartir sesión con Web Share:', errShare);
+                        } catch (errorCache) {
+                            console.warn('Tampoco funcionó CACHE + Share:', errorCache);
                         }
                     }
                 }
 
-                // 3) PC / NAVEGADORES SIN SHARE: descarga tradicional.
-                const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonTexto);
+                // ==============================================================
+                // MÉTODO 2 - WEB SHARE API:
+                // Archivo .json etiquetado como text/plain. Android/WebView suele
+                // aceptar este MIME aunque rechace application/json.
+                // ==============================================================
+                if (navigator.share && typeof File !== 'undefined') {
+                    const archivoCompatible = new File(
+                        [jsonTexto],
+                        nombreArchivo,
+                        { type: 'text/plain' }
+                    );
+
+                    try {
+                        // No bloqueamos el intento por navigator.canShare(), porque
+                        // algunas WebView devuelven false aunque share(files) funcione.
+                        await navigator.share({
+                            files: [archivoCompatible],
+                            title: nombreArchivo,
+                            text: 'Copia de seguridad de Cuenta Final Inquilinos'
+                        });
+                        return;
+                    } catch (errorArchivoShare) {
+                        const msg = String(errorArchivoShare && errorArchivoShare.message ? errorArchivoShare.message : '').toLowerCase();
+                        if (errorArchivoShare && (errorArchivoShare.name === 'AbortError' || msg.includes('cancel'))) {
+                            return;
+                        }
+                        console.warn('Android no aceptó compartir el archivo:', errorArchivoShare);
+                    }
+
+                    // Último intento usando el panel Android como texto. Esto no
+                    // depende de soporte para compartir archivos en la WebView.
+                    try {
+                        await navigator.share({
+                            title: nombreArchivo,
+                            text: jsonTexto
+                        });
+                        alert('Android no permitió adjuntar el .json como archivo. Se compartió el contenido del respaldo como texto.');
+                        return;
+                    } catch (errorTextoShare) {
+                        const msg = String(errorTextoShare && errorTextoShare.message ? errorTextoShare.message : '').toLowerCase();
+                        if (errorTextoShare && (errorTextoShare.name === 'AbortError' || msg.includes('cancel'))) {
+                            return;
+                        }
+                        console.warn('Tampoco se pudo compartir como texto:', errorTextoShare);
+                    }
+                }
+
+                // ==============================================================
+                // MÉTODO 3 - PC / NAVEGADOR NORMAL:
+                // Blob URL convencional.
+                // ==============================================================
+                const blob = new Blob([jsonTexto], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
                 const enlace = document.createElement('a');
-                enlace.href = dataUri;
+                enlace.href = url;
                 enlace.download = nombreArchivo;
                 enlace.style.display = 'none';
                 document.body.appendChild(enlace);
                 enlace.click();
                 enlace.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
 
             } catch (error) {
-                console.error('Error al guardar/compartir sesión:', error);
-                alert('No se pudo generar la copia de seguridad de la sesión.\n\n' + (error && error.message ? error.message : error));
+                console.error('Error al guardar sesión:', error);
+
+                // Fallback final: copiar el respaldo. Así nunca se pierde la sesión
+                // aunque la WebView no exponga ninguna API de archivos.
+                try {
+                    const datosSesion = obtenerDatosSesion();
+                    const jsonTexto = JSON.stringify(datosSesion, null, 2);
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(jsonTexto);
+                        alert('La aplicación Android bloqueó el guardado de archivos. Como respaldo alternativo, el contenido JSON fue copiado al portapapeles.');
+                        return;
+                    }
+                } catch (_) {}
+
+                alert('No se pudo guardar la sesión en este dispositivo.\n\n' + (error && error.message ? error.message : error));
             } finally {
                 if (boton) {
                     boton.disabled = false;
