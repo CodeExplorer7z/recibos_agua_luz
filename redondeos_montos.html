@@ -167,7 +167,7 @@
                     
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-blue-600 mb-2">MES DE COBRO (Aparecerá en boletas)</label>
-                        <input type="text" id="mes_cobro" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none uppercase font-bold text-gray-700" placeholder="Ej. SETIEMBRE" value="SETIEMBRE">
+                        <input type="text" id="mes_cobro" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none uppercase font-bold text-gray-700" placeholder="Ej. SETIEMBRE">
                     </div>
 
                     <div class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
@@ -211,7 +211,7 @@
                     
                     <div class="bg-white p-3 rounded-lg border border-blue-100 mb-3 text-center">
                         <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Ya Redondeado)</span>
-                        <span class="text-2xl font-black text-blue-600" id="prorrateo_total_text">S/ 0</span>
+                        <span class="text-2xl font-black text-blue-600" id="prorrateo_total_text"></span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -239,15 +239,15 @@
                 <div class="boleta-wrapper">
                     <div class="boleta-card" id="boleta-mariluz">
                         <div class="boleta-header">
-                            <span>MES: <span class="txt-mes">SETIEMBRE</span></span>
+                            <span>MES: <span class="txt-mes"></span></span>
                             <h3>MARILUZ</h3>
                         </div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_mariluz">0</div></div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_mariluz">0</div></div>
+                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_mariluz"></div></div>
+                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_mariluz"></div></div>
                         <div class="divider"></div>
                         <div class="boleta-total">
                             <span>TOTAL A PAGAR</span>
-                            <h2 id="out_total_mariluz">S/. 0</h2>
+                            <h2 id="out_total_mariluz"></h2>
                         </div>
                         <div class="boleta-detalles" id="detalles_mariluz"></div>
                     </div>
@@ -258,15 +258,15 @@
                 <div class="boleta-wrapper">
                     <div class="boleta-card" id="boleta-kendra">
                         <div class="boleta-header">
-                            <span>MES: <span class="txt-mes">SETIEMBRE</span></span>
+                            <span>MES: <span class="txt-mes"></span></span>
                             <h3>KENDRA</h3>
                         </div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_kendra">0</div></div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_kendra">0</div></div>
+                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_kendra"></div></div>
+                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_kendra"></div></div>
                         <div class="divider"></div>
                         <div class="boleta-total">
                             <span>TOTAL A PAGAR</span>
-                            <h2 id="out_total_kendra">S/. 0</h2>
+                            <h2 id="out_total_kendra"></h2>
                         </div>
                         <div class="boleta-detalles" id="detalles_kendra"></div>
                     </div>
@@ -277,15 +277,15 @@
                 <div class="boleta-wrapper">
                     <div class="boleta-card" id="boleta-sonia">
                         <div class="boleta-header">
-                            <span>MES: <span class="txt-mes">SETIEMBRE</span></span>
+                            <span>MES: <span class="txt-mes"></span></span>
                             <h3>SONIA</h3>
                         </div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_sonia">0</div></div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_sonia">0</div></div>
+                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_sonia"></div></div>
+                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_sonia"></div></div>
                         <div class="divider"></div>
                         <div class="boleta-total">
                             <span>TOTAL A PAGAR</span>
-                            <h2 id="out_total_sonia">S/. 0</h2>
+                            <h2 id="out_total_sonia"></h2>
                         </div>
                         <div class="boleta-detalles" id="detalles_sonia"></div>
                     </div>
@@ -303,12 +303,69 @@
         let datosRedondeados = { mariluz: { agua: 0, luz: 0 }, ks_agua: { agua: 0 }, kendra: { agua: 0, luz: 0 }, sonia: { agua: 0, luz: 0 } };
         let comparteAgua = false;
         let ultimaFuenteProrrateo = null;
-        let ultimoTotalCompartidoRedondeado = null; 
+        let ultimoTotalCompartidoRedondeado = null;
+        let mesImportadoAgua = '';
+        let mesImportadoLuz = '';
 
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('input[type=number]').forEach(input => { input.addEventListener('wheel', e => e.preventDefault(), { passive: false }); });
             procesarCalculosGlobales(); 
         });
+
+        function extraerMesDesdeJson(datos) {
+            if (Array.isArray(datos)) {
+                const metadata = datos.find(reg => reg && (reg.tipo_registro === 'metadata' || reg.tipo === 'metadata'));
+                if (metadata) {
+                    const m = metadata.mes_cobro || metadata.mes || (metadata.periodo && metadata.periodo.mes);
+                    if (m) return String(m).trim().toUpperCase();
+                }
+                const registroConMes = datos.find(reg => reg && (reg.mes_cobro || reg.mes || (reg.periodo && reg.periodo.mes)));
+                if (registroConMes) {
+                    const m = registroConMes.mes_cobro || registroConMes.mes || (registroConMes.periodo && registroConMes.periodo.mes);
+                    if (m) return String(m).trim().toUpperCase();
+                }
+                return '';
+            }
+
+            if (datos && typeof datos === 'object') {
+                const m = datos.mes_cobro || datos.mes || (datos.periodo && datos.periodo.mes);
+                return String(m || '').trim().toUpperCase();
+            }
+            return '';
+        }
+
+        function aplicarMesImportado(tipo, mes) {
+            const mesNormalizado = String(mes || '').trim().toUpperCase();
+            if (!mesNormalizado) return true;
+
+            const esAgua = tipo === 'agua';
+            const otroMes = esAgua ? mesImportadoLuz : mesImportadoAgua;
+            const otroServicio = esAgua ? 'LUZ' : 'AGUA';
+            const servicioActual = esAgua ? 'AGUA' : 'LUZ';
+
+            // Si ya se importó el otro servicio, ambos deben pertenecer al mismo mes.
+            if (otroMes && otroMes !== mesNormalizado) {
+                alert(
+                    `No se importaron los datos de ${servicioActual}.\n\n` +
+                    `El JSON de ${servicioActual} corresponde a ${mesNormalizado}, ` +
+                    `pero el JSON de ${otroServicio} ya cargado corresponde a ${otroMes}.\n\n` +
+                    `Esto evita mezclar servicios de meses distintos en una misma boleta.`
+                );
+                return false;
+            }
+
+            if (esAgua) mesImportadoAgua = mesNormalizado;
+            else mesImportadoLuz = mesNormalizado;
+
+            document.getElementById('mes_cobro').value = mesNormalizado;
+            return true;
+        }
+
+        function obtenerRegistrosServicio(datos) {
+            if (Array.isArray(datos)) return datos;
+            if (datos && typeof datos === 'object' && Array.isArray(datos.inquilinos)) return datos.inquilinos;
+            return [];
+        }
 
         function importarJsonAgua(event) {
             const file = event.target.files[0];
@@ -318,18 +375,28 @@
             reader.onload = function(e) {
                 try {
                     const datos = JSON.parse(e.target.result);
-                    
-                    // REGLA: si el título dice solo "KENDRA", corresponde únicamente a Kendra.
-                    // El agua se considera compartida solo cuando el nombre del registro contiene
-                    // explícitamente a KENDRA y SONIA (ej.: "KENDRA + SONIA").
+
+                    if (!Array.isArray(datos) && datos && datos.tipo && String(datos.tipo).toLowerCase() !== 'agua') {
+                        throw new Error('El archivo seleccionado no corresponde a un JSON de AGUA.');
+                    }
+
+                    const registros = obtenerRegistrosServicio(datos);
+                    const mesImportado = extraerMesDesdeJson(datos);
+                    if (!aplicarMesImportado('agua', mesImportado)) return;
+
+                    // REGLA: KENDRA sola es individual. Solo se considera agua
+                    // compartida cuando el nombre contiene a KENDRA y SONIA.
                     let importados = 0;
 
-                    datos.forEach(inq => {
+                    registros.forEach(inq => {
+                        if (!inq || typeof inq !== 'object') return;
                         const nombreLower = (inq.nombre || '').toLowerCase();
-                        let monto = (parseFloat(inq.monto_pagar) || 0).toFixed(2);
-                        let m3 = inq.consumo_m3 !== undefined ? inq.consumo_m3 : '';
-                        let fi = inq.fecha_inicio || '';
-                        let ff = inq.fecha_fin || '';
+                        const monto = (parseFloat(inq.monto_pagar) || 0).toFixed(2);
+                        const m3 = inq.consumo_m3 !== undefined
+                            ? inq.consumo_m3
+                            : (inq.consumo && inq.consumo.m3_real !== undefined ? inq.consumo.m3_real : '');
+                        const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
+                        const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
                         if (nombreLower.includes('mariluz')) {
                             document.getElementById('agua_mariluz').value = monto;
@@ -344,7 +411,6 @@
                             document.getElementById('fecha_fin_ks_agua').value = ff;
                             importados++;
                         } else if (nombreLower.includes('kendra')) {
-                            // KENDRA sola = consumo individual de Kendra.
                             document.getElementById('agua_kendra').value = monto;
                             document.getElementById('m3_kendra').value = m3;
                             document.getElementById('fecha_inicio_kendra_agua').value = fi;
@@ -360,15 +426,17 @@
                     });
 
                     if (importados > 0) {
-                        alert("¡Los datos de AGUA fueron importados exitosamente!");
+                        const detalleMes = mesImportado ? ` (${mesImportado})` : '';
+                        alert(`¡Los datos de AGUA${detalleMes} fueron importados exitosamente!`);
                         procesarCalculosGlobales();
                     } else {
-                        alert("El archivo se leyó, pero no se encontraron inquilinos válidos.");
+                        alert('El archivo se leyó, pero no se encontraron inquilinos válidos.');
                     }
-                } catch (err) { alert("Error al procesar JSON de Agua:\n" + err.message); }
-                
-                // LIMPIAR INPUT AL FINAL (Para evitar que el navegador aborte la lectura)
-                event.target.value = '';
+                } catch (err) {
+                    alert('Error al procesar JSON de Agua:\n' + err.message);
+                } finally {
+                    event.target.value = '';
+                }
             };
             reader.readAsText(file);
         }
@@ -381,14 +449,26 @@
             reader.onload = function(e) {
                 try {
                     const datos = JSON.parse(e.target.result);
+
+                    if (!Array.isArray(datos) && datos && datos.tipo && String(datos.tipo).toLowerCase() !== 'luz') {
+                        throw new Error('El archivo seleccionado no corresponde a un JSON de LUZ.');
+                    }
+
+                    const registros = obtenerRegistrosServicio(datos);
+                    const mesImportado = extraerMesDesdeJson(datos);
+                    if (!aplicarMesImportado('luz', mesImportado)) return;
+
                     let importados = 0;
 
-                    datos.forEach(inq => {
+                    registros.forEach(inq => {
+                        if (!inq || typeof inq !== 'object') return;
                         const nombreLower = (inq.nombre || '').toLowerCase();
-                        let monto = (parseFloat(inq.monto_pagar) || 0).toFixed(2);
-                        let kwh = inq.kwh_real !== undefined ? inq.kwh_real : '';
-                        let fi = inq.fecha_inicio || '';
-                        let ff = inq.fecha_fin || '';
+                        const monto = (parseFloat(inq.monto_pagar) || 0).toFixed(2);
+                        const kwh = inq.kwh_real !== undefined
+                            ? inq.kwh_real
+                            : (inq.consumo && inq.consumo.kwh_real !== undefined ? inq.consumo.kwh_real : '');
+                        const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
+                        const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
                         if (nombreLower.includes('mariluz')) {
                             document.getElementById('luz_mariluz').value = monto;
@@ -412,15 +492,17 @@
                     });
 
                     if (importados > 0) {
-                        alert("¡Los datos de LUZ fueron importados exitosamente!");
+                        const detalleMes = mesImportado ? ` (${mesImportado})` : '';
+                        alert(`¡Los datos de LUZ${detalleMes} fueron importados exitosamente!`);
                         procesarCalculosGlobales();
                     } else {
-                        alert("El archivo se leyó, pero no se encontraron inquilinos válidos.");
+                        alert('El archivo se leyó, pero no se encontraron inquilinos válidos.');
                     }
-                } catch (err) { alert("Error al procesar JSON de Luz:\n" + err.message); }
-                
-                // LIMPIAR INPUT AL FINAL (Para evitar que el navegador aborte la lectura)
-                event.target.value = '';
+                } catch (err) {
+                    alert('Error al procesar JSON de Luz:\n' + err.message);
+                } finally {
+                    event.target.value = '';
+                }
             };
             reader.readAsText(file);
         }
@@ -592,49 +674,75 @@
         }
 
         function generarFilaDetalle(servicio, ini, fin, consumo, unidad, ocultarM3 = false) {
+            // Si este servicio todavía no tiene datos, no mostrar una fila artificial con ceros.
+            const tieneDatos = Boolean(ini || fin || (consumo !== undefined && String(consumo).trim() !== ''));
+            if (!tieneDatos) return '';
+
             let dias = calcularDias(ini, fin);
             let txtIni = formatearFechaBol(ini); let txtFin = formatearFechaBol(fin);
             let periodo = (txtIni === "..." && txtFin === "...") ? "SIN FECHAS" : `${txtIni} -${txtFin}`;
-            let colCons = ocultarM3 ? "" : `<span class="col-consumo">${consumo || "0.00"} ${unidad}</span>`;
-            return `<div class="detalle-fila"><span class="col-periodo">${servicio} (${periodo})</span><span class="col-dias">${dias} DÍAS FACTURADOS</span>${colCons}</div>`;
+            let diasTexto = (ini && fin) ? `${dias} DÍAS FACTURADOS` : '';
+            let colCons = ocultarM3 ? "" : `<span class="col-consumo">${String(consumo).trim() !== '' ? consumo + ' ' + unidad : ''}</span>`;
+            return `<div class="detalle-fila"><span class="col-periodo">${servicio} (${periodo})</span><span class="col-dias">${diasTexto}</span>${colCons}</div>`;
         }
 
         function generarBoletas() {
-            let mes = document.getElementById('mes_cobro').value.toUpperCase();
+            const valor = id => document.getElementById(id)?.value ?? '';
+            const tieneValor = id => String(valor(id)).trim() !== '';
+            const ponerImporte = (id, presente, importe) => {
+                document.getElementById(id).innerText = presente ? importe : '';
+            };
+            const ponerTotal = (id, presentes, total) => {
+                document.getElementById(id).innerText = presentes ? `S/. ${total}` : '';
+            };
+
+            let mes = valor('mes_cobro').trim().toUpperCase();
             Array.from(document.getElementsByClassName('txt-mes')).forEach(el => el.innerText = mes);
 
-            // MARILUZ
+            // MARILUZ: cada servicio queda vacío hasta que exista un dato real para ese servicio.
             let aguaM = datosRedondeados.mariluz.agua; let luzM = datosRedondeados.mariluz.luz;
-            document.getElementById('out_agua_mariluz').innerText = aguaM;
-            document.getElementById('out_luz_mariluz').innerText = luzM;
-            document.getElementById('out_total_mariluz').innerText = "S/. " + (aguaM + luzM);
+            const hayAguaM = tieneValor('agua_mariluz') || tieneValor('m3_mariluz') || tieneValor('fecha_inicio_mariluz') || tieneValor('fecha_fin_mariluz');
+            const hayLuzM = tieneValor('luz_mariluz') || tieneValor('kwh_mariluz') || tieneValor('fecha_inicio_mariluz_luz') || tieneValor('fecha_fin_mariluz_luz');
+            ponerImporte('out_agua_mariluz', hayAguaM, aguaM);
+            ponerImporte('out_luz_mariluz', hayLuzM, luzM);
+            ponerTotal('out_total_mariluz', hayAguaM || hayLuzM, (hayAguaM ? aguaM : 0) + (hayLuzM ? luzM : 0));
             document.getElementById('detalles_mariluz').innerHTML = 
-                generarFilaDetalle('AGUA', document.getElementById('fecha_inicio_mariluz').value, document.getElementById('fecha_fin_mariluz').value, document.getElementById('m3_mariluz').value, 'M3') + 
-                generarFilaDetalle('LUZ', document.getElementById('fecha_inicio_mariluz_luz').value, document.getElementById('fecha_fin_mariluz_luz').value, document.getElementById('kwh_mariluz').value, 'KWH');
+                (hayAguaM ? generarFilaDetalle('AGUA', valor('fecha_inicio_mariluz'), valor('fecha_fin_mariluz'), valor('m3_mariluz'), 'M3') : '') + 
+                (hayLuzM ? generarFilaDetalle('LUZ', valor('fecha_inicio_mariluz_luz'), valor('fecha_fin_mariluz_luz'), valor('kwh_mariluz'), 'KWH') : '');
 
             // KENDRA
-            let aguaK = comparteAgua ? (parseInt(document.getElementById('prorrateo_kendra').value) || 0) : datosRedondeados.kendra.agua;
+            let aguaK = comparteAgua ? (parseInt(valor('prorrateo_kendra')) || 0) : datosRedondeados.kendra.agua;
             let luzK = datosRedondeados.kendra.luz;
-            let fi_k_agua = comparteAgua ? document.getElementById('fecha_inicio_ks_agua').value : document.getElementById('fecha_inicio_kendra_agua').value;
-            let ff_k_agua = comparteAgua ? document.getElementById('fecha_fin_ks_agua').value : document.getElementById('fecha_fin_kendra_agua').value;
-            document.getElementById('out_agua_kendra').innerText = aguaK;
-            document.getElementById('out_luz_kendra').innerText = luzK;
-            document.getElementById('out_total_kendra').innerText = "S/. " + (aguaK + luzK);
+            let fi_k_agua = comparteAgua ? valor('fecha_inicio_ks_agua') : valor('fecha_inicio_kendra_agua');
+            let ff_k_agua = comparteAgua ? valor('fecha_fin_ks_agua') : valor('fecha_fin_kendra_agua');
+            const hayAguaK = comparteAgua
+                ? (tieneValor('agua_compartida') || tieneValor('m3_compartida') || tieneValor('fecha_inicio_ks_agua') || tieneValor('fecha_fin_ks_agua'))
+                : (tieneValor('agua_kendra') || tieneValor('m3_kendra') || tieneValor('fecha_inicio_kendra_agua') || tieneValor('fecha_fin_kendra_agua'));
+            const hayLuzK = tieneValor('luz_kendra') || tieneValor('kwh_kendra') || tieneValor('fecha_inicio_kendra_luz') || tieneValor('fecha_fin_kendra_luz');
+            ponerImporte('out_agua_kendra', hayAguaK, comparteAgua && !tieneValor('prorrateo_kendra') ? '' : aguaK);
+            ponerImporte('out_luz_kendra', hayLuzK, luzK);
+            const aguaKDisponible = hayAguaK && (!comparteAgua || tieneValor('prorrateo_kendra'));
+            ponerTotal('out_total_kendra', aguaKDisponible || hayLuzK, (aguaKDisponible ? aguaK : 0) + (hayLuzK ? luzK : 0));
             document.getElementById('detalles_kendra').innerHTML = 
-                generarFilaDetalle('AGUA', fi_k_agua, ff_k_agua, document.getElementById('m3_kendra').value, 'M3', comparteAgua) + 
-                generarFilaDetalle('LUZ', document.getElementById('fecha_inicio_kendra_luz').value, document.getElementById('fecha_fin_kendra_luz').value, document.getElementById('kwh_kendra').value, 'KWH');
+                (hayAguaK ? generarFilaDetalle('AGUA', fi_k_agua, ff_k_agua, comparteAgua ? '' : valor('m3_kendra'), 'M3', comparteAgua) : '') + 
+                (hayLuzK ? generarFilaDetalle('LUZ', valor('fecha_inicio_kendra_luz'), valor('fecha_fin_kendra_luz'), valor('kwh_kendra'), 'KWH') : '');
 
             // SONIA
-            let aguaS = comparteAgua ? (parseInt(document.getElementById('prorrateo_sonia').value) || 0) : datosRedondeados.sonia.agua;
+            let aguaS = comparteAgua ? (parseInt(valor('prorrateo_sonia')) || 0) : datosRedondeados.sonia.agua;
             let luzS = datosRedondeados.sonia.luz;
-            let fi_s_agua = comparteAgua ? document.getElementById('fecha_inicio_ks_agua').value : document.getElementById('fecha_inicio_sonia_agua').value;
-            let ff_s_agua = comparteAgua ? document.getElementById('fecha_fin_ks_agua').value : document.getElementById('fecha_fin_sonia_agua').value;
-            document.getElementById('out_agua_sonia').innerText = aguaS;
-            document.getElementById('out_luz_sonia').innerText = luzS;
-            document.getElementById('out_total_sonia').innerText = "S/. " + (aguaS + luzS);
+            let fi_s_agua = comparteAgua ? valor('fecha_inicio_ks_agua') : valor('fecha_inicio_sonia_agua');
+            let ff_s_agua = comparteAgua ? valor('fecha_fin_ks_agua') : valor('fecha_fin_sonia_agua');
+            const hayAguaS = comparteAgua
+                ? (tieneValor('agua_compartida') || tieneValor('m3_compartida') || tieneValor('fecha_inicio_ks_agua') || tieneValor('fecha_fin_ks_agua'))
+                : (tieneValor('agua_sonia') || tieneValor('m3_sonia') || tieneValor('fecha_inicio_sonia_agua') || tieneValor('fecha_fin_sonia_agua'));
+            const hayLuzS = tieneValor('luz_sonia') || tieneValor('kwh_sonia') || tieneValor('fecha_inicio_sonia_luz') || tieneValor('fecha_fin_sonia_luz');
+            ponerImporte('out_agua_sonia', hayAguaS, comparteAgua && !tieneValor('prorrateo_sonia') ? '' : aguaS);
+            ponerImporte('out_luz_sonia', hayLuzS, luzS);
+            const aguaSDisponible = hayAguaS && (!comparteAgua || tieneValor('prorrateo_sonia'));
+            ponerTotal('out_total_sonia', aguaSDisponible || hayLuzS, (aguaSDisponible ? aguaS : 0) + (hayLuzS ? luzS : 0));
             document.getElementById('detalles_sonia').innerHTML = 
-                generarFilaDetalle('AGUA', fi_s_agua, ff_s_agua, document.getElementById('m3_sonia').value, 'M3', comparteAgua) + 
-                generarFilaDetalle('LUZ', document.getElementById('fecha_inicio_sonia_luz').value, document.getElementById('fecha_fin_sonia_luz').value, document.getElementById('kwh_sonia').value, 'KWH');
+                (hayAguaS ? generarFilaDetalle('AGUA', fi_s_agua, ff_s_agua, comparteAgua ? '' : valor('m3_sonia'), 'M3', comparteAgua) : '') + 
+                (hayLuzS ? generarFilaDetalle('LUZ', valor('fecha_inicio_sonia_luz'), valor('fecha_fin_sonia_luz'), valor('kwh_sonia'), 'KWH') : '');
         }
 
         async function capturarYCompartirBoleta(elementId, nombreArchivo, titulo, textoCompartir) {
@@ -796,7 +904,9 @@
                 guardado_en: new Date().toISOString(),
                 campos,
                 estado: {
-                    ultimaFuenteProrrateo: ultimaFuenteProrrateo || null
+                    ultimaFuenteProrrateo: ultimaFuenteProrrateo || null,
+                    mesImportadoAgua: mesImportadoAgua || '',
+                    mesImportadoLuz: mesImportadoLuz || ''
                 }
             };
         }
@@ -1008,6 +1118,8 @@
                     ultimaFuenteProrrateo = datos.estado && ['kendra', 'sonia'].includes(datos.estado.ultimaFuenteProrrateo)
                         ? datos.estado.ultimaFuenteProrrateo
                         : null;
+                    mesImportadoAgua = datos.estado ? String(datos.estado.mesImportadoAgua || '').trim().toUpperCase() : '';
+                    mesImportadoLuz = datos.estado ? String(datos.estado.mesImportadoLuz || '').trim().toUpperCase() : '';
                     ultimoTotalCompartidoRedondeado = null;
 
                     procesarCalculosGlobales();
