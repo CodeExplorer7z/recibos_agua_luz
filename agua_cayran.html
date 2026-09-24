@@ -60,7 +60,7 @@
 <div class="nav-back-bar d-flex justify-content-between align-items-center">
     <a href="./index.html" class="btn-back">&#8592; Menú Principal</a>
     <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-success fw-bold text-white shadow-sm" style="border-radius: 6px;" onclick="guardarEstadoApp()">📥 Guardar Datos</button>
+        <button class="btn btn-sm btn-success fw-bold text-white shadow-sm" style="border-radius: 6px;" onclick="guardarEstadoApp()">💾 GUARDAR JSON ÚNICO</button>
         <button class="btn btn-sm btn-secondary fw-bold text-white shadow-sm" style="border-radius: 6px;" onclick="document.getElementById('file_import').click()">📤 Importar Datos</button>
         <!-- Input oculto para seleccionar el archivo JSON -->
         <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
@@ -116,8 +116,7 @@
                 <div class="col-6 col-md-2"><label class="small-label">Total Recibo Principal</label><input type="text" id="v_total_main" class="form-control form-control-sm input-total-main" value="S/. 0.00" readonly></div>
                 
                 <div class="col-6 col-md-2 d-flex align-items-end gap-1">
-                    <button class="btn btn-sm w-50 fw-bold shadow-sm" style="background-color: var(--blue-dark); color: white; border-radius: 6px; height: 31px; border: none; font-size: 0.75rem;" onclick="exportResumenPDF()">RESUMEN</button>
-                    <button class="btn btn-sm w-50 fw-bold shadow-sm" style="background-color: #0ea5e9; color: white; border-radius: 6px; height: 31px; border: none; font-size: 0.75rem;" onclick="exportarJSONAgua()">JSON</button>
+                    <button class="btn btn-sm w-100 fw-bold shadow-sm" style="background-color: var(--blue-dark); color: white; border-radius: 6px; height: 31px; border: none; font-size: 0.75rem;" onclick="exportResumenPDF()">RESUMEN</button>
                 </div>
             </div>
         </div>
@@ -177,171 +176,374 @@
     }
 
     // =========================================================================
-    // NUEVA FUNCIÓN: EXPORTAR JSON AGUA
+    // JSON ÚNICO AGUA
+    // Un solo archivo sirve para:
+    // 1) restaurar completamente Agua Cayrán;
+    // 2) importar montos/consumos/fechas/mes en redondeos_montos;
+    // 3) conservar una base histórica con entradas, cálculos y resultados.
     // =========================================================================
+
+    function numeroAgua(valor, decimales = 6) {
+        const n = Number(valor);
+        if (!Number.isFinite(n)) return 0;
+        return Number(n.toFixed(decimales));
+    }
+
+    function valorNumeroAgua(id) {
+        return parseFloat(document.getElementById(id)?.value) || 0;
+    }
+
+    function textoNumeroAgua(id) {
+        return parseFloat(document.getElementById(id)?.innerText) || 0;
+    }
+
+    function fechaAguaLocal(fechaStr) {
+        if (!fechaStr) return null;
+        const d = new Date(fechaStr + 'T00:00:00');
+        return isNaN(d) ? null : d;
+    }
+
+    function diasInclusivosAgua(inicio, fin) {
+        const a = fechaAguaLocal(inicio);
+        const b = fechaAguaLocal(fin);
+        if (!a || !b) return 0;
+        const d = Math.floor((b - a) / 864e5) + 1;
+        return d > 0 ? d : 0;
+    }
+
+    function formatoYYYYMMDDagua(fechaObj) {
+        if (!fechaObj || isNaN(fechaObj)) return '';
+        const y = fechaObj.getFullYear();
+        const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
+        const d = String(fechaObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function calcularInicioFacturadoAgua(fechaFinStr, diasFacturados) {
+        const endDate = fechaAguaLocal(fechaFinStr);
+        const dias = Number(diasFacturados) || 0;
+        if (!endDate || dias < 1) return '';
+        return formatoYYYYMMDDagua(new Date(endDate.getTime() - (dias - 1) * 86400000));
+    }
+
+    function capturarEstadoAppAgua() {
+        const estado = {};
+        document.querySelectorAll('input, select').forEach(input => {
+            if (input.id && input.type !== 'file' && input.type !== 'button') {
+                estado[input.id] = input.type === 'checkbox' ? input.checked : input.value;
+            }
+        });
+        return estado;
+    }
+
+    function descargarJSONAgua(datos, nombreArchivo) {
+        const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
     function exportarJSONAgua() {
-        const mCurrDStr = document.getElementById('m_curr_d').value;
-        if (!mCurrDStr) {
-            alert("Es necesario ingresar la Fecha Actual del recibo principal para realizar la exportación.");
+        calc();
+
+        const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
+        const mPrevD = document.getElementById('m_prev_d').value;
+        const mCurrD = document.getElementById('m_curr_d').value;
+
+        if (!mes) {
+            alert('Selecciona el MES antes de guardar el JSON.');
+            return;
+        }
+        if (!mCurrD) {
+            alert('Es necesario ingresar la Fecha Actual del recibo principal para guardar el JSON.');
             return;
         }
 
-        const mes = document.getElementById('m_mes').value || 'MES';
+        const fechaActualObj = fechaAguaLocal(mCurrD);
+        const anio = fechaActualObj ? fechaActualObj.getFullYear() : null;
         const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
         const hasNoMeter = document.getElementById('has_nometer').checked;
-        
-        let datosExportar = [];
+        const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
 
-        const formatoYYYYMMDD = (fechaObj) => {
-            if(!fechaObj || isNaN(fechaObj)) return "";
-            const y = fechaObj.getFullYear();
-            const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
-            const d = String(fechaObj.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        };
+        const mPrevR = valorNumeroAgua('m_prev_r');
+        const mCurrR = valorNumeroAgua('m_curr_r');
+        const consumoTotal = Math.max(0, mCurrR - mPrevR);
+        const diasRecibo = diasInclusivosAgua(mPrevD, mCurrD);
 
-        const calcularFechaInicio = (fechaFinStr, diasFacturados) => {
-            const endDate = new Date(fechaFinStr + "T00:00:00");
-            if (isNaN(endDate)) return "";
-            const startDate = new Date(endDate.getTime() - (diasFacturados - 1) * 86400000);
-            return formatoYYYYMMDD(startDate);
-        };
+        const vWater = valorNumeroAgua('v_water');
+        const vSewer = valorNumeroAgua('v_sewer');
+        const vFixed = valorNumeroAgua('v_fixed');
+        const vMora = valorNumeroAgua('v_mora');
+        const vRedAnt = valorNumeroAgua('v_red_ant');
+        const vRedAct = valorNumeroAgua('v_red_act');
+        const igvPrincipal = 0.18 * (vWater + vSewer + vFixed);
+        const totalPrincipal = vWater + vSewer + vFixed + igvPrincipal + vMora + vRedAnt + vRedAct;
+        const tarifaAguaM3 = consumoTotal > 0 ? vWater / consumoTotal : 0;
+        const tarifaAlcantarilladoM3 = consumoTotal > 0 ? vSewer / consumoTotal : 0;
+
+        const inquilinos = [];
+        let sumaConsumo = 0;
+        let sumaMontos = 0;
 
         for (let i = 1; i <= nMetered; i++) {
-            const elName = document.getElementById(`i${i}_name`);
-            if (!elName) continue;
-            let nombreInq = elName.value || `Inquilino #${i}`;
-            
-            const txtDias = document.getElementById(`pdf_dias_${i}`).innerText; 
-            const diasFacturar = parseInt(txtDias.replace('Días facturados: ', '')) || 0;
-            
-            const cCons = parseFloat(document.getElementById(`i${i}_res_cons`).innerText) || 0;
-            const cTotal = parseFloat(document.getElementById(`i${i}_pdf_total_val`).innerText) || 0;
+            const nombre = document.getElementById(`i${i}_name`)?.value || `Inquilino #${i}`;
+            const iPrevR = valorNumeroAgua(`i${i}_prev_r`);
+            const iCurrR = valorNumeroAgua(`i${i}_curr_r`);
+            const iPrevD = document.getElementById(`i${i}_prev_d`)?.value || '';
+            const iCurrD = document.getElementById(`i${i}_curr_d`)?.value || '';
+            const diasLectura = diasInclusivosAgua(iPrevD, iCurrD);
+            const consumoMedidor = Math.max(0, iCurrR - iPrevR);
+            const consumoDiario = diasLectura > 0 ? consumoMedidor / diasLectura : 0;
+            const modo = document.getElementById(`i${i}_calc_mode`)?.value || 'auto';
+            const diasFacturados = modo === 'manual'
+                ? Math.max(0, parseFloat(document.getElementById(`i${i}_manual_days`)?.value) || 0)
+                : diasRecibo;
 
-            datosExportar.push({
-                nombre: nombreInq,
-                consumo_m3: cCons,
-                dias_facturados: diasFacturar,
-                monto_pagar: cTotal,
-                fecha_inicio: calcularFechaInicio(mCurrDStr, diasFacturar),
-                fecha_fin: mCurrDStr
+            const consumoM3 = numeroAgua(textoNumeroAgua(`i${i}_res_cons`), 2);
+            const total = numeroAgua(textoNumeroAgua(`i${i}_pdf_total_val`), 2);
+            const fechaInicio = calcularInicioFacturadoAgua(mCurrD, diasFacturados);
+
+            sumaConsumo += consumoM3;
+            sumaMontos += total;
+
+            inquilinos.push({
+                tipo_registro: 'inquilino',
+                tipo_servicio: 'agua',
+                mes: mes,
+                mes_cobro: mes,
+                anio: anio,
+                nombre: nombre,
+                id_interno: i,
+                con_medidor: true,
+
+                // Campos de interoperabilidad que usa redondeos_montos.
+                consumo_m3: consumoM3,
+                dias_facturados: diasFacturados,
+                monto_pagar: total,
+                fecha_inicio: fechaInicio,
+                fecha_fin: mCurrD,
+
+                modo_calculo: modo,
+                lecturas: {
+                    lectura_anterior: numeroAgua(iPrevR),
+                    lectura_actual: numeroAgua(iCurrR),
+                    fecha_lectura_anterior: iPrevD,
+                    fecha_lectura_actual: iCurrD,
+                    dias_entre_lecturas: diasLectura,
+                    consumo_medidor_m3: numeroAgua(consumoMedidor),
+                    consumo_diario_m3: numeroAgua(consumoDiario)
+                },
+                consumo: {
+                    m3_real: consumoM3,
+                    dias_facturados: diasFacturados,
+                    periodo_facturado_inicio: fechaInicio,
+                    periodo_facturado_fin: mCurrD
+                },
+                calculos: {
+                    tarifa_agua_m3: numeroAgua(tarifaAguaM3),
+                    tarifa_alcantarillado_m3: numeroAgua(tarifaAlcantarilladoM3),
+                    agua: numeroAgua(textoNumeroAgua(`i${i}_val_water`)),
+                    alcantarillado: numeroAgua(textoNumeroAgua(`i${i}_val_sewer`)),
+                    cargo_fijo: numeroAgua(textoNumeroAgua(`i${i}_val_fixed`)),
+                    igv: numeroAgua(textoNumeroAgua(`i${i}_val_igv`)),
+                    mora: numeroAgua(textoNumeroAgua(`i${i}_val_mora`)),
+                    redondeo_anterior: numeroAgua(textoNumeroAgua(`i${i}_val_red_ant`)),
+                    redondeo_actual: numeroAgua(textoNumeroAgua(`i${i}_val_red_act`)),
+                    total_pagar: total
+                }
             });
         }
 
-        if (hasNoMeter) {
-            const elName = document.getElementById('inometer_name');
-            let nombreInq = elName ? elName.value : 'Inquilino Sin Medidor';
-            if (!nombreInq) nombreInq = 'Inquilino Sin Medidor';
-            
-            const txtDias = document.getElementById('pdf_dias_nometer').innerText; 
-            const diasFacturar = parseInt(txtDias.replace('Días facturados: ', '')) || 0;
-            
-            const cCons = parseFloat(document.getElementById('inometer_res_cons').innerText) || 0;
-            const cTotal = parseFloat(document.getElementById('inometer_pdf_total_val').innerText) || 0;
+        if (hasNoMeter && document.getElementById('inometer_name')) {
+            const nombre = document.getElementById('inometer_name').value || 'Inquilino Sin Medidor';
+            const diasFacturados = diasRecibo;
+            const consumoM3 = numeroAgua(textoNumeroAgua('inometer_res_cons'), 2);
+            const total = numeroAgua(textoNumeroAgua('inometer_pdf_total_val'), 2);
+            const fechaInicio = calcularInicioFacturadoAgua(mCurrD, diasFacturados);
 
-            datosExportar.push({
-                nombre: nombreInq,
-                consumo_m3: cCons,
-                dias_facturados: diasFacturar,
-                monto_pagar: cTotal,
-                fecha_inicio: calcularFechaInicio(mCurrDStr, diasFacturar),
-                fecha_fin: mCurrDStr
+            sumaConsumo += consumoM3;
+            sumaMontos += total;
+
+            inquilinos.push({
+                tipo_registro: 'inquilino',
+                tipo_servicio: 'agua',
+                mes: mes,
+                mes_cobro: mes,
+                anio: anio,
+                nombre: nombre,
+                id_interno: 'nometer',
+                con_medidor: false,
+
+                // Campos de interoperabilidad que usa redondeos_montos.
+                consumo_m3: consumoM3,
+                dias_facturados: diasFacturados,
+                monto_pagar: total,
+                fecha_inicio: fechaInicio,
+                fecha_fin: mCurrD,
+
+                metodo_calculo: 'diferencia_recibo_principal_menos_inquilinos_con_medidor',
+                lecturas: null,
+                consumo: {
+                    m3_real: consumoM3,
+                    dias_facturados: diasFacturados,
+                    periodo_facturado_inicio: fechaInicio,
+                    periodo_facturado_fin: mCurrD
+                },
+                calculos: {
+                    tarifa_agua_m3: numeroAgua(tarifaAguaM3),
+                    tarifa_alcantarillado_m3: numeroAgua(tarifaAlcantarilladoM3),
+                    agua: numeroAgua(textoNumeroAgua('inometer_val_water')),
+                    alcantarillado: numeroAgua(textoNumeroAgua('inometer_val_sewer')),
+                    cargo_fijo: numeroAgua(textoNumeroAgua('inometer_val_fixed')),
+                    igv: numeroAgua(textoNumeroAgua('inometer_val_igv')),
+                    mora: numeroAgua(textoNumeroAgua('inometer_val_mora')),
+                    redondeo_anterior: numeroAgua(textoNumeroAgua('inometer_val_red_ant')),
+                    redondeo_actual: numeroAgua(textoNumeroAgua('inometer_val_red_act')),
+                    total_pagar: total
+                }
             });
         }
 
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosExportar, null, 2));
-        const nombreArchivo = `exportacion_agua_${mes.toLowerCase()}.json`;
-        
-        const anchorDescarga = document.createElement('a');
-        anchorDescarga.setAttribute("href", dataStr);
-        anchorDescarga.setAttribute("download", nombreArchivo);
-        document.body.appendChild(anchorDescarga);
-        anchorDescarga.click();
-        anchorDescarga.remove();
+        const jsonUnificado = {
+            schema: 'agua_cayran_unificado',
+            schema_version: '3.0',
+            tipo: 'agua',
+            mes: mes,
+            mes_cobro: mes,
+            anio: anio,
+            periodo: { mes: mes, anio: anio },
+            fecha_exportacion: new Date().toISOString(),
+
+            // Copia exacta de los campos para reabrir el trabajo en Agua Cayrán.
+            estado_app: capturarEstadoAppAgua(),
+
+            configuracion: {
+                num_medidores: nMetered,
+                inquilino_sin_medidor: hasNoMeter,
+                total_inquilinos: totalTenants,
+                igv_porcentaje: 18
+            },
+
+            recibo_principal: {
+                tipo_registro: 'recibo_principal',
+                tipo_servicio: 'agua',
+                mes: mes,
+                mes_cobro: mes,
+                anio: anio,
+                fecha_inicio: mPrevD,
+                fecha_fin: mCurrD,
+                dias_recibo: diasRecibo,
+                lecturas: {
+                    lectura_anterior: numeroAgua(mPrevR),
+                    lectura_actual: numeroAgua(mCurrR),
+                    fecha_lectura_anterior: mPrevD,
+                    fecha_lectura_actual: mCurrD,
+                    consumo_m3: numeroAgua(consumoTotal)
+                },
+                tarifas: {
+                    agua_por_m3: numeroAgua(tarifaAguaM3),
+                    alcantarillado_por_m3: numeroAgua(tarifaAlcantarilladoM3)
+                },
+                importes: {
+                    agua: numeroAgua(vWater),
+                    alcantarillado: numeroAgua(vSewer),
+                    cargo_fijo: numeroAgua(vFixed),
+                    igv: numeroAgua(igvPrincipal),
+                    mora: numeroAgua(vMora),
+                    redondeo_anterior: numeroAgua(vRedAnt),
+                    redondeo_actual: numeroAgua(vRedAct),
+                    total_pagar: numeroAgua(totalPrincipal, 2)
+                }
+            },
+
+            inquilinos: inquilinos,
+
+            resumen: {
+                tipo_registro: 'resumen',
+                tipo_servicio: 'agua',
+                mes: mes,
+                mes_cobro: mes,
+                anio: anio,
+                consumo_total_recibo_m3: numeroAgua(consumoTotal, 2),
+                consumo_total_distribuido_m3: numeroAgua(sumaConsumo, 2),
+                diferencia_consumo_m3: numeroAgua(consumoTotal - sumaConsumo, 2),
+                total_recibo_principal: numeroAgua(totalPrincipal, 2),
+                total_distribuido_inquilinos: numeroAgua(sumaMontos, 2),
+                diferencia_montos: numeroAgua(totalPrincipal - sumaMontos, 2),
+                cantidad_inquilinos: totalTenants
+            }
+        };
+
+        descargarJSONAgua(jsonUnificado, `agua_${mes.toLowerCase()}_${anio || 'sin_anio'}.json`);
     }
 
-    // =========================================================================
-    // NUEVAS FUNCIONES: GUARDAR Y CARGAR ESTADO (SESIÓN)
-    // =========================================================================
-
+    // El botón superior es el ÚNICO generador de JSON.
     function guardarEstadoApp() {
-        const estado = {};
-        // Captura todos los inputs y selects de la página
-        const inputs = document.querySelectorAll('input, select');
-        
-        inputs.forEach(input => {
-            // Excluimos inputs irrelevantes o el input de archivo
-            if (input.id && input.type !== 'file' && input.type !== 'button') {
-                if (input.type === 'checkbox') {
-                    estado[input.id] = input.checked;
-                } else {
-                    estado[input.id] = input.value;
-                }
-            }
-        });
+        exportarJSONAgua();
+    }
 
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estado));
-        const mes = document.getElementById('m_mes').value || 'SESION';
-        const nombreArchivo = `datos_guardados_agua_${mes.toLowerCase()}.json`;
+    function cargarEstadoLegacyAgua(estado) {
+        if (!estado || typeof estado !== 'object' || Array.isArray(estado)) {
+            throw new Error('Estado de Agua Cayrán no válido.');
+        }
 
-        const anchorDescarga = document.createElement('a');
-        anchorDescarga.setAttribute("href", dataStr);
-        anchorDescarga.setAttribute("download", nombreArchivo);
-        document.body.appendChild(anchorDescarga);
-        anchorDescarga.click();
-        anchorDescarga.remove();
+        if (estado.n_tenants_meter !== undefined) {
+            document.getElementById('n_tenants_meter').value = estado.n_tenants_meter;
+        }
+        if (estado.has_nometer !== undefined) {
+            document.getElementById('has_nometer').checked = Boolean(estado.has_nometer);
+        }
+
+        render();
+
+        for (const id in estado) {
+            const elemento = document.getElementById(id);
+            if (!elemento || id === 'n_tenants_meter' || id === 'has_nometer') continue;
+            if (elemento.type === 'checkbox') elemento.checked = Boolean(estado[id]);
+            else elemento.value = estado[id] ?? '';
+        }
+
+        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
+        for (let i = 1; i <= nMetered; i++) {
+            if (document.getElementById(`i${i}_calc_mode`)) toggleMode(i, false);
+        }
+        calc();
     }
 
     function cargarEstadoApp(event) {
-        const file = event.target.files[0];
+        const input = event.target;
+        const file = input.files && input.files[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const estado = JSON.parse(e.target.result);
+                const datos = JSON.parse(e.target.result);
 
-                // 1. Restaurar primero las variables que definen la estructura del DOM
-                if (estado['n_tenants_meter'] !== undefined) {
-                    document.getElementById('n_tenants_meter').value = estado['n_tenants_meter'];
+                if (datos && typeof datos === 'object' && !Array.isArray(datos) &&
+                    datos.schema === 'agua_cayran_unificado' && datos.estado_app) {
+                    cargarEstadoLegacyAgua(datos.estado_app);
+                    const mes = String(datos.mes_cobro || datos.mes || '').trim().toUpperCase();
+                    alert(`¡JSON único de AGUA${mes ? ' (' + mes + ')' : ''} restaurado correctamente!`);
+                } else if (datos && typeof datos === 'object' && !Array.isArray(datos)) {
+                    // Compatibilidad con archivos antiguos de "Guardar Datos".
+                    cargarEstadoLegacyAgua(datos);
+                    alert('¡Datos antiguos de Agua Cayrán restaurados correctamente!');
+                } else if (Array.isArray(datos)) {
+                    throw new Error('Este es un JSON antiguo de exportación resumida. No contiene todos los campos necesarios para reconstruir Agua Cayrán.');
+                } else {
+                    throw new Error('Formato JSON no reconocido.');
                 }
-                if (estado['has_nometer'] !== undefined) {
-                    document.getElementById('has_nometer').checked = estado['has_nometer'];
-                }
-
-                // 2. Renderizar las cajas de los inquilinos con la cantidad correcta
-                render();
-
-                // 3. Volcar el resto de los datos guardados en los campos generados
-                for (const id in estado) {
-                    const elemento = document.getElementById(id);
-                    // Evitamos sobreescribir los estructurales que ya asignamos
-                    if (elemento && id !== 'n_tenants_meter' && id !== 'has_nometer') {
-                        if (elemento.type === 'checkbox') {
-                            elemento.checked = estado[id];
-                        } else {
-                            elemento.value = estado[id];
-                        }
-                    }
-                }
-
-                // 4. Comprobar si algún inquilino tenía el modo de cálculo "manual" y activarlo
-                const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
-                for(let i = 1; i <= nMetered; i++) {
-                    if(document.getElementById(`i${i}_calc_mode`)) {
-                        toggleMode(i, false);
-                    }
-                }
-
-                // 5. Recalcular las matemáticas para actualizar los textos de los totales
-                calc();
-                
-                // Limpiar el input file por si deseas volver a importar el mismo archivo después
-                event.target.value = "";
-                
             } catch (error) {
-                alert("Error al leer el archivo JSON. Asegúrate de que sea un archivo de guardado válido.");
                 console.error(error);
+                alert('Error al importar el JSON de Agua Cayrán:\n' + (error && error.message ? error.message : error));
+            } finally {
+                input.value = '';
             }
         };
         reader.readAsText(file);
