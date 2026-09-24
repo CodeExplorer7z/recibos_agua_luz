@@ -51,17 +51,28 @@
                 <p class="text-gray-500 text-sm sm:ml-11">Ingresa los datos para generar el reporte general y boletas individuales.</p>
             </div>
             
-            <div class="flex flex-col sm:flex-row gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full sm:w-auto">
                 <div>
                     <input type="file" id="input_json_agua" accept=".json,application/json" class="hidden" onchange="importarJsonAgua(event)">
-                    <button onclick="document.getElementById('input_json_agua').click()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center gap-2">
+                    <button type="button" onclick="document.getElementById('input_json_agua').click()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
                         IMPORTAR JSON AGUA
                     </button>
                 </div>
                 <div>
                     <input type="file" id="input_json_luz" accept=".json,application/json" class="hidden" onchange="importarJsonLuz(event)">
-                    <button onclick="document.getElementById('input_json_luz').click()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center gap-2">
+                    <button type="button" onclick="document.getElementById('input_json_luz').click()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
                         IMPORTAR JSON LUZ
+                    </button>
+                </div>
+                <div>
+                    <button type="button" onclick="guardarSesion()" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
+                        GUARDAR SESIÓN
+                    </button>
+                </div>
+                <div>
+                    <input type="file" id="input_sesion" accept=".json,application/json" class="hidden" onchange="importarSesion(event)">
+                    <button type="button" onclick="document.getElementById('input_sesion').click()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
+                        IMPORTAR SESIÓN
                     </button>
                 </div>
             </div>
@@ -197,11 +208,6 @@
             </div>
 
         </div>
-
-        <button onclick="generarYCompartirImagen()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg transition duration-200 flex justify-center items-center text-lg">
-            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-            Exportar Cuadro General (Tabla)
-        </button>
 
         <!-- SECCIÓN 3: BOLETAS INDIVIDUALES (VISIBLES) -->
         <div class="mt-8 pt-8 border-t-2 border-dashed border-gray-300">
@@ -654,12 +660,170 @@
                 generarFilaDetalle('LUZ', document.getElementById('fecha_inicio_sonia_luz').value, document.getElementById('fecha_fin_sonia_luz').value, document.getElementById('kwh_sonia').value, 'KWH');
         }
 
-        function descargarBoleta(idElemento, nombreBase) {
+        async function descargarBoleta(idElemento, nombreBase) {
             const boleta = document.getElementById(idElemento);
-            let mes = document.getElementById('mes_cobro').value.trim() || "Mes";
-            html2canvas(boleta, { scale: 3, backgroundColor: null }).then(canvas => {
-                let enlace = document.createElement('a'); enlace.download = `${nombreBase}_${mes}.png`; enlace.href = canvas.toDataURL("image/png"); enlace.click();
+            if (!boleta) {
+                alert("No se encontró la boleta para descargar.");
+                return;
+            }
+
+            if (typeof html2canvas !== 'function') {
+                alert("No se pudo cargar el generador de imágenes. Verifica tu conexión a Internet y vuelve a intentarlo.");
+                return;
+            }
+
+            procesarCalculosGlobales();
+            const mes = (document.getElementById('mes_cobro').value.trim() || "MES")
+                .toUpperCase()
+                .replace(/[\\/:*?"<>|]+/g, '-')
+                .replace(/\s+/g, '_');
+            const nombreArchivo = `${nombreBase}_${mes}.png`;
+
+            try {
+                const canvas = await html2canvas(boleta, {
+                    scale: Math.max(2, Math.min(3, window.devicePixelRatio || 2)),
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    allowTaint: false,
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: -window.scrollY
+                });
+
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob(b => b ? resolve(b) : reject(new Error('No se pudo crear la imagen PNG.')), 'image/png', 1);
+                });
+
+                const archivo = new File([blob], nombreArchivo, { type: 'image/png' });
+
+                // En móviles/navegadores compatibles permite compartir la imagen directamente.
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+                    try {
+                        await navigator.share({
+                            files: [archivo],
+                            title: nombreBase.replaceAll('_', ' '),
+                            text: `Boleta de ${mes.replaceAll('_', ' ')}`
+                        });
+                        return;
+                    } catch (err) {
+                        // Si el usuario cancela el diálogo de compartir, no forzamos una descarga.
+                        if (err && err.name === 'AbortError') return;
+                    }
+                }
+
+                // Descarga estándar para PC y navegadores sin Web Share API.
+                const url = URL.createObjectURL(blob);
+                const enlace = document.createElement('a');
+                enlace.href = url;
+                enlace.download = nombreArchivo;
+                enlace.style.display = 'none';
+                document.body.appendChild(enlace);
+                enlace.click();
+                enlace.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
+            } catch (error) {
+                console.error('Error al generar la boleta:', error);
+                alert("No se pudo generar la imagen de la boleta. Intenta nuevamente o verifica que el navegador permita descargas.");
+            }
+        }
+
+        function obtenerDatosSesion() {
+            const campos = {};
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                if (!el.id || el.type === 'file') return;
+                if (el.type === 'checkbox' || el.type === 'radio') campos[el.id] = el.checked;
+                else campos[el.id] = el.value;
             });
+
+            return {
+                tipo: 'CUENTA_FINAL_INQUILINOS_SESSION',
+                version: 1,
+                guardado_en: new Date().toISOString(),
+                campos,
+                estado: {
+                    ultimaFuenteProrrateo: ultimaFuenteProrrateo || null
+                }
+            };
+        }
+
+        function guardarSesion() {
+            try {
+                procesarCalculosGlobales();
+                const datosSesion = obtenerDatosSesion();
+                const mesOriginal = document.getElementById('mes_cobro').value.trim() || 'SIN MES';
+                const mesArchivo = mesOriginal
+                    .toUpperCase()
+                    .replace(/[\\/:*?"<>|]+/g, '-')
+                    .replace(/\s+/g, ' ');
+                const nombreArchivo = `CUENTA FINAL INQUILINOS-${mesArchivo}.json`;
+                const blob = new Blob([JSON.stringify(datosSesion, null, 2)], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const enlace = document.createElement('a');
+                enlace.href = url;
+                enlace.download = nombreArchivo;
+                enlace.style.display = 'none';
+                document.body.appendChild(enlace);
+                enlace.click();
+                enlace.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
+            } catch (error) {
+                console.error('Error al guardar sesión:', error);
+                alert('No se pudo guardar la sesión.');
+            }
+        }
+
+        function importarSesion(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const datos = JSON.parse(e.target.result);
+                    if (!datos || datos.tipo !== 'CUENTA_FINAL_INQUILINOS_SESSION' || !datos.campos || typeof datos.campos !== 'object') {
+                        throw new Error('El archivo no corresponde a una sesión válida de esta calculadora.');
+                    }
+
+                    // Restaurar primero todos los campos, incluso los que puedan quedar deshabilitados
+                    // posteriormente por el modo de agua compartida.
+                    Object.entries(datos.campos).forEach(([id, valor]) => {
+                        const el = document.getElementById(id);
+                        if (!el || el.type === 'file') return;
+                        if (el.type === 'checkbox' || el.type === 'radio') el.checked = Boolean(valor);
+                        else el.value = valor ?? '';
+                    });
+
+                    ultimaFuenteProrrateo = datos.estado && ['kendra', 'sonia'].includes(datos.estado.ultimaFuenteProrrateo)
+                        ? datos.estado.ultimaFuenteProrrateo
+                        : null;
+                    ultimoTotalCompartidoRedondeado = null;
+
+                    procesarCalculosGlobales();
+
+                    // procesarCalculosGlobales puede recalcular el prorrateo. Si el respaldo traía
+                    // ambos valores, los restauramos exactamente y actualizamos las boletas.
+                    if (comparteAgua) {
+                        const kGuardado = datos.campos.prorrateo_kendra;
+                        const sGuardado = datos.campos.prorrateo_sonia;
+                        if (kGuardado !== undefined) document.getElementById('prorrateo_kendra').value = kGuardado;
+                        if (sGuardado !== undefined) document.getElementById('prorrateo_sonia').value = sGuardado;
+                        generarBoletas();
+                    }
+
+                    alert('¡Sesión importada correctamente!');
+                } catch (error) {
+                    console.error('Error al importar sesión:', error);
+                    alert('No se pudo importar la sesión:\n' + error.message);
+                } finally {
+                    input.value = '';
+                }
+            };
+            reader.onerror = function() {
+                alert('No se pudo leer el archivo de sesión.');
+                input.value = '';
+            };
+            reader.readAsText(file);
         }
 
         function actualizarTablaGeneral(inquilinosFiltrados, granTotal) {
