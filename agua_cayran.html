@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v4.html -->
+<!-- Nombre del archivo: agua_cayran_v6.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -135,9 +135,9 @@
 <div id="pdf-template-container"></div>
 
 <div class="container-fluid py-2" style="max-width: 1500px;">
-    <div class="row">
+    <div class="row" id="main_row">
         <!-- SECCIÓN VERTICAL: RECIBO PRINCIPAL -->
-        <div class="col-lg-3 col-md-4 mb-4">
+        <div class="col-lg-3 col-md-4 mb-4" id="main_card_col">
             <div class="card main-card h-100">
                 <div class="card-body">
                     <!-- align-items-end alinea los inputs en la base, ignorando diferencias de altura en los labels -->
@@ -201,7 +201,7 @@
                                 <option value="6">6</option>
                             </select>
                             <div class="form-check ms-1">
-                                <input class="form-check-input" type="checkbox" id="has_nometer" checked onchange="render()">
+                                <input class="form-check-input" type="checkbox" id="has_nometer" onchange="render()">
                                 <label class="form-check-label small-label pt-1" for="has_nometer" style="color: #1e293b;">Incluir Sin Medidor</label>
                             </div>
                         </div>
@@ -227,7 +227,7 @@
         </div>
 
         <!-- SECCIÓN GRILLA: INQUILINOS -->
-        <div class="col-lg-9 col-md-8">
+        <div class="col-lg-9 col-md-8" id="tenants_col">
             <div class="row g-0" id="tenants_grid"></div>
         </div>
     </div>
@@ -616,8 +616,21 @@
     function render() {
         const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
         const hasNoMeter = document.getElementById('has_nometer').checked;
-        const grid = document.getElementById('tenants_grid');
+        const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
         
+        const mainCol = document.getElementById('main_card_col');
+        const tenantsCol = document.getElementById('tenants_col');
+        
+        if (totalTenants === 0) {
+            mainCol.className = 'col-lg-4 col-md-6 col-12 mb-4 mx-auto';
+            tenantsCol.style.display = 'none';
+        } else {
+            mainCol.className = 'col-lg-3 col-md-4 mb-4';
+            tenantsCol.className = 'col-lg-9 col-md-8';
+            tenantsCol.style.display = 'block';
+        }
+
+        const grid = document.getElementById('tenants_grid');
         const state = {};
         const inputs = document.querySelectorAll('#tenants_grid input, #tenants_grid select');
         inputs.forEach(inp => state[inp.id] = inp.value);
