@@ -1,14 +1,16 @@
-<!-- Nombre del archivo: luz_cayran_v3.html -->
+<!-- Nombre del archivo: luz_cayran_v6.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CÁLCULO LUZ - ESCENARIO DINÁMICO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CÁLCULO LUZ - ENERGÍA Y CONTROL</title>
     <link rel="icon" type="image/x-icon" href="recibo_luz.ico">
+    
     <!-- Bootstrap y Google Fonts -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     
     <!-- Librerías JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -16,346 +18,799 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
+    <script>
+        // Inicializar tema sin parpadeos
+        const savedTheme = localStorage.getItem('themeLuz') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
     <style>
+        /* === PALETA DIFERENCIADA PARA LUZ === */
         :root { 
-            --primary: #4f46e5; 
-            --primary-hover: #4338ca;
-            --bg: #f1f5f9; 
-            --card: #ffffff; 
-            --text: #0f172a; 
-            --text-muted: #475569;
-            --border: #e2e8f0; 
-            --enel-blue: #4338ca; 
-            --input-fill: #f8fafc; 
-            --radius-card: 16px;
-            --radius-input: 10px;
+            --accent-main: #8b5cf6; 
+            --accent-secondary: #f59e0b; 
+            --bg-app: #f3f4f6; 
+            --surface: #ffffff; 
+            --text-main: #1f2937; 
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb; 
+            --input-bg: #f9fafb; 
+            --input-focus-ring: rgba(139, 92, 246, 0.25);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05);
+            --radius-box: 20px;
+            --radius-btn: 50px; 
+        }
+
+        [data-theme="dark"] {
+            --accent-main: #a78bfa; 
+            --accent-secondary: #fbbf24; 
+            --bg-app: #111827; 
+            --surface: #1f2937; 
+            --text-main: #f9fafb; 
+            --text-muted: #9ca3af;
+            --border-color: #374151; 
+            --input-bg: #111827; 
+            --input-focus-ring: rgba(167, 139, 250, 0.25);
+            --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.3);
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text); 
+            font-family: 'Nunito', system-ui, sans-serif; 
+            background-color: var(--bg-app); 
+            color: var(--text-main); 
             margin: 0; 
-            padding: max(15px, env(safe-area-inset-top)) 15px max(20px, env(safe-area-inset-bottom)) 15px; 
+            padding-bottom: max(30px, env(safe-area-inset-bottom)); 
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
         }
         
-        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 24px; padding: 0; }
-        @media (min-width: 992px) { .container { grid-template-columns: 1fr 1fr; align-items: start; } }
+        .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 30px; padding: 0 20px; }
+        @media (min-width: 1024px) { .container { grid-template-columns: 1fr 1fr; align-items: start; } }
         
-        /* Barra de Navegación */
-        .nav-back-bar { 
-            max-width: 1200px; 
-            margin: 0 auto 20px auto; 
-            padding: 15px 20px; 
-            background: var(--card);
-            border-radius: var(--radius-card);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        /* === NAVEGACIÓN FLOTANTE (ESTILO ISLA) === */
+        .nav-island-container {
+            position: sticky;
+            top: 15px;
+            z-index: 1000;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+            pointer-events: none;
+        }
+        
+        .nav-island {
+            background-color: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 50px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1260px;
+            pointer-events: auto;
+            transition: all 0.3s;
         }
         
-        .btn-back { 
-            display: inline-flex; align-items: center; gap: 8px; 
-            background: #f1f5f9; color: #334155 !important; 
-            text-decoration: none; padding: 10px 16px; 
-            border-radius: var(--radius-input); font-weight: 600; font-size: 0.95rem; 
-            transition: all 0.2s;
+        .nav-island .btn-back {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 1rem;
+            padding: 8px 16px;
+            border-radius: 50px;
+            transition: background 0.2s;
         }
-        .btn-back:hover { background: #e2e8f0; color: #0f172a !important; }
+        .nav-island .btn-back:hover { background: var(--input-bg); }
         
-        /* Tarjetas (Cards) */
-        .card { 
-            background: var(--card); 
-            border-radius: var(--radius-card); 
-            padding: 24px; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025); 
-            border: 1px solid var(--border); 
-            margin-bottom: 0;
-            transition: transform 0.2s, box-shadow 0.2s;
+        /* === TARJETAS ESTILO PANEL === */
+        .panel { 
+            background: var(--surface); 
+            border-radius: var(--radius-box); 
+            padding: 28px; 
+            box-shadow: var(--shadow-md); 
+            border: 1px solid var(--border-color); 
+            transition: all 0.3s;
             position: relative;
-            overflow: hidden;
-        }
-        .card:hover { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); }
-        
-        #main-receipt { border-top: 5px solid var(--primary); }
-        
-        /* Títulos de Secciones */
-        .section-title { 
-            background: #e0e7ff; padding: 10px 16px; border-radius: 8px; 
-            font-weight: 700; margin: 24px 0 16px 0; font-size: 0.95rem; 
-            color: #3730a3; border-left: 4px solid var(--primary);
-            display: flex; align-items: center;
         }
         
-        .titulo-fijo { font-size: 1.3rem; font-weight: 800; color: var(--text); width: 100%; padding: 0; margin: 0; border: none; letter-spacing: -0.5px; }
-        .titulo-fijo span { color: var(--primary); }
+        #main-receipt { 
+            border-top: none;
+            background: linear-gradient(to bottom, var(--surface), var(--surface)), linear-gradient(to right, var(--accent-main), var(--accent-secondary));
+            background-clip: padding-box, border-box;
+            border: 3px solid transparent;
+        }
+        
+        /* Títulos de Secciones Minimalistas */
+        .panel-title { 
+            font-weight: 800; margin: 30px 0 20px 0; font-size: 1.1rem; 
+            color: var(--text-main);
+            display: flex; align-items: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .panel-title i { color: var(--accent-secondary); font-size: 1.4rem; }
+        
+        .header-hero { text-align: center; margin-bottom: 30px; }
+        .header-hero h1 { font-size: 1.8rem; font-weight: 900; color: var(--text-main); margin: 0; }
+        .header-hero h1 span { color: var(--accent-main); }
+        .header-hero p { color: var(--text-muted); font-size: 0.95rem; margin-top: 5px; }
         
         .titulo-editable { 
-            font-size: 1.2rem; font-weight: 700; color: var(--text); 
-            border: 1px dashed #cbd5e1; padding: 10px 14px; border-radius: var(--radius-input); 
-            width: 100%; background: #f8fafc; transition: all 0.2s;
+            font-size: 1.4rem; font-weight: 800; color: var(--text-main); 
+            border: none; border-bottom: 2px solid var(--border-color);
+            padding: 8px 0; border-radius: 0; 
+            width: 100%; background: transparent; transition: all 0.2s;
         }
-        .titulo-editable:focus { border-color: var(--primary); outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-        .titulo-editable::placeholder { font-weight: 500; opacity: 0.5; }
+        .titulo-editable:focus { border-bottom-color: var(--accent-main); outline: none; }
+        .titulo-editable::placeholder { font-weight: 600; opacity: 0.4; }
         
-        .header-card { display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
-        
-        .btn-group { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; align-items: center; }
-        
-        /* Cajas de Información */
-        .info-box { 
-            background: #fffbeb; border-left: 4px solid #fbbf24; 
-            padding: 14px 16px; border-radius: 8px; font-size: 0.85rem; 
-            margin-bottom: 20px; color: #92400e; line-height: 1.6; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        /* === Cajas de Información === */
+        .alert-box { 
+            background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent-secondary); 
+            padding: 16px; border-radius: 12px; font-size: 0.9rem; 
+            margin-bottom: 25px; color: var(--text-main); font-weight: 600;
         }
         
-        /* Formularios y Inputs */
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
+        /* === Inputs Estilo Filled === */
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .input-group-custom { display: flex; flex-direction: column; }
+        .input-group-custom label { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
         
-        input:not(.readonly), select:not(.readonly) { 
-            padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: var(--radius-input); 
-            font-size: 16px; width: 100%; background-color: var(--input-fill); 
-            color: var(--text); font-family: 'Inter', sans-serif; font-weight: 500;
+        input.filled, select.filled { 
+            padding: 14px 16px; border: 2px solid transparent; border-radius: 12px; 
+            font-size: 1.05rem; width: 100%; background-color: var(--input-bg); 
+            color: var(--text-main); font-family: 'Nunito', sans-serif; font-weight: 600;
             transition: all 0.2s ease;
         }
-        input:not(.readonly):focus, select:not(.readonly):focus {
-            border-color: var(--primary); outline: none; background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        input.filled:focus, select.filled:focus {
+            border-color: var(--accent-main); outline: none; background-color: var(--surface);
+            box-shadow: 0 0 0 4px var(--input-focus-ring);
         }
-        input:disabled { background-color: #e2e8f0; color: #94a3b8; cursor: not-allowed; border-color: transparent; }
+        input.filled:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        .readonly { 
-            background: #f1f5f9; font-weight: 700; color: var(--primary); 
-            padding: 12px 14px; border: 1px dashed #cbd5e1; border-radius: var(--radius-input); 
-            font-size: 1rem; width: 100%; font-family: 'Inter', sans-serif;
+        .readonly-box { 
+            background: rgba(139, 92, 246, 0.05); font-weight: 800; color: var(--accent-main); 
+            padding: 14px 16px; border: 2px dashed rgba(139, 92, 246, 0.3); border-radius: 12px; 
+            font-size: 1.1rem; width: 100%; text-align: center;
         }
         
-        /* Botones */
-        .btn { 
-            border: none; padding: 12px 18px; border-radius: var(--radius-input); 
-            font-weight: 600; cursor: pointer; text-align: center; font-size: 0.9rem; 
-            flex: 1; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 6px;
+        /* === Botones === */
+        .btn-pill { 
+            border: none; padding: 12px 24px; border-radius: var(--radius-btn); 
+            font-weight: 700; cursor: pointer; text-align: center; font-size: 0.95rem; 
+            transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px;
         }
-        .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
-        .btn:active { transform: translateY(1px); }
+        .btn-pill:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-pill:active { transform: translateY(0); }
         
-        .btn-limpiar { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
-        .btn-limpiar:hover { background: #fecaca; }
-        .btn-resumen { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2); }
-        .btn-json { background: #10b981; color: white; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); } 
-        .btn-toggle { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-        .btn-toggle:hover { background: #e2e8f0; }
-        .btn-whatsapp { background: #25D366; color: white; box-shadow: 0 4px 6px rgba(37, 211, 102, 0.2); }
+        .btn-primary-custom { background: var(--accent-main); color: white; }
+        .btn-secondary-custom { background: var(--border-color); color: var(--text-main); }
+        .btn-success-custom { background: #10b981; color: white; } 
+        .btn-danger-custom { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        [data-theme="dark"] .btn-danger-custom { color: #f87171; }
         
         /* Checkbox switch moderno */
-        .custom-checkbox-wrapper {
-            display: flex; align-items: center; gap: 12px; padding: 14px 16px; 
-            border: 1px solid #cbd5e1; border-radius: var(--radius-input); 
-            background: #fff; cursor: pointer; transition: all 0.2s;
+        .switch-wrapper {
+            display: flex; align-items: center; gap: 15px; padding: 18px 20px; 
+            border: 2px solid var(--border-color); border-radius: 16px; 
+            background: var(--surface); cursor: pointer; transition: all 0.2s;
         }
-        .custom-checkbox-wrapper:hover { border-color: var(--primary); background: #f8fafc; }
-        .custom-checkbox-wrapper input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary); }
+        .switch-wrapper:hover { border-color: var(--accent-main); }
+        .switch-wrapper input[type="checkbox"] { width: 24px; height: 24px; cursor: pointer; accent-color: var(--accent-main); }
         
+        /* === Responsive & Menú Comprimido en Móvil (Estilo App) === */
         @media (max-width: 768px) { 
-            .card { padding: 16px; border-radius: 12px; }
+            .container { padding: 0 10px; }
+            .panel { padding: 16px; border-radius: 16px; }
             .grid-2 { grid-template-columns: 1fr; gap: 12px; }
-            .section-title { padding: 8px 12px; margin: 16px 0 12px 0; font-size: 0.9rem; }
-            .nav-back-bar { flex-direction: column; align-items: stretch; padding: 12px; gap: 12px; }
-            .nav-back-bar .d-flex { flex-direction: column; }
-            .btn { padding: 10px 14px; font-size: 0.85rem; }
-            .titulo-fijo { font-size: 1.1rem; }
+            
+            /* Menú altamente comprimido */
+            .nav-island-container { top: 8px; margin-bottom: 20px; padding: 0 10px; }
+            .nav-island { padding: 8px; border-radius: 16px; gap: 8px; flex-direction: column; }
+            .nav-island .btn-back { width: 100%; justify-content: center; padding: 8px; font-size: 0.9rem; margin: 0; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border-color); }
+            
+            /* Botones en una sola fila compacta */
+            .nav-island .d-flex { width: 100%; flex-direction: row !important; gap: 6px !important; flex-wrap: nowrap !important; }
+            .btn-pill { padding: 8px 4px; font-size: 0.75rem; flex: 1; flex-direction: column; gap: 4px; border-radius: 10px; }
+            .btn-pill i { font-size: 1.2rem; margin: 0; }
+            .btn-pill span { display: block; text-align: center; line-height: 1.1; }
+
+            .input-group-custom label { font-size: 0.75rem; }
+            input.filled, select.filled { padding: 12px 14px; font-size: 1rem; }
+            .titulo-editable { font-size: 1.2rem; }
+            .header-hero h1 { font-size: 1.5rem; }
         }
         
+        /* === GALERÍA OCR === */
+        .ocr-zone { background: var(--input-bg); border: 2px dashed var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 30px; text-align: center; transition: all 0.3s; }
+        .ocr-zone:hover { border-color: var(--accent-main); }
+        .gallery-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; align-items: center; justify-content: center; flex-wrap: wrap; }
+        .thumb-wrapper { position: relative; width: 90px; height: 90px; flex-shrink: 0; }
+        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; border: 2px solid var(--accent-main); }
+        .btn-remove-thumb { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-add-photo { width: 90px; height: 90px; flex-shrink: 0; background: var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+        .btn-add-photo:hover { background: var(--accent-main); color: white; }
+        
+        .btn-ciclo { cursor: pointer; font-size: 1.2rem; color: var(--accent-secondary); transition: transform 0.2s; }
+        .btn-ciclo:hover { transform: rotate(180deg); }
+
         /* Estilos PDF Inalterados (Protegidos) */
         #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
         .modo-recibo { font-family: Arial, sans-serif !important; padding: 40px !important; color: #000 !important; background: white !important; }
-        .modo-recibo .header-pdf { display: flex; justify-content: space-between; border-bottom: 3px solid var(--enel-blue); padding-bottom: 10px; margin-bottom: 20px; }
-        .modo-recibo .total-box-pdf { background: var(--enel-blue); color: white; padding: 10px; border-radius: 5px; text-align: center; min-width: 150px; }
+        .modo-recibo .header-pdf { display: flex; justify-content: space-between; border-bottom: 3px solid var(--accent-main); padding-bottom: 10px; margin-bottom: 20px; }
+        .modo-recibo .total-box-pdf { background: var(--accent-main); color: white; padding: 10px; border-radius: 5px; text-align: center; min-width: 150px; }
         .modo-recibo .tabla-pdf { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .modo-recibo .tabla-pdf th { text-align: left; background: #f1f5f9; padding: 10px; border-bottom: 2px solid #cbd5e1; }
-        .modo-recibo .tabla-pdf td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+        .modo-recibo .tabla-pdf th { text-align: left; background: #f1f5f9 !important; padding: 10px; border-bottom: 2px solid #cbd5e1 !important; color: #000 !important; }
+        .modo-recibo .tabla-pdf td { padding: 10px; border-bottom: 1px solid #e2e8f0 !important; color: #000 !important; }
         
         .pdf-calculos { font-family: 'Segoe UI', Helvetica, Arial, sans-serif !important; padding: 25px !important; color: #1e293b !important; background: #f8fafc !important; }
-        .pdf-calculos .main-header { background: linear-gradient(135deg, #3730a3, #4f46e5); color: white; padding: 14px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
-        .pdf-calculos .main-header h2 { margin: 0; font-size: 1.2rem; font-weight: 800; }
-        .pdf-calculos .main-header p { margin: 3px 0 0 0; font-size: 0.9rem; opacity: 0.9; }
-        .pdf-calculos .bloque-paso { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 15px; margin-bottom: 10px; page-break-inside: avoid; }
-        .pdf-calculos .paso-titulo { display: inline-block; background: #e0e7ff; color: #3730a3; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; margin-bottom: 5px; text-transform: uppercase; }
-        .pdf-calculos .pregunta { font-weight: 700; color: #1e293b; font-size: 0.9rem; margin-bottom: 6px; }
-        .pdf-calculos .desarrollo { background: #f8fafc; border-left: 3px solid #6366f1; padding: 8px 12px; font-size: 0.85rem; line-height: 1.4; color: #334155; border-radius: 0 6px 6px 0; }
+        .pdf-calculos .main-header { background: linear-gradient(135deg, #4c1d95, #8b5cf6); color: white; padding: 14px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+        .pdf-calculos .main-header h2 { margin: 0; font-size: 1.2rem; font-weight: 800; color: white !important;}
+        .pdf-calculos .main-header p { margin: 3px 0 0 0; font-size: 0.9rem; opacity: 0.9; color: white !important;}
+        .pdf-calculos .bloque-paso { background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 8px; padding: 12px 15px; margin-bottom: 10px; page-break-inside: avoid; }
+        .pdf-calculos .paso-titulo { display: inline-block; background: #ede9fe !important; color: #4c1d95 !important; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; margin-bottom: 5px; text-transform: uppercase; }
+        .pdf-calculos .pregunta { font-weight: 700; color: #1e293b !important; font-size: 0.9rem; margin-bottom: 6px; }
+        .pdf-calculos .desarrollo { background: #f8fafc !important; border-left: 3px solid #8b5cf6; padding: 8px 12px; font-size: 0.85rem; line-height: 1.4; color: #334155 !important; border-radius: 0 6px 6px 0; }
         .pdf-calculos .lista-valores { display: table; width: 100%; margin: 4px 0; }
         .pdf-calculos .fila-valor { display: table-row; }
-        .pdf-calculos .celda-label { display: table-cell; font-weight: 600; padding: 2px 5px 2px 0; color: #475569; width: 45%; }
-        .pdf-calculos .celda-operacion { display: table-cell; padding: 2px 5px; color: #334155; font-family: monospace; font-weight: bold; }
-        .pdf-calculos .formula-box { font-style: italic; color: #64748b; margin-bottom: 6px; font-size: 0.8rem; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; border: 1px dashed #cbd5e1; }
-        .pdf-calculos .linea-operacion { margin-top: 6px; padding-top: 4px; border-top: 1px solid #cbd5e1; font-weight: 700; color: #0f172a; }
-        .pdf-calculos .bloque-total { background: #ffffff; border: 2px solid #3730a3; box-shadow: 0 4px 6px -1px rgba(55, 48, 163, 0.1); }
-        .pdf-calculos .bloque-total .paso-titulo { background: #fef08a; color: #854d0e; }
-        .pdf-calculos .bloque-total .desarrollo { background: #fafafa; border-left-color: #f59e0b; color: #1e293b; }
-        .pdf-calculos .bloque-total .linea-operacion { border-top: 2px solid #3730a3; color: #d97706; font-size: 1.05rem; padding-top: 6px; }
+        .pdf-calculos .celda-label { display: table-cell; font-weight: 600; padding: 2px 5px 2px 0; color: #475569 !important; width: 45%; }
+        .pdf-calculos .celda-operacion { display: table-cell; padding: 2px 5px; color: #334155 !important; font-family: monospace; font-weight: bold; }
+        .pdf-calculos .formula-box { font-style: italic; color: #64748b !important; margin-bottom: 6px; font-size: 0.8rem; background: #f1f5f9 !important; padding: 4px 8px; border-radius: 4px; border: 1px dashed #cbd5e1 !important; }
+        .pdf-calculos .linea-operacion { margin-top: 6px; padding-top: 4px; border-top: 1px solid #cbd5e1 !important; font-weight: 700; color: #0f172a !important; }
+        .pdf-calculos .bloque-total { background: #ffffff !important; border: 2px solid #6d28d9 !important; box-shadow: 0 4px 6px -1px rgba(109, 40, 217, 0.1); }
+        .pdf-calculos .bloque-total .paso-titulo { background: #fef08a !important; color: #854d0e !important; }
+        .pdf-calculos .bloque-total .desarrollo { background: #fafafa !important; border-left-color: #f59e0b !important; color: #1e293b !important; }
+        .pdf-calculos .bloque-total .linea-operacion { border-top: 2px solid #6d28d9 !important; color: #d97706 !important; font-size: 1.05rem; padding-top: 6px; }
 
-        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
 
-        .photo-gallery-wrapper { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: var(--radius-card); padding: 16px; margin-bottom: 24px; text-align: center; }
-        .gallery-container { display: flex; gap: 12px; overflow-x: auto; padding: 10px 0; align-items: center; justify-content: center; flex-wrap: wrap; }
-        .thumb-wrapper { position: relative; width: 85px; height: 85px; flex-shrink: 0; }
-        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-remove-thumb { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
-        .btn-remove-thumb:hover { transform: scale(1.1); }
-        .btn-add-photo { width: 85px; height: 85px; flex-shrink: 0; background: #e2e8f0; border: 2px dashed #94a3b8; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #64748b; cursor: pointer; transition: all 0.2s; }
-        .btn-add-photo:hover { background: #cbd5e1; border-color: var(--primary); color: var(--primary); }
-        
-        .btn-ciclo {
-            cursor: pointer; font-size: 1.1rem; background: #e2e8f0; border-radius: 6px; 
-            padding: 4px 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;
+        /* ==============================================================
+           UX REDESIGN 2026 · RESPONSIVE WEB + MOBILE
+           Se mantiene intacta la lógica de cálculo y generación de PDFs.
+           ============================================================== */
+
+        html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+        body {
+            min-width: 0;
+            min-height: 100dvh;
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
         }
-        .btn-ciclo:hover { background: #cbd5e1; transform: translateY(-1px); }
-        .btn-ciclo:active { transform: scale(0.95); }
+
+        /* Contenido principal: ancho fluido sin desbordes */
+        .container {
+            width: min(100%, 1320px);
+            max-width: 1320px;
+            min-width: 0;
+            gap: clamp(18px, 2.4vw, 30px);
+            padding-inline: clamp(12px, 2.6vw, 28px);
+        }
+
+        .container > *,
+        #inquilinos-container,
+        .panel,
+        .grid-2,
+        .input-group-custom,
+        .header-card,
+        .d-flex { min-width: 0; }
+
+        /* Barra superior: deja de ser una isla flotante */
+        .nav-island-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            margin: 0 0 clamp(16px, 2vw, 26px);
+            padding: max(8px, env(safe-area-inset-top)) clamp(12px, 2.6vw, 28px) 8px;
+            background: color-mix(in srgb, var(--bg-app) 88%, transparent);
+            border-bottom: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
+            backdrop-filter: blur(16px) saturate(150%);
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            pointer-events: auto;
+        }
+
+        .nav-island {
+            width: min(100%, 1264px);
+            max-width: 1264px;
+            min-height: 50px;
+            margin: 0 auto;
+            padding: 4px;
+            border: 0;
+            border-radius: 14px;
+            background: transparent;
+            box-shadow: none;
+            gap: 10px;
+        }
+
+        .nav-island > .d-flex {
+            width: auto;
+            gap: 7px !important;
+            align-items: center;
+            flex-wrap: nowrap !important;
+        }
+
+        .nav-island .btn-back,
+        .nav-island .btn-pill {
+            min-height: 42px;
+            height: 42px;
+            padding: 0 14px;
+            border-radius: 12px;
+            font-size: .88rem;
+            font-weight: 800;
+            line-height: 1;
+            gap: 7px;
+            white-space: nowrap;
+            flex: 0 0 auto;
+            flex-direction: row;
+            box-shadow: none;
+        }
+
+        .nav-island .btn-back {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-island .btn-pill {
+            border: 1px solid transparent;
+        }
+
+        .nav-island .btn-secondary-custom {
+            background: var(--surface);
+            border-color: var(--border-color);
+        }
+
+        .nav-island .btn-success-custom {
+            background: #10b981;
+        }
+
+        .nav-island .btn-back:hover,
+        .nav-island .btn-pill:hover {
+            transform: none;
+            box-shadow: 0 5px 14px rgba(0,0,0,.08);
+        }
+
+        .nav-island .btn-back i,
+        .nav-island .btn-pill i {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        /* Superficies más limpias */
+        .panel {
+            padding: clamp(18px, 2.5vw, 28px);
+            border-radius: clamp(16px, 2vw, 22px);
+            box-shadow: 0 12px 34px -24px rgba(15, 23, 42, .35);
+        }
+
+        #main-receipt { border-width: 2px; }
+
+        .header-hero {
+            margin-bottom: clamp(20px, 3vw, 30px);
+        }
+
+        .header-hero h1 {
+            font-size: clamp(1.45rem, 3vw, 1.9rem);
+            line-height: 1.08;
+            letter-spacing: -.02em;
+        }
+
+        .header-hero p {
+            max-width: 48ch;
+            margin: 7px auto 0;
+            line-height: 1.45;
+        }
+
+        .panel-title {
+            margin: clamp(24px, 3vw, 30px) 0 14px;
+            font-size: clamp(.92rem, 1.6vw, 1.05rem);
+            line-height: 1.3;
+            letter-spacing: .065em;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .input-group-custom label {
+            margin-bottom: 6px;
+            font-size: .76rem;
+            line-height: 1.25;
+        }
+
+        input.filled,
+        select.filled {
+            min-height: 48px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+
+        .switch-wrapper {
+            gap: 12px;
+            padding: 14px 15px;
+            border-width: 1px;
+            border-radius: 14px;
+            line-height: 1.35;
+        }
+
+        .switch-wrapper span { min-width: 0; }
+
+        .alert-box {
+            padding: 13px 14px;
+            border-radius: 12px;
+            line-height: 1.4;
+        }
+
+        #total_pagar_m {
+            max-width: 100%;
+            font-size: clamp(2rem, 7vw, 2.5rem) !important;
+        }
+
+        /* Botones generales: táctiles sin ser gigantes */
+        .btn-pill {
+            min-height: 44px;
+            padding: 10px 16px;
+            font-size: .9rem;
+            line-height: 1.2;
+        }
+
+        .titulo-editable {
+            min-width: 0 !important;
+            font-size: clamp(1.08rem, 2vw, 1.35rem);
+        }
+
+        /* Tablet */
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            #inquilinos-container { gap: 18px !important; }
+        }
+
+        /* Mobile: experiencia tipo app */
+        @media (max-width: 640px) {
+            .nav-island-container {
+                padding: max(6px, env(safe-area-inset-top)) 10px 6px;
+                margin-bottom: 12px;
+            }
+
+            .nav-island {
+                min-height: 46px;
+                padding: 2px 0;
+                gap: 6px;
+                border-radius: 0;
+            }
+
+            .nav-island > .d-flex {
+                margin-left: auto;
+                gap: 5px !important;
+            }
+
+            .nav-island .btn-back,
+            .nav-island .btn-pill {
+                width: 40px;
+                min-width: 40px;
+                height: 40px;
+                min-height: 40px;
+                padding: 0;
+                border-radius: 11px;
+                justify-content: center;
+            }
+
+            .nav-island .btn-back span,
+            .nav-island .btn-pill span {
+                display: none !important;
+            }
+
+            .nav-island .btn-back i,
+            .nav-island .btn-pill i {
+                font-size: 1.08rem;
+            }
+
+            .container {
+                padding-inline: 10px;
+                gap: 14px;
+            }
+
+            .panel {
+                padding: 16px 14px;
+                border-radius: 16px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 11px;
+            }
+
+            .header-hero { margin-bottom: 20px; }
+            .header-hero h1 { font-size: 1.38rem; }
+            .header-hero p { font-size: .88rem; }
+
+            .panel-title {
+                margin-top: 22px;
+                margin-bottom: 12px;
+                font-size: .88rem;
+                letter-spacing: .045em;
+            }
+
+            .panel-title i { font-size: 1.12rem; }
+
+            .input-group-custom label { font-size: .72rem; }
+
+            input.filled,
+            select.filled {
+                min-height: 47px;
+                padding: 11px 12px;
+                font-size: 16px; /* evita zoom automático en iOS */
+            }
+
+            .switch-wrapper {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .switch-wrapper input[type="checkbox"] {
+                width: 21px;
+                height: 21px;
+                flex: 0 0 21px;
+                margin-top: 1px;
+            }
+
+            .switch-wrapper span { font-size: .9rem !important; }
+
+            .alert-box {
+                font-size: .82rem;
+                gap: 8px;
+            }
+
+            .alert-box.d-flex {
+                align-items: flex-start !important;
+            }
+
+            .btn-pill {
+                min-height: 43px;
+                padding: 9px 12px;
+                font-size: .84rem;
+                flex-direction: row;
+                gap: 6px;
+                border-radius: 11px;
+            }
+
+            .btn-pill i { font-size: 1rem; }
+
+            .titulo-editable {
+                width: 100%;
+                font-size: 1.08rem;
+            }
+
+            .header-card > .d-flex:first-child {
+                gap: 8px !important;
+            }
+
+            .header-card .btn-group .btn-pill {
+                min-width: 42px;
+                width: 42px;
+                padding: 0 !important;
+            }
+
+            .ocr-zone {
+                padding: 14px;
+                border-radius: 14px;
+            }
+
+            .gallery-container {
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                scroll-snap-type: x proximity;
+            }
+
+            .thumb-wrapper,
+            .btn-add-photo {
+                width: 76px;
+                height: 76px;
+                scroll-snap-align: start;
+            }
+
+            .mt-5.p-4.rounded-4.text-center {
+                margin-top: 26px !important;
+                padding: 18px 10px !important;
+            }
+        }
+
+        /* Pantallas muy estrechas */
+        @media (max-width: 360px) {
+            .container { padding-inline: 7px; }
+            .panel { padding-inline: 11px; }
+            .nav-island-container { padding-inline: 7px; }
+            .nav-island .btn-back,
+            .nav-island .btn-pill {
+                width: 38px;
+                min-width: 38px;
+                height: 38px;
+                min-height: 38px;
+            }
+        }
+
+        /* Accesibilidad y dispositivos táctiles */
+        @media (hover: none) {
+            .btn-pill:hover,
+            .nav-island .btn-pill:hover,
+            .nav-island .btn-back:hover {
+                transform: none;
+                filter: none;
+                box-shadow: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+
     </style>
 </head>
 <body>
 
-<div class="nav-back-bar">
-    <a href="./index.html" class="btn-back">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Menú Principal
-    </a>
-    <div class="d-flex gap-2">
-        <button class="btn" style="background:#10b981; color:white; font-size: 0.9rem;" onclick="guardarEstadoAppLuz()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-            Guardar JSON
-        </button>
-        <button class="btn" style="background:#475569; color:white; font-size: 0.9rem;" onclick="document.getElementById('file_import_luz').click()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-            Importar
-        </button>
-        <input type="file" id="file_import_luz" accept=".json" style="display: none;" onchange="cargarEstadoAppLuz(event)">
+<div class="nav-island-container">
+    <div class="nav-island">
+        <a href="./index.html" class="btn-back">
+            <i class="bi bi-arrow-left"></i> <span>Menú</span>
+        </a>
+        <div class="d-flex justify-content-center">
+            <button id="btn-theme-toggle" class="btn-pill btn-secondary-custom" onclick="toggleTheme()" title="Cambiar Tema">
+                <!-- Se inyecta por JS -->
+            </button>
+            <button class="btn-pill btn-success-custom" onclick="guardarEstadoAppLuz()">
+                <i class="bi bi-cloud-arrow-down-fill"></i> <span>Guardar JSON</span>
+            </button>
+            <button class="btn-pill btn-secondary-custom" onclick="document.getElementById('file_import_luz').click()">
+                <i class="bi bi-folder-symlink-fill"></i> <span>Importar</span>
+            </button>
+            <input type="file" id="file_import_luz" accept=".json" style="display: none;" onchange="cargarEstadoAppLuz(event)">
+        </div>
     </div>
 </div>
 
 <div id="pdf-template-container"></div> 
 
 <div class="container">
-    <div class="card" id="main-receipt">
-        <div class="header-card text-center">
-            <h1 class="titulo-fijo">RECIBO PRINCIPAL <span>(EMPRESA LUZ)</span></h1>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Configura los datos del recibo matriz para realizar los cálculos.</p>
+    <div class="panel" id="main-receipt">
+        <div class="header-hero">
+            <h1>CONTROL DE <span>ENERGÍA</span></h1>
+            <p>Configura los datos del recibo principal para distribuir los gastos.</p>
         </div>
 
-        <div class="photo-gallery-wrapper" style="display: none;">
-            <div style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                SUBE FOTOS DEL RECIBO (Max 5):
+        <div class="ocr-zone" style="display: none;">
+            <div style="font-weight: 800; color: var(--accent-main); margin-bottom: 15px; font-size: 1.1rem;">
+                <i class="bi bi-lightning-charge-fill"></i> ESCÁNER DE RECIBO (OCR)
             </div>
             
             <div class="gallery-container" id="gallery-ui"></div>
             
             <input type="file" id="input_subir" accept="image/*" multiple style="display:none;" onchange="manejarSeleccionFotos(event)">
             
-            <div class="btn-group mt-3 justify-content-center">
-                <button class="btn" style="background: #0ea5e9; color: white; max-width: 250px;" onclick="document.getElementById('input_subir').click()">📁 Subir de Galería</button>
+            <div class="d-flex justify-content-center mt-3">
+                <button class="btn-pill btn-primary-custom" onclick="document.getElementById('input_subir').click()">
+                    <i class="bi bi-images"></i> <span>Subir Fotos (Max 5)</span>
+                </button>
             </div>
 
-            <button id="btn-procesar-ocr" class="btn mt-3" style="background: #10b981; color: white; width: 100%; display: none;" onclick="procesarFotosConOCR()">
-                ✨ Extraer Datos Automáticamente
+            <button id="btn-procesar-ocr" class="btn-pill btn-success-custom mt-3 w-100" style="display: none;" onclick="procesarFotosConOCR()">
+                <i class="bi bi-magic"></i> <span>Extraer Datos Automáticamente</span>
             </button>
-            <div id="ocr_status" style="display:none; background: #ede9fe; color: #6d28d9; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-align: center; margin-top: 12px;"></div>
+            <div id="ocr_status" style="display:none; background: rgba(139, 92, 246, 0.1); color: var(--accent-main); padding: 15px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; margin-top: 15px;"></div>
         </div>
 
-        <div class="btn-group" style="margin-bottom: 24px; gap: 15px;">
-            <button class="btn btn-limpiar" onclick="limpiarPrincipal()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                Limpiar Datos
+        <div class="d-flex gap-3 mb-4 flex-wrap">
+            <button class="btn-pill btn-danger-custom flex-grow-1" onclick="limpiarPrincipal()">
+                <i class="bi bi-trash3-fill"></i> <span>Limpiar Todo</span>
             </button>
-            <button id="btn-descargar-resumen" class="btn btn-resumen" style="display: none;" onclick="descargarResumenPDF()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                Descargar Resumen
+            <button id="btn-descargar-resumen" class="btn-pill btn-primary-custom flex-grow-1" style="display: none;" onclick="descargarResumenPDF()">
+                <i class="bi bi-file-earmark-pdf-fill"></i> <span>Resumen PDF</span>
             </button>
         </div>
 
-        <div class="info-box">
-            <b>FACTOR APORTE DE LEY (UIT 2026 - S/. 5500):</b> <span id="detalle_factor" style="font-weight:800; color:var(--primary); font-size:1.1rem; margin-left: 5px;">-</span>
+        <div class="alert-box d-flex align-items-center justify-content-between">
+            <span><b>APORTE LEY (UIT S/. 5500):</b></span>
+            <span id="detalle_factor" style="font-weight:900; color:var(--accent-main); font-size:1.15rem;">-</span>
         </div>
 
         <div class="grid-2">
-            <div class="form-group">
-                <label>MES DE FACTURACIÓN:</label>
-                <select id="mes_principal" onchange="calculate()">
+            <div class="input-group-custom">
+                <label>Mes de Facturación</label>
+                <select id="mes_principal" class="filled" onchange="calculate()">
                     <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option>
                     <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option>AGOSTO</option>
                     <option>SETIEMBRE</option><option>OCTUBRE</option><option>NOVIEMBRE</option><option>DICIEMBRE</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>N° INQUILINOS CON MEDIDOR:</label>
-                <select id="num_medidores" onchange="actualizarVista()">
-                    <option value="" selected></option>
+            <div class="input-group-custom">
+                <label>Inquilinos con Medidor</label>
+                <select id="num_medidores" class="filled" onchange="actualizarVista()">
+                    <option value="" selected>Seleccione...</option>
                     <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
                 </select>
             </div>
         </div>
         
-        <div class="mt-3 mb-4">
-            <label class="custom-checkbox-wrapper">
+        <div class="mt-4 mb-4">
+            <label class="switch-wrapper">
                 <input type="checkbox" id="has_sin_medidor" onchange="actualizarVista()">
-                <span style="font-size: 0.95rem; font-weight: 600; color: var(--text);">Habilitar inquilino sin medidor (Cálculo por diferencia)</span>
+                <span style="font-size: 1rem; font-weight: 700;">Habilitar inquilino sin medidor (Cálculo Diferencial)</span>
             </label>
         </div>
 
-        <div class="section-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="me-2" style="margin-right: 8px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            Fechas y Lecturas (Recibo Principal)
-        </div>
+        <div class="panel-title"><i class="bi bi-calendar2-range-fill"></i> Control de Medidor Principal</div>
         <div class="grid-2">
-            <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group">
-                <label style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    Lectura Actual:
-                    <span class="btn-ciclo" onclick="avanzarCicloPrincipal()" title="Pasar datos actuales a anteriores y limpiar">🔄</span>
-                </label>
-                <input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()">
+            <div class="input-group-custom"><label>Lectura Anterior</label><input type="number" id="lec_ant_m" class="filled" inputmode="decimal" oninput="calculate()"></div>
+            <div class="input-group-custom">
+                <label class="d-flex justify-content-between">Lectura Actual <i class="bi bi-arrow-repeat btn-ciclo" onclick="avanzarCicloPrincipal()" title="Rotar lecturas"></i></label>
+                <input type="number" id="lec_act_m" class="filled" inputmode="decimal" oninput="calculate()">
             </div>
-            <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
-            <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
+            <div class="input-group-custom"><label>Fecha Lectura Anterior</label><input type="date" id="fec_ant_m" class="filled" onchange="calculate()"></div>
+            <div class="input-group-custom"><label>Fecha Lectura Actual</label><input type="date" id="fec_act_m" class="filled" onchange="calculate()"></div>
         </div>
 
-        <div class="section-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="me-2" style="margin-right: 8px;"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            Importes del Recibo (S/.)
-        </div>
+        <div class="panel-title"><i class="bi bi-receipt-cutoff"></i> Detalle de Importes (S/.)</div>
         <div class="grid-2">
-            <div class="form-group"><label>Tarifa kWh:</label><input type="number" id="tarifa" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Reposición y Mantenimiento:</label><input type="number" id="rep_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Cargo Fijo:</label><input type="number" id="cargo_fijo_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Alumbrado Público:</label><input type="number" id="alum_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Interés compensatorio:</label><input type="number" id="int_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Redondeo anterior:</label><input type="number" id="red_ant_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Redondeo actual:</label><input type="number" id="red_act_m" step="0.01" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Aporte Ley N°28749:</label><input type="text" id="aporte_ley_m" class="readonly" readonly></div>
+            <div class="input-group-custom"><label>Tarifa kWh</label><input type="number" id="tarifa" class="filled" step="0.0001" inputmode="decimal" oninput="calculate()"></div>
+            <div class="input-group-custom"><label>Rep. y Mantenimiento</label><input type="number" id="rep_m" class="filled" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="input-group-custom"><label>Cargo Fijo</label><input type="number" id="cargo_fijo_m" class="filled" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="input-group-custom"><label>Alumbrado Público</label><input type="number" id="alum_m" class="filled" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="input-group-custom"><label>Interés compensatorio</label><input type="number" id="int_m" class="filled" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="input-group-custom"><label>Redondeo anterior</label><input type="number" id="red_ant_m" class="filled" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="input-group-custom"><label>Redondeo actual</label><input type="number" id="red_act_m" class="filled" step="0.01" inputmode="decimal" oninput="calculate()"></div>
+            <div class="input-group-custom"><label>Aporte Ley N°28749</label><input type="text" id="aporte_ley_m" class="filled readonly" disabled></div>
         </div>
 
-        <div class="form-group" style="margin-top:25px; padding: 20px; background: #f8fafc; border: 2px solid var(--primary); border-radius: 12px; text-align: center;">
-            <label style="font-size: 1.1rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">TOTAL A PAGAR (S/.):</label>
-            <input type="text" id="total_pagar_m" class="readonly" style="font-size:2rem; border:none; background:transparent; text-align: center; color: var(--text); padding: 0;" readonly>
+        <div class="mt-5 p-4 rounded-4 text-center" style="background: rgba(139, 92, 246, 0.1); border: 2px dashed var(--accent-main);">
+            <div style="font-size: 1rem; font-weight: 800; color: var(--accent-main); text-transform: uppercase; margin-bottom: 5px;">Total a Pagar (Principal)</div>
+            <input type="text" id="total_pagar_m" class="readonly" style="font-size:2.5rem; font-weight: 900; border:none; background:transparent; text-align: center; color: var(--text-main); padding: 0;" readonly value="S/. 0.00">
         </div>
     </div>
 
     <!-- Contenedor dinámico de inquilinos -->
-    <div id="inquilinos-container" style="display: grid; gap: 24px;"></div>
+    <div id="inquilinos-container" style="display: grid; gap: 30px;"></div>
 </div>
 
 <script>
     const UIT_VIGENTE = 5500;
     const container = document.getElementById('inquilinos-container');
+
+    // =========================================================================
+    // MODO OSCURO (THEME TOGGLE)
+    // =========================================================================
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('themeLuz', newTheme);
+        actualizarIconoTema(newTheme);
+    }
+
+    function actualizarIconoTema(theme) {
+        const btn = document.getElementById('btn-theme-toggle');
+        if (theme === 'dark') {
+            btn.innerHTML = `<i class="bi bi-sun-fill"></i> <span>Claro</span>`;
+        } else {
+            btn.innerHTML = `<i class="bi bi-moon-stars-fill"></i> <span>Oscuro</span>`;
+        }
+    }
+    window.addEventListener('DOMContentLoaded', () => actualizarIconoTema(document.documentElement.getAttribute('data-theme')));
     
     function parseDateLocal(dStr) {
         if(!dStr) return null;
@@ -378,20 +833,10 @@
             try {
                 const { Filesystem, Share } = window.Capacitor.Plugins;
                 const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
-                const savedFile = await Filesystem.writeFile({
-                    path: nombreArchivo,
-                    data: base64Data,
-                    directory: 'CACHE'
-                });
-                await Share.share({
-                    title: nombreArchivo,
-                    url: savedFile.uri,
-                    dialogTitle: 'Guardar o Compartir JSON'
-                });
+                const savedFile = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'CACHE' });
+                await Share.share({ title: nombreArchivo, url: savedFile.uri, dialogTitle: 'Guardar o Compartir JSON' });
                 return;
-            } catch (err) {
-                console.error('Error con Capacitor Share:', err);
-            }
+            } catch (err) { console.error('Error con Capacitor Share:', err); }
         }
 
         const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
@@ -399,24 +844,14 @@
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
-                await navigator.share({
-                    files: [file],
-                    title: 'Respaldo JSON de Luz',
-                    text: nombreArchivo
-                });
+                await navigator.share({ files: [file], title: 'Respaldo JSON de Luz', text: nombreArchivo });
                 return;
-            } catch (error) {
-                console.error('Error compartiendo vía Web Share API:', error);
-            }
+            } catch (error) { console.error('Error compartiendo vía Web Share API:', error); }
         }
 
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nombreArchivo;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        const a = document.createElement('a'); a.href = url; a.download = nombreArchivo;
+        document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
@@ -429,8 +864,7 @@
             try {
                 const datos = JSON.parse(e.target.result);
 
-                if (datos && typeof datos === 'object' && !Array.isArray(datos) &&
-                    datos.schema === 'luz_cayran_unificado' && datos.estado_app) {
+                if (datos && typeof datos === 'object' && !Array.isArray(datos) && datos.schema === 'luz_cayran_unificado' && datos.estado_app) {
                     cargarEstadoLegacyLuz(datos.estado_app);
                     const mesTxt = String(datos.mes_cobro || datos.mes || '').trim().toUpperCase();
                     alert(`¡JSON único${mesTxt ? ' (' + mesTxt + ')' : ''} restaurado correctamente!`);
@@ -439,47 +873,30 @@
                 } else if (datos && typeof datos === 'object') {
                     cargarEstadoLegacyLuz(datos);
                     alert("¡Datos de sesión antiguos restaurados correctamente!");
-                } else {
-                    throw new Error("Formato JSON no reconocido.");
-                }
-
+                } else { throw new Error("Formato JSON no reconocido."); }
                 event.target.value = "";
             } catch (error) {
                 alert("Error al leer el archivo JSON. Asegúrate de que sea un archivo generado por Luz Cayrán.");
-                console.error(error);
-                event.target.value = "";
+                console.error(error); event.target.value = "";
             }
         };
         reader.readAsText(file);
     }
 
     function cargarEstadoLegacyLuz(estado) {
-        if (estado['num_medidores'] !== undefined) {
-            document.getElementById('num_medidores').value = estado['num_medidores'];
-        }
-        if (estado['has_sin_medidor'] !== undefined) {
-            document.getElementById('has_sin_medidor').checked = estado['has_sin_medidor'];
-        }
-
+        if (estado['num_medidores'] !== undefined) document.getElementById('num_medidores').value = estado['num_medidores'];
+        if (estado['has_sin_medidor'] !== undefined) document.getElementById('has_sin_medidor').checked = estado['has_sin_medidor'];
         actualizarVista();
 
         for (const id in estado) {
             const elemento = document.getElementById(id);
             if (elemento && id !== 'num_medidores' && id !== 'has_sin_medidor') {
-                if (elemento.type === 'checkbox') {
-                    elemento.checked = estado[id];
-                } else {
-                    elemento.value = estado[id];
-                }
+                if (elemento.type === 'checkbox') elemento.checked = estado[id];
+                else elemento.value = estado[id];
             }
         }
 
-        for (let i = 2; i <= 5; i++) {
-            if (document.getElementById(`modo_dias_i${i}`)) {
-                toggleModoDias(i, false);
-            }
-        }
-
+        for (let i = 2; i <= 5; i++) { if (document.getElementById(`modo_dias_i${i}`)) toggleModoDias(i, false); }
         calculate();
     }
 
@@ -488,36 +905,22 @@
         const reciboPrincipal = datos.find(r => r && r.tipo_registro === 'recibo_principal') || null;
         const inquilinos = datos.filter(r => r && r.tipo_registro === 'inquilino');
 
-        if (!reciboPrincipal || inquilinos.length === 0) {
-            throw new Error("Este JSON no contiene el recibo principal y los inquilinos necesarios para restaurar Luz Cayrán.");
-        }
+        if (!reciboPrincipal || inquilinos.length === 0) throw new Error("Este JSON no contiene el recibo principal y los inquilinos necesarios.");
 
         const conMedidor = inquilinos.filter(r => r.con_medidor !== false);
         const sinMedidor = inquilinos.find(r => r.con_medidor === false) || null;
 
-        let numMedidores = metadata && metadata.configuracion
-            ? parseInt(metadata.configuracion.num_medidores)
-            : conMedidor.length;
-
+        let numMedidores = metadata && metadata.configuracion ? parseInt(metadata.configuracion.num_medidores) : conMedidor.length;
         if (!Number.isFinite(numMedidores)) numMedidores = conMedidor.length;
         numMedidores = Math.min(4, Math.max(1, numMedidores || 1));
 
-        let hasSinMedidor;
-        if (metadata && metadata.configuracion && typeof metadata.configuracion.inquilino_sin_medidor === 'boolean') {
-            hasSinMedidor = metadata.configuracion.inquilino_sin_medidor;
-        } else {
-            hasSinMedidor = !!sinMedidor;
-        }
+        let hasSinMedidor = (metadata && metadata.configuracion && typeof metadata.configuracion.inquilino_sin_medidor === 'boolean') ? metadata.configuracion.inquilino_sin_medidor : !!sinMedidor;
 
         document.getElementById('num_medidores').value = String(numMedidores);
         document.getElementById('has_sin_medidor').checked = hasSinMedidor;
         actualizarVista();
 
-        const mesImportado =
-            (metadata && (metadata.mes_cobro || metadata.mes || (metadata.periodo && metadata.periodo.mes))) ||
-            reciboPrincipal.mes_cobro || reciboPrincipal.mes ||
-            (inquilinos[0] && (inquilinos[0].mes_cobro || inquilinos[0].mes)) || '';
-
+        const mesImportado = (metadata && (metadata.mes_cobro || metadata.mes || (metadata.periodo && metadata.periodo.mes))) || reciboPrincipal.mes_cobro || reciboPrincipal.mes || (inquilinos[0] && (inquilinos[0].mes_cobro || inquilinos[0].mes)) || '';
         if (mesImportado) {
             const selectMes = document.getElementById('mes_principal');
             const mesNormalizado = String(mesImportado).trim().toUpperCase();
@@ -525,58 +928,38 @@
             if (opcion) selectMes.value = opcion.value;
         }
 
-        const lecturasM = reciboPrincipal.lecturas || {};
-        const importesM = reciboPrincipal.importes || {};
+        const lecturasM = reciboPrincipal.lecturas || {}; const importesM = reciboPrincipal.importes || {};
 
-        asignarValorLuz('lec_ant_m', lecturasM.lectura_anterior);
-        asignarValorLuz('lec_act_m', lecturasM.lectura_actual);
+        asignarValorLuz('lec_ant_m', lecturasM.lectura_anterior); asignarValorLuz('lec_act_m', lecturasM.lectura_actual);
         asignarValorLuz('fec_ant_m', lecturasM.fecha_lectura_anterior || reciboPrincipal.fecha_inicio || '');
         asignarValorLuz('fec_act_m', lecturasM.fecha_lectura_actual || reciboPrincipal.fecha_fin || '');
-        asignarValorLuz('tarifa', reciboPrincipal.tarifa_kwh);
-        asignarValorLuz('rep_m', importesM.reposicion_mantenimiento);
-        asignarValorLuz('cargo_fijo_m', importesM.cargo_fijo);
-        asignarValorLuz('alum_m', importesM.alumbrado_publico);
-        asignarValorLuz('int_m', importesM.interes_compensatorio);
-        asignarValorLuz('red_ant_m', importesM.redondeo_anterior);
+        asignarValorLuz('tarifa', reciboPrincipal.tarifa_kwh); asignarValorLuz('rep_m', importesM.reposicion_mantenimiento);
+        asignarValorLuz('cargo_fijo_m', importesM.cargo_fijo); asignarValorLuz('alum_m', importesM.alumbrado_publico);
+        asignarValorLuz('int_m', importesM.interes_compensatorio); asignarValorLuz('red_ant_m', importesM.redondeo_anterior);
         asignarValorLuz('red_act_m', importesM.redondeo_actual);
 
         for (let i = 2; i <= 5; i++) {
-            asignarValorLuz(`titulo_i${i}`, '');
-            asignarValorLuz(`lec_ant_i${i}`, '');
-            asignarValorLuz(`lec_act_i${i}`, '');
-            asignarValorLuz(`fec_ant_i${i}`, '');
-            asignarValorLuz(`fec_act_i${i}`, '');
-            asignarValorLuz(`modo_dias_i${i}`, 'recibo');
-            asignarValorLuz(`dias_vividos_i${i}`, '');
+            asignarValorLuz(`titulo_i${i}`, ''); asignarValorLuz(`lec_ant_i${i}`, ''); asignarValorLuz(`lec_act_i${i}`, '');
+            asignarValorLuz(`fec_ant_i${i}`, ''); asignarValorLuz(`fec_act_i${i}`, '');
+            asignarValorLuz(`modo_dias_i${i}`, 'recibo'); asignarValorLuz(`dias_vividos_i${i}`, '');
         }
-        asignarValorLuz('titulo_i1', '');
-
-        if (hasSinMedidor && sinMedidor) {
-            asignarValorLuz('titulo_i1', sinMedidor.nombre || 'Inquilino sin medidor');
-        }
+        asignarValorLuz('titulo_i1', ''); if (hasSinMedidor && sinMedidor) asignarValorLuz('titulo_i1', sinMedidor.nombre || 'Inquilino sin medidor');
 
         conMedidor.forEach((inq, indice) => {
             let i = parseInt(inq.id_interno);
             if (!Number.isFinite(i) || i < 2 || i > 5) i = indice + 2;
             if (i > 5) return;
-
             const lecturas = inq.lecturas || {};
             asignarValorLuz(`titulo_i${i}`, inq.nombre || `Inquilino ${i - 1}`);
-            asignarValorLuz(`lec_ant_i${i}`, lecturas.lectura_anterior);
-            asignarValorLuz(`lec_act_i${i}`, lecturas.lectura_actual);
-            asignarValorLuz(`fec_ant_i${i}`, lecturas.fecha_lectura_anterior || '');
-            asignarValorLuz(`fec_act_i${i}`, lecturas.fecha_lectura_actual || '');
-
+            asignarValorLuz(`lec_ant_i${i}`, lecturas.lectura_anterior); asignarValorLuz(`lec_act_i${i}`, lecturas.lectura_actual);
+            asignarValorLuz(`fec_ant_i${i}`, lecturas.fecha_lectura_anterior || ''); asignarValorLuz(`fec_act_i${i}`, lecturas.fecha_lectura_actual || '');
             const modo = inq.modo_dias === 'manual' ? 'manual' : 'recibo';
             asignarValorLuz(`modo_dias_i${i}`, modo);
-            if (inq.dias_facturados !== undefined && inq.dias_facturados !== null) {
-                asignarValorLuz(`dias_vividos_i${i}`, inq.dias_facturados);
-            }
+            if (inq.dias_facturados !== undefined && inq.dias_facturados !== null) asignarValorLuz(`dias_vividos_i${i}`, inq.dias_facturados);
             toggleModoDias(i, false);
         });
 
         calculate();
-
         const mesTexto = mesImportado ? ` (${String(mesImportado).toUpperCase()})` : '';
         alert(`¡Archivo completo de LUZ${mesTexto} restaurado correctamente!`);
     }
@@ -585,168 +968,134 @@
         if (valor === undefined || valor === null) return;
         const elemento = document.getElementById(id);
         if (!elemento) return;
-
-        if (elemento.type === 'checkbox') {
-            elemento.checked = !!valor;
-        } else {
-            elemento.value = valor;
-        }
+        if (elemento.type === 'checkbox') elemento.checked = !!valor; else elemento.value = valor;
     }
 
     // =========================================================================
-    // FUNCIONES: ROTACIÓN DE CICLO ACTUAL A ANTERIOR
+    // FUNCIONES: ROTACIÓN DE CICLO
     // =========================================================================
 
     function avanzarCicloPrincipal() {
-        if(confirm("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores? Los datos actuales quedarán en blanco para que ingreses los nuevos.")) {
-            const lecAct = document.getElementById('lec_act_m');
-            const lecAnt = document.getElementById('lec_ant_m');
-            if(lecAct && lecAnt) {
-                lecAnt.value = lecAct.value;
-                lecAct.value = '';
-            }
-
-            const fecAct = document.getElementById('fec_act_m');
-            const fecAnt = document.getElementById('fec_ant_m');
-            if(fecAct && fecAnt) {
-                fecAnt.value = fecAct.value;
-                fecAct.value = '';
-            }
+        if(confirm("¿Pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores? Los actuales quedarán en blanco.")) {
+            const lecAct = document.getElementById('lec_act_m'); const lecAnt = document.getElementById('lec_ant_m');
+            if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
+            const fecAct = document.getElementById('fec_act_m'); const fecAnt = document.getElementById('fec_ant_m');
+            if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calculate();
         }
     }
 
     function avanzarCicloInquilino(id) {
         const nombreInq = document.getElementById(`titulo_i${id}`).value || `Inquilino ${id-1}`;
-        if(confirm(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores? Los campos actuales quedarán en blanco para el nuevo mes.`)) {
-            const lecAct = document.getElementById(`lec_act_i${id}`);
-            const lecAnt = document.getElementById(`lec_ant_i${id}`);
-            if(lecAct && lecAnt) {
-                lecAnt.value = lecAct.value;
-                lecAct.value = '';
-            }
-
-            const fecAct = document.getElementById(`fec_act_i${id}`);
-            const fecAnt = document.getElementById(`fec_ant_i${id}`);
-            if(fecAct && fecAnt) {
-                fecAnt.value = fecAct.value;
-                fecAct.value = '';
-            }
+        if(confirm(`¿Pasar datos actuales de "${nombreInq.toUpperCase()}" a anteriores?`)) {
+            const lecAct = document.getElementById(`lec_act_i${id}`); const lecAnt = document.getElementById(`lec_ant_i${id}`);
+            if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
+            const fecAct = document.getElementById(`fec_act_i${id}`); const fecAnt = document.getElementById(`fec_ant_i${id}`);
+            if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calculate();
         }
     }
 
     // =========================================================================
 
-    function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault, alertBg) {
+    function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault) {
         return `
-        <div class="card" id="recibo_i${id}" style="border-top: 5px solid ${colorBorde};">
+        <div class="panel" id="recibo_i${id}" style="border-top: 4px solid ${colorBorde};">
             <div class="header-card">
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <input type="text" id="titulo_i${id}" class="titulo-editable flex-grow-1" placeholder="${titulo}" style="color:${colorBorde}; font-size: 1.15rem; min-width: 200px;" oninput="sincronizarNombre(${id})">
+                    <input type="text" id="titulo_i${id}" class="titulo-editable flex-grow-1" placeholder="${titulo}" style="color:${colorBorde}; min-width: 200px;" oninput="sincronizarNombre(${id})">
                     <div class="btn-group flex-nowrap" style="width: auto;">
-                        <button class="btn btn-toggle btn-sm px-3" onclick="toggleCardBody(${id})" title="Ocultar/Mostrar">👁️ Toggle</button>
-                        <button class="btn btn-limpiar btn-sm px-3" onclick="limpiarInquilino(${id})" title="Borrar datos">🗑️</button>
+                        <button class="btn-pill btn-secondary-custom btn-sm px-3" onclick="toggleCardBody(${id})" title="Ocultar/Mostrar"><i class="bi bi-eye-fill"></i></button>
+                        <button class="btn-pill btn-danger-custom btn-sm px-3" onclick="limpiarInquilino(${id})" title="Borrar datos"><i class="bi bi-trash-fill"></i></button>
                     </div>
                 </div>
-                <div class="btn-group mt-2">
-                    <button class="btn btn-whatsapp" onclick="generarImagenRecibo(${id})">
-                        <svg style="width:18px; height:18px; fill:white; margin-right:4px;" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                        RECIBO PDF
+                <div class="d-flex gap-2 mt-3 flex-wrap">
+                    <button class="btn-pill flex-grow-1" style="background:#25D366; color:white;" onclick="generarImagenRecibo(${id})">
+                        <i class="bi bi-whatsapp"></i> <span>Recibo</span>
                     </button>
-                    <button class="btn" style="background:#0f766e; color:white;" onclick="generarImagenCalculos(${id})">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
-                        CÁLCULOS
+                    <button class="btn-pill btn-primary-custom flex-grow-1" onclick="generarImagenCalculos(${id})">
+                        <i class="bi bi-calculator-fill"></i> <span>Cálculos</span>
                     </button>
                 </div>
             </div>
             <div id="body_i${id}">
-                <div class="section-title">1. DATOS DE LECTURA (Promedio diario)</div>
+                <div class="panel-title"><i class="bi bi-speedometer2"></i> 1. Datos de Lectura</div>
                 <div class="grid-2">
-                    <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_i${id}" inputmode="decimal" oninput="calculate()"></div>
-                    <div class="form-group">
-                        <label style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            Lectura Actual:
-                            <span class="btn-ciclo" onclick="avanzarCicloInquilino(${id})" title="Pasar datos actuales a anteriores y limpiar">🔄</span>
-                        </label>
-                        <input type="number" id="lec_act_i${id}" inputmode="decimal" oninput="calculate()">
+                    <div class="input-group-custom"><label>Lectura Anterior</label><input type="number" id="lec_ant_i${id}" class="filled" inputmode="decimal" oninput="calculate()"></div>
+                    <div class="input-group-custom">
+                        <label class="d-flex justify-content-between">Lectura Actual <i class="bi bi-arrow-repeat btn-ciclo" onclick="avanzarCicloInquilino(${id})"></i></label>
+                        <input type="number" id="lec_act_i${id}" class="filled" inputmode="decimal" oninput="calculate()">
                     </div>
-                    <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_i${id}" onchange="calculate()"></div>
-                    <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_i${id}" onchange="calculate()"></div>
+                    <div class="input-group-custom"><label>Fecha Lectura Anterior</label><input type="date" id="fec_ant_i${id}" class="filled" onchange="calculate()"></div>
+                    <div class="input-group-custom"><label>Fecha Lectura Actual</label><input type="date" id="fec_act_i${id}" class="filled" onchange="calculate()"></div>
                 </div>
-                <div class="section-title">2. DÍAS A COBRAR</div>
+                <div class="panel-title"><i class="bi bi-calendar-check"></i> 2. Días a Cobrar</div>
                 <div class="grid-2">
-                    <div class="form-group">
-                        <label>Modo de cálculo:</label>
-                        <select id="modo_dias_i${id}" onchange="toggleModoDias(${id}, true); calculate();" style="background-color: ${alertBg}; border-color: ${colorBorde}; font-weight:600; color: #0f172a;">
+                    <div class="input-group-custom">
+                        <label>Modo de cálculo</label>
+                        <select id="modo_dias_i${id}" class="filled" onchange="toggleModoDias(${id}, true); calculate();">
                             <option value="recibo" ${modoDefault === 'recibo' ? 'selected' : ''}>Asumir días del recibo</option>
                             <option value="manual" ${modoDefault === 'manual' ? 'selected' : ''}>Escribir días manualmente</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Días a Facturar (Control):</label>
-                        <input type="number" id="dias_vividos_i${id}" disabled oninput="calculate()" style="font-weight: bold;">
+                    <div class="input-group-custom">
+                        <label>Días (Control)</label>
+                        <input type="number" id="dias_vividos_i${id}" class="filled" disabled oninput="calculate()">
                     </div>
                 </div>
                 
-                <div style="display: none;">
-                    <div class="section-title">DETALLE DE IMPORTES (S/.)</div>
-                    <div class="grid-2">
-                        <div class="form-group"><label>Cargo energía:</label><input id="ener_i${id}" class="readonly" readonly></div>
-                        <div class="form-group"><label>Reposición y Mantenimiento:</label><input id="rep_i${id}" class="readonly" readonly></div>
-                        <div class="form-group"><label>Cargo Fijo:</label><input id="cf_i${id}" class="readonly" readonly></div>
-                        <div class="form-group"><label>Alumbrado Público:</label><input id="alum_i${id}" class="readonly" readonly></div>
-                        <div class="form-group"><label>Interés compensatorio:</label><input id="int_i${id}" class="readonly" readonly></div>
-                        <div class="form-group"><label>IGV (18%):</label><input id="igv_i${id}" class="readonly" readonly></div>
-                        <div class="form-group"><label>Ley N° 28749:</label><input id="aporte_i${id}" class="readonly" readonly></div>
-                        <div class="form-group"><label>Redondeo anterior:</label><input id="red_ant_i${id}" class="readonly" readonly></div>
-                        <div class="form-group"><label>Redondeo actual:</label><input id="red_act_i${id}" class="readonly" readonly></div>
-                    </div>
+                <div style="display: none !important;">
+                    <div class="input-group-custom"><label>Cargo energía:</label><input id="ener_i${id}" class="readonly" readonly></div>
+                    <div class="input-group-custom"><label>Reposición y Mantenimiento:</label><input id="rep_i${id}" class="readonly" readonly></div>
+                    <div class="input-group-custom"><label>Cargo Fijo:</label><input id="cf_i${id}" class="readonly" readonly></div>
+                    <div class="input-group-custom"><label>Alumbrado Público:</label><input id="alum_i${id}" class="readonly" readonly></div>
+                    <div class="input-group-custom"><label>Interés compensatorio:</label><input id="int_i${id}" class="readonly" readonly></div>
+                    <div class="input-group-custom"><label>IGV (18%):</label><input id="igv_i${id}" class="readonly" readonly></div>
+                    <div class="input-group-custom"><label>Ley N° 28749:</label><input id="aporte_i${id}" class="readonly" readonly></div>
+                    <div class="input-group-custom"><label>Redondeo anterior:</label><input id="red_ant_i${id}" class="readonly" readonly></div>
+                    <div class="input-group-custom"><label>Redondeo actual:</label><input id="red_act_i${id}" class="readonly" readonly></div>
                 </div>
 
-                <div class="form-group" style="display: none;">
-                    <label style="margin:0; font-size: 1.1rem; color: #0f172a;">TOTAL INQ. ${id - 1}:</label>
-                    <input type="text" id="total_pagar_i${id}" class="readonly" style="font-size:1.6rem; border:none; background:transparent; width: 150px; text-align: right; padding: 0; color: ${colorBorde};" readonly>
+                <div class="mt-4 p-3 rounded-4 d-flex justify-content-between align-items-center" style="display: none !important; background: var(--input-bg); border: 2px solid ${colorBorde};">
+                    <div style="font-weight: 800; color: ${colorBorde}; text-transform: uppercase;">Total a Pagar</div>
+                    <input type="text" id="total_pagar_i${id}" class="readonly" style="font-size:1.8rem; font-weight:900; border:none; background:transparent; text-align: right; color: ${colorBorde}; width: 60%; padding: 0;" readonly value="0.00">
                 </div>
             </div>
         </div>
         `;
     }
 
-    container.innerHTML += generarTarjetaInquilino(2, "Inquilino 1", "#059669", "recibo", "#d1fae5");
-    container.innerHTML += generarTarjetaInquilino(3, "Inquilino 2", "#2563eb", "recibo", "#dbeafe");
-    container.innerHTML += generarTarjetaInquilino(4, "Inquilino 3", "#9333ea", "recibo", "#f3e8ff");
-    container.innerHTML += generarTarjetaInquilino(5, "Inquilino 4", "#ea580c", "recibo", "#ffedd5");
+    container.innerHTML += generarTarjetaInquilino(2, "Inquilino 1", "#10b981", "recibo"); // Emerald
+    container.innerHTML += generarTarjetaInquilino(3, "Inquilino 2", "#3b82f6", "recibo"); // Blue
+    container.innerHTML += generarTarjetaInquilino(4, "Inquilino 3", "#d946ef", "recibo"); // Fuchsia
+    container.innerHTML += generarTarjetaInquilino(5, "Inquilino 4", "#f97316", "recibo"); // Orange
 
     container.innerHTML += `
-        <div class="card" id="recibo_i1" style="border-top: 5px solid #ef4444;">
+        <div class="panel" id="recibo_i1" style="border-top: 4px solid #ef4444;">
             <div class="header-card">
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <input type="text" id="titulo_i1" class="titulo-editable flex-grow-1" placeholder="Inquilino sin medidor" style="color:#ef4444; border-color:#fca5a5; font-size: 1.15rem; min-width: 200px;">
+                    <input type="text" id="titulo_i1" class="titulo-editable flex-grow-1" placeholder="Inquilino sin medidor" style="color:#ef4444; border-bottom-color:#fca5a5; min-width: 200px;" oninput="sincronizarNombre(1)">
                     <div class="btn-group flex-nowrap" style="width: auto;">
-                        <button class="btn btn-toggle btn-sm px-3" onclick="toggleCardBody(1)">👁️ Toggle</button>
-                        <button class="btn btn-limpiar btn-sm px-3" onclick="limpiarInquilino(1)">🗑️</button>
+                        <button class="btn-pill btn-secondary-custom btn-sm px-3" onclick="toggleCardBody(1)"><i class="bi bi-eye-fill"></i></button>
+                        <button class="btn-pill btn-danger-custom btn-sm px-3" onclick="limpiarInquilino(1)"><i class="bi bi-trash-fill"></i></button>
                     </div>
                 </div>
-                <div class="btn-group mt-2">
-                    <button class="btn btn-whatsapp" onclick="generarImagenRecibo(1)">
-                        <svg style="width:18px; height:18px; fill:white; margin-right:4px;" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                        RECIBO PDF
+                <div class="d-flex gap-2 mt-3 flex-wrap">
+                    <button class="btn-pill flex-grow-1" style="background:#25D366; color:white;" onclick="generarImagenRecibo(1)">
+                        <i class="bi bi-whatsapp"></i> <span>Recibo</span>
                     </button>
-                    <button class="btn" style="background:#0f766e; color:white;" onclick="generarImagenCalculos(1)">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
-                        CÁLCULOS
+                    <button class="btn-pill btn-primary-custom flex-grow-1" onclick="generarImagenCalculos(1)">
+                        <i class="bi bi-calculator-fill"></i> <span>Cálculos</span>
                     </button>
                 </div>
             </div>
             <div id="body_i1">
-                <div class="info-box" style="background:#fee2e2; border-left-color:#ef4444; color:#991b1b; font-weight: 600; margin-top: 15px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                    El monto de este inquilino se calcula restando al recibo principal los montos de los demás inquilinos con medidor.
+                <div class="alert-box" style="background:rgba(239, 68, 68, 0.1); border-left-color:#ef4444; color:#ef4444; margin-top: 20px;">
+                    <i class="bi bi-info-circle-fill me-2"></i> El monto de este inquilino se calcula restando al recibo principal los montos de los demás inquilinos con medidor.
                 </div>
-                <div class="form-group" style="display: none;">
-                    <label style="margin:0; font-size: 1.1rem; color: #991b1b;">TOTAL SIN MEDIDOR:</label>
-                    <input type="text" id="total_pagar_i1" class="readonly" style="font-size:1.6rem; border:none; background:transparent; color:#ef4444; width: 150px; text-align: right; padding: 0;" readonly>
+                <div class="mt-4 p-3 rounded-4 d-flex justify-content-between align-items-center" style="display: none !important; background: var(--input-bg); border: 2px solid #ef4444;">
+                    <div style="font-weight: 800; color: #ef4444; text-transform: uppercase;">Total a Pagar</div>
+                    <input type="text" id="total_pagar_i1" class="readonly" style="font-size:1.8rem; font-weight:900; border:none; background:transparent; text-align: right; color: #ef4444; width: 60%; padding: 0;" readonly value="0.00">
                 </div>
             </div>
         </div>
@@ -754,35 +1103,20 @@
 
     function toggleCardBody(id) {
         const bodyEl = document.getElementById(`body_i${id}`);
-        if(bodyEl) {
-            if(bodyEl.style.display === 'none') {
-                bodyEl.style.display = 'block';
-            } else {
-                bodyEl.style.display = 'none';
-            }
-        }
+        if(bodyEl) { bodyEl.style.display = bodyEl.style.display === 'none' ? 'block' : 'none'; }
     }
 
     function verificarDatosCompletos() {
         const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
         const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
-        
-        const tar = getVal('tarifa');
-        const totM = getVal('total_pagar_m');
+        const tar = getVal('tarifa'); const totM = getVal('total_pagar_m');
         if (tar <= 0 || totM <= 0) return false;
-
         for (let i = 2; i <= (numMedidores + 1); i++) {
             const totInq = getVal(`total_pagar_i${i}`);
-            const lecAnt = getVal(`lec_ant_i${i}`);
-            const lecAct = getVal(`lec_act_i${i}`);
+            const lecAnt = getVal(`lec_ant_i${i}`); const lecAct = getVal(`lec_act_i${i}`);
             if (totInq <= 0 || lecAct < lecAnt) return false;
         }
-
-        if (hasSinMedidor) {
-            const totI1 = getVal('total_pagar_i1');
-            if (totI1 <= 0) return false;
-        }
-
+        if (hasSinMedidor) { const totI1 = getVal('total_pagar_i1'); if (totI1 <= 0) return false; }
         return true;
     }
 
@@ -791,10 +1125,8 @@
         const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
         const tarjetaI1 = document.getElementById('recibo_i1');
         if (tarjetaI1) tarjetaI1.style.display = hasSinMedidor ? 'block' : 'none';
-
         for (let i = 2; i <= 5; i++) {
-            const index = i - 1; 
-            const debeMostrar = index <= numMedidores;
+            const index = i - 1; const debeMostrar = index <= numMedidores;
             const tarjeta = document.getElementById(`recibo_i${i}`);
             if (tarjeta) tarjeta.style.display = debeMostrar ? 'block' : 'none';
         }
@@ -803,10 +1135,7 @@
 
     function sincronizarNombre(id) {
         const tituloInput = document.getElementById(`titulo_i${id}`);
-        if(tituloInput) {
-            let nombre = tituloInput.value.trim();
-            if(nombre === '') nombre = `Inquilino ${id - 1}`;
-        }
+        if(tituloInput) { let nombre = tituloInput.value.trim(); if(nombre === '') nombre = `Inquilino ${id - 1}`; }
     }
 
     function toggleModoDias(i, enfocar = true) {
@@ -814,11 +1143,11 @@
         const inputDias = document.getElementById(`dias_vividos_i${i}`);
         if (modo === 'manual') {
             inputDias.disabled = false;
-            inputDias.style.backgroundColor = 'var(--input-fill)';
+            inputDias.style.borderColor = 'var(--accent-secondary)';
             if (enfocar) { inputDias.value = ''; inputDias.focus(); }
         } else {
             inputDias.disabled = true;
-            inputDias.style.backgroundColor = '#e2e8f0';
+            inputDias.style.borderColor = 'transparent';
         }
     }
 
@@ -835,18 +1164,14 @@
             try {
                 const { Filesystem, Share } = window.Capacitor.Plugins;
                 const base64Data = pdfBase64Uri.split(',')[1] || pdfBase64Uri;
-                const savedFile = await Filesystem.writeFile({
-                    path: nombreArchivo, data: base64Data, directory: 'CACHE'
-                });
+                const savedFile = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'CACHE' });
                 await Share.share({ title: nombreArchivo, url: savedFile.uri, dialogTitle: 'Abrir o Guardar Recibo PDF' });
                 return;
             } catch (err) { console.error('Error con Capacitor Share:', err); }
         }
         const link = document.createElement('a');
         link.href = pdfBase64Uri; link.download = nombreArchivo; 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
     function calculate() {
@@ -922,44 +1247,22 @@
             const igv_i1 = sub_i1 * 0.18;
             const total_i1 = sub_i1 + igv_i1 + ap_i1_val + red_ant_i1_val + red_act_i1_val;
 
-            window._i1_cache = {
-                kwh: kwhDiferencia,
-                ener: en_i1,
-                rep: rep_i1_val,
-                cf: cf_i1_val,
-                alum: alum_i1_val,
-                int: int_i1_val,
-                igv: igv_i1,
-                aporte: ap_i1_val,
-                red_ant: red_ant_i1_val,
-                red_act: red_act_i1_val,
-                total: total_i1
-            };
-
+            window._i1_cache = { kwh: kwhDiferencia, ener: en_i1, rep: rep_i1_val, cf: cf_i1_val, alum: alum_i1_val, int: int_i1_val, igv: igv_i1, aporte: ap_i1_val, red_ant: red_ant_i1_val, red_act: red_act_i1_val, total: total_i1 };
             setVal('total_pagar_i1', total_i1);
         }
 
         const btnResumen = document.getElementById('btn-descargar-resumen');
-        
-        if (verificarDatosCompletos()) {
-            btnResumen.style.display = 'inline-flex';
-        } else {
-            btnResumen.style.display = 'none';
-        }
+        if (verificarDatosCompletos()) { btnResumen.style.display = 'inline-flex'; } else { btnResumen.style.display = 'none'; }
     }
 
     function exportarJSON() {
         calculate();
 
         const f1m_val = document.getElementById('fec_act_m').value;
-        if (!f1m_val) {
-            alert("Es necesario tener la fecha actual del recibo principal completada.");
-            return;
-        }
+        if (!f1m_val) { alert("Es necesario tener la fecha actual del recibo principal completada."); return; }
 
         const f2m_val = document.getElementById('fec_ant_m').value;
-        const d_f1m = parseDateLocal(f1m_val);
-        const d_f2m = parseDateLocal(f2m_val);
+        const d_f1m = parseDateLocal(f1m_val); const d_f2m = parseDateLocal(f2m_val);
         const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
         const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
@@ -967,12 +1270,10 @@
         const totalInquilinosReales = numMedidores + (hasSinMedidor ? 1 : 0);
         const n = totalInquilinosReales > 0 ? totalInquilinosReales : 1;
 
-        const mes = document.getElementById('mes_principal').value || '';
-        const mesCobro = mes;
+        const mes = document.getElementById('mes_principal').value || ''; const mesCobro = mes;
         const anio = d_f1m ? d_f1m.getFullYear() : null;
 
-        const factorLey = (2 * UIT_VIGENTE) / 1000000;
-        const tarifa = getVal('tarifa');
+        const factorLey = (2 * UIT_VIGENTE) / 1000000; const tarifa = getVal('tarifa');
         const km = Math.max(0, getVal('lec_act_m') - getVal('lec_ant_m'));
         const energiaPrincipal = km * tarifa;
         const subtotalPrincipal = getVal('rep_m') + getVal('cargo_fijo_m') + energiaPrincipal + getVal('alum_m') + getVal('int_m');
@@ -980,346 +1281,86 @@
         const aporteLeyPrincipal = km * factorLey;
         const totalPrincipal = getVal('total_pagar_m');
 
-        const numero = (valor, decimales = 6) => {
-            const n = Number(valor);
-            if (!Number.isFinite(n)) return 0;
-            return Number(n.toFixed(decimales));
-        };
-
-        const formatoYYYYMMDD = (fechaObj) => {
-            if (!fechaObj || isNaN(fechaObj)) return "";
-            const y = fechaObj.getFullYear();
-            const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
-            const d = String(fechaObj.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        };
-
-        const calcularFechaInicio = (fechaFinStr, diasTotales) => {
-            const endDate = parseDateLocal(fechaFinStr);
-            if (!endDate || !diasTotales || diasTotales < 1) return "";
-            const startDate = new Date(endDate.getTime() - (diasTotales - 1) * 86400000);
-            return formatoYYYYMMDD(startDate);
-        };
+        const numero = (valor, decimales = 6) => { const n = Number(valor); if (!Number.isFinite(n)) return 0; return Number(n.toFixed(decimales)); };
+        const formatoYYYYMMDD = (fechaObj) => { if (!fechaObj || isNaN(fechaObj)) return ""; const y = fechaObj.getFullYear(); const m = String(fechaObj.getMonth() + 1).padStart(2, '0'); const d = String(fechaObj.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; };
+        const calcularFechaInicio = (fechaFinStr, diasTotales) => { const endDate = parseDateLocal(fechaFinStr); if (!endDate || !diasTotales || diasTotales < 1) return ""; const startDate = new Date(endDate.getTime() - (diasTotales - 1) * 86400000); return formatoYYYYMMDD(startDate); };
 
         const datosExportar = [];
+        datosExportar.push({ tipo_registro: "metadata", schema: "luz_cayran", schema_version: "2.0", mes: mes, mes_cobro: mesCobro, anio: anio, periodo: { mes: mes, anio: anio }, fecha_exportacion: new Date().toISOString(), configuracion: { num_medidores: numMedidores, inquilino_sin_medidor: hasSinMedidor, total_inquilinos: totalInquilinosReales, uit_vigente: numero(UIT_VIGENTE, 2), factor_aporte_ley: numero(factorLey, 8), igv_porcentaje: 18 } });
+        datosExportar.push({ tipo_registro: "recibo_principal", mes: mes, mes_cobro: mesCobro, anio: anio, fecha_inicio: f2m_val || "", fecha_fin: f1m_val || "", dias_recibo: dm, lecturas: { lectura_anterior: numero(getVal('lec_ant_m')), lectura_actual: numero(getVal('lec_act_m')), fecha_lectura_anterior: f2m_val || "", fecha_lectura_actual: f1m_val || "", consumo_kwh: numero(km) }, tarifa_kwh: numero(tarifa), importes: { energia: numero(energiaPrincipal), reposicion_mantenimiento: numero(getVal('rep_m')), cargo_fijo: numero(getVal('cargo_fijo_m')), alumbrado_publico: numero(getVal('alum_m')), interes_compensatorio: numero(getVal('int_m')), subtotal_antes_igv: numero(subtotalPrincipal), igv: numero(igvPrincipal), aporte_ley_28749: numero(aporteLeyPrincipal), redondeo_anterior: numero(getVal('red_ant_m')), redondeo_actual: numero(getVal('red_act_m')), total_pagar: numero(totalPrincipal) } });
 
-        datosExportar.push({
-            tipo_registro: "metadata",
-            schema: "luz_cayran",
-            schema_version: "2.0",
-            mes: mes,
-            mes_cobro: mesCobro,
-            anio: anio,
-            periodo: {
-                mes: mes,
-                anio: anio
-            },
-            fecha_exportacion: new Date().toISOString(),
-            configuracion: {
-                num_medidores: numMedidores,
-                inquilino_sin_medidor: hasSinMedidor,
-                total_inquilinos: totalInquilinosReales,
-                uit_vigente: numero(UIT_VIGENTE, 2),
-                factor_aporte_ley: numero(factorLey, 8),
-                igv_porcentaje: 18
-            }
-        });
-
-        datosExportar.push({
-            tipo_registro: "recibo_principal",
-            mes: mes,
-            mes_cobro: mesCobro,
-            anio: anio,
-            fecha_inicio: f2m_val || "",
-            fecha_fin: f1m_val || "",
-            dias_recibo: dm,
-            lecturas: {
-                lectura_anterior: numero(getVal('lec_ant_m')),
-                lectura_actual: numero(getVal('lec_act_m')),
-                fecha_lectura_anterior: f2m_val || "",
-                fecha_lectura_actual: f1m_val || "",
-                consumo_kwh: numero(km)
-            },
-            tarifa_kwh: numero(tarifa),
-            importes: {
-                energia: numero(energiaPrincipal),
-                reposicion_mantenimiento: numero(getVal('rep_m')),
-                cargo_fijo: numero(getVal('cargo_fijo_m')),
-                alumbrado_publico: numero(getVal('alum_m')),
-                interes_compensatorio: numero(getVal('int_m')),
-                subtotal_antes_igv: numero(subtotalPrincipal),
-                igv: numero(igvPrincipal),
-                aporte_ley_28749: numero(aporteLeyPrincipal),
-                redondeo_anterior: numero(getVal('red_ant_m')),
-                redondeo_actual: numero(getVal('red_act_m')),
-                total_pagar: numero(totalPrincipal)
-            }
-        });
-
-        let sumaKwhMedidores = 0;
-        let sumaKwhDistribuidos = 0;
-        let sumaMontosInquilinos = 0;
+        let sumaKwhMedidores = 0; let sumaKwhDistribuidos = 0; let sumaMontosInquilinos = 0;
 
         if (hasSinMedidor) {
             const nombreI1 = document.getElementById('titulo_i1').value || 'Inquilino sin medidor';
-            const c = window._i1_cache || {
-                kwh: 0, ener: 0, rep: 0, cf: 0, alum: 0, int: 0,
-                igv: 0, aporte: 0, red_ant: 0, red_act: 0, total: 0
-            };
-            const kwhI1 = numero(c.kwh, 2);
-            const totalI1 = numero(getVal('total_pagar_i1'), 2);
-            const fechaFin = f1m_val;
-            const fechaInicio = calcularFechaInicio(fechaFin, dm);
+            const c = window._i1_cache || { kwh: 0, ener: 0, rep: 0, cf: 0, alum: 0, int: 0, igv: 0, aporte: 0, red_ant: 0, red_act: 0, total: 0 };
+            const kwhI1 = numero(c.kwh, 2); const totalI1 = numero(getVal('total_pagar_i1'), 2);
+            const fechaFin = f1m_val; const fechaInicio = calcularFechaInicio(fechaFin, dm);
 
-            sumaKwhDistribuidos += kwhI1;
-            sumaMontosInquilinos += totalI1;
-
-            datosExportar.push({
-                tipo_registro: "inquilino",
-                mes: mes,
-                mes_cobro: mesCobro,
-                anio: anio,
-                nombre: nombreI1,
-                id_interno: 1,
-                con_medidor: false,
-
-                kwh_real: kwhI1,
-                dias_facturados: dm,
-                monto_pagar: totalI1,
-                fecha_inicio: fechaInicio,
-                fecha_fin: fechaFin,
-
-                metodo_calculo: "diferencia_recibo_principal_menos_inquilinos_con_medidor",
-                lecturas: null,
-                consumo: {
-                    kwh_real: kwhI1,
-                    dias_facturados: dm
-                },
-                calculos: {
-                    energia: numero(c.ener),
-                    reposicion_mantenimiento: numero(c.rep),
-                    cargo_fijo: numero(c.cf),
-                    alumbrado_publico: numero(c.alum),
-                    interes_compensatorio: numero(c.int),
-                    subtotal_antes_igv: numero(c.ener + c.rep + c.cf + c.alum + c.int),
-                    igv: numero(c.igv),
-                    aporte_ley_28749: numero(c.aporte),
-                    redondeo_anterior: numero(c.red_ant),
-                    redondeo_actual: numero(c.red_act),
-                    total_pagar: totalI1
-                }
-            });
+            sumaKwhDistribuidos += kwhI1; sumaMontosInquilinos += totalI1;
+            datosExportar.push({ tipo_registro: "inquilino", mes: mes, mes_cobro: mesCobro, anio: anio, nombre: nombreI1, id_interno: 1, con_medidor: false, kwh_real: kwhI1, dias_facturados: dm, monto_pagar: totalI1, fecha_inicio: fechaInicio, fecha_fin: fechaFin, metodo_calculo: "diferencia_recibo_principal_menos_inquilinos_con_medidor", lecturas: null, consumo: { kwh_real: kwhI1, dias_facturados: dm }, calculos: { energia: numero(c.ener), reposicion_mantenimiento: numero(c.rep), cargo_fijo: numero(c.cf), alumbrado_publico: numero(c.alum), interes_compensatorio: numero(c.int), subtotal_antes_igv: numero(c.ener + c.rep + c.cf + c.alum + c.int), igv: numero(c.igv), aporte_ley_28749: numero(c.aporte), redondeo_anterior: numero(c.red_ant), redondeo_actual: numero(c.red_act), total_pagar: totalI1 } });
         }
 
         for (let i = 2; i <= (numMedidores + 1); i++) {
             const nombreInq = document.getElementById(`titulo_i${i}`).value || `Inquilino ${i - 1}`;
-
-            const lAnt = getVal(`lec_ant_i${i}`);
-            const lAct = getVal(`lec_act_i${i}`);
-            const f1i = document.getElementById(`fec_act_i${i}`).value;
-            const f2i = document.getElementById(`fec_ant_i${i}`).value;
-            const diLectura = (f1i && f2i)
-                ? Math.max(1, Math.floor((new Date(f1i + 'T00:00:00') - new Date(f2i + 'T00:00:00')) / 864e5) + 1)
-                : 0;
-
-            const consumoMedidor = Math.max(0, lAct - lAnt);
-            const consumoDiario = diLectura > 0 ? (consumoMedidor / diLectura) : 0;
-
+            const lAnt = getVal(`lec_ant_i${i}`); const lAct = getVal(`lec_act_i${i}`);
+            const f1i = document.getElementById(`fec_act_i${i}`).value; const f2i = document.getElementById(`fec_ant_i${i}`).value;
+            const diLectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i + 'T00:00:00') - new Date(f2i + 'T00:00:00')) / 864e5) + 1) : 0;
+            const consumoMedidor = Math.max(0, lAct - lAnt); const consumoDiario = diLectura > 0 ? (consumoMedidor / diLectura) : 0;
             const modo = document.getElementById(`modo_dias_i${i}`).value;
             const diasFacturar = modo === 'recibo' ? dm : Math.max(0, parseInt(getVal(`dias_vividos_i${i}`)) || 0);
-            const kwhConsumidoReal = numero(consumoDiario * diasFacturar, 2);
-            const totalInq = numero(getVal(`total_pagar_i${i}`), 2);
-
-            const fechaFin = f1m_val;
-            const fechaInicio = calcularFechaInicio(fechaFin, diasFacturar);
-
-            const energia = getVal(`ener_i${i}`);
-            const rep = getVal(`rep_i${i}`);
-            const cf = getVal(`cf_i${i}`);
-            const alum = getVal(`alum_i${i}`);
-            const interes = getVal(`int_i${i}`);
-            const igv = getVal(`igv_i${i}`);
-            const aporte = getVal(`aporte_i${i}`);
-            const redAnt = getVal(`red_ant_i${i}`);
-            const redAct = getVal(`red_act_i${i}`);
-
-            sumaKwhMedidores += kwhConsumidoReal;
-            sumaKwhDistribuidos += kwhConsumidoReal;
-            sumaMontosInquilinos += totalInq;
-
-            datosExportar.push({
-                tipo_registro: "inquilino",
-                mes: mes,
-                mes_cobro: mesCobro,
-                anio: anio,
-                nombre: nombreInq,
-                id_interno: i,
-                con_medidor: true,
-
-                kwh_real: kwhConsumidoReal,
-                dias_facturados: diasFacturar,
-                monto_pagar: totalInq,
-                fecha_inicio: fechaInicio,
-                fecha_fin: fechaFin,
-
-                modo_dias: modo,
-                lecturas: {
-                    lectura_anterior: numero(lAnt),
-                    lectura_actual: numero(lAct),
-                    fecha_lectura_anterior: f2i || "",
-                    fecha_lectura_actual: f1i || "",
-                    dias_entre_lecturas: diLectura,
-                    consumo_medidor_kwh: numero(consumoMedidor),
-                    consumo_diario_kwh: numero(consumoDiario)
-                },
-                consumo: {
-                    kwh_real: kwhConsumidoReal,
-                    dias_facturados: diasFacturar,
-                    periodo_facturado_inicio: fechaInicio,
-                    periodo_facturado_fin: fechaFin
-                },
-                calculos: {
-                    tarifa_kwh: numero(tarifa),
-                    energia: numero(energia),
-                    reposicion_mantenimiento: numero(rep),
-                    cargo_fijo: numero(cf),
-                    alumbrado_publico: numero(alum),
-                    interes_compensatorio: numero(interes),
-                    subtotal_antes_igv: numero(energia + rep + cf + alum + interes),
-                    igv: numero(igv),
-                    aporte_ley_28749: numero(aporte),
-                    redondeo_anterior: numero(redAnt),
-                    redondeo_actual: numero(redAct),
-                    total_pagar: totalInq
-                }
-            });
+            const kwhConsumidoReal = numero(consumoDiario * diasFacturar, 2); const totalInq = numero(getVal(`total_pagar_i${i}`), 2);
+            const fechaFin = f1m_val; const fechaInicio = calcularFechaInicio(fechaFin, diasFacturar);
+            
+            sumaKwhMedidores += kwhConsumidoReal; sumaKwhDistribuidos += kwhConsumidoReal; sumaMontosInquilinos += totalInq;
+            datosExportar.push({ tipo_registro: "inquilino", mes: mes, mes_cobro: mesCobro, anio: anio, nombre: nombreInq, id_interno: i, con_medidor: true, kwh_real: kwhConsumidoReal, dias_facturados: diasFacturar, monto_pagar: totalInq, fecha_inicio: fechaInicio, fecha_fin: fechaFin, modo_dias: modo, lecturas: { lectura_anterior: numero(lAnt), lectura_actual: numero(lAct), fecha_lectura_anterior: f2i || "", fecha_lectura_actual: f1i || "", dias_entre_lecturas: diLectura, consumo_medidor_kwh: numero(consumoMedidor), consumo_diario_kwh: numero(consumoDiario) }, consumo: { kwh_real: kwhConsumidoReal, dias_facturados: diasFacturar, periodo_facturado_inicio: fechaInicio, periodo_facturado_fin: fechaFin }, calculos: { tarifa_kwh: numero(tarifa), energia: numero(getVal(`ener_i${i}`)), reposicion_mantenimiento: numero(getVal(`rep_i${i}`)), cargo_fijo: numero(getVal(`cf_i${i}`)), alumbrado_publico: numero(getVal(`alum_i${i}`)), interes_compensatorio: numero(getVal(`int_i${i}`)), subtotal_antes_igv: numero(getVal(`ener_i${i}`) + getVal(`rep_i${i}`) + getVal(`cf_i${i}`) + getVal(`alum_i${i}`) + getVal(`int_i${i}`)), igv: numero(getVal(`igv_i${i}`)), aporte_ley_28749: numero(getVal(`aporte_i${i}`)), redondeo_anterior: numero(getVal(`red_ant_i${i}`)), redondeo_actual: numero(getVal(`red_act_i${i}`)), total_pagar: totalInq } });
         }
 
         const kwhSinMedidor = hasSinMedidor && window._i1_cache ? numero(window._i1_cache.kwh, 2) : 0;
-
-        datosExportar.push({
-            tipo_registro: "resumen",
-            mes: mes,
-            mes_cobro: mesCobro,
-            anio: anio,
-            consumo_total_recibo_kwh: numero(km, 2),
-            consumo_inquilinos_con_medidor_kwh: numero(sumaKwhMedidores, 2),
-            consumo_inquilino_sin_medidor_kwh: kwhSinMedidor,
-            consumo_total_distribuido_kwh: numero(sumaKwhDistribuidos, 2),
-            diferencia_consumo_kwh: numero(km - sumaKwhDistribuidos, 2),
-            total_recibo_principal: numero(totalPrincipal, 2),
-            total_distribuido_inquilinos: numero(sumaMontosInquilinos, 2),
-            diferencia_montos: numero(totalPrincipal - sumaMontosInquilinos, 2),
-            cantidad_inquilinos: totalInquilinosReales
-        });
+        datosExportar.push({ tipo_registro: "resumen", mes: mes, mes_cobro: mesCobro, anio: anio, consumo_total_recibo_kwh: numero(km, 2), consumo_inquilinos_con_medidor_kwh: numero(sumaKwhMedidores, 2), consumo_inquilino_sin_medidor_kwh: kwhSinMedidor, consumo_total_distribuido_kwh: numero(sumaKwhDistribuidos, 2), diferencia_consumo_kwh: numero(km - sumaKwhDistribuidos, 2), total_recibo_principal: numero(totalPrincipal, 2), total_distribuido_inquilinos: numero(sumaMontosInquilinos, 2), diferencia_montos: numero(totalPrincipal - sumaMontosInquilinos, 2), cantidad_inquilinos: totalInquilinosReales });
 
         const estadoApp = {};
-        document.querySelectorAll('input, select').forEach(input => {
-            if (input.id && input.type !== 'file' && input.type !== 'button') {
-                estadoApp[input.id] = input.type === 'checkbox' ? input.checked : input.value;
-            }
-        });
+        document.querySelectorAll('input, select').forEach(input => { if (input.id && input.type !== 'file' && input.type !== 'button') estadoApp[input.id] = input.type === 'checkbox' ? input.checked : input.value; });
 
-        const jsonUnificado = {
-            schema: 'luz_cayran_unificado',
-            schema_version: '3.0',
-            tipo: 'luz',
-            mes: mes,
-            mes_cobro: mesCobro,
-            anio: anio,
-            periodo: { mes: mes, anio: anio },
-            fecha_exportacion: datosExportar[0].fecha_exportacion || new Date().toISOString(),
-
-            estado_app: estadoApp,
-
-            configuracion: datosExportar[0].configuracion || {},
-            recibo_principal: datosExportar[1] || {},
-            inquilinos: datosExportar.filter(r => r && r.tipo_registro === 'inquilino'),
-            resumen: datosExportar.find(r => r && r.tipo_registro === 'resumen') || {}
-        };
-
-        const mesMayuscula = mes ? mes.toUpperCase() : 'SIN_MES';
-        const anioTexto = anio || '2026';
+        const jsonUnificado = { schema: 'luz_cayran_unificado', schema_version: '3.0', tipo: 'luz', mes: mes, mes_cobro: mesCobro, anio: anio, periodo: { mes: mes, anio: anio }, fecha_exportacion: datosExportar[0].fecha_exportacion || new Date().toISOString(), estado_app: estadoApp, configuracion: datosExportar[0].configuracion || {}, recibo_principal: datosExportar[1] || {}, inquilinos: datosExportar.filter(r => r && r.tipo_registro === 'inquilino'), resumen: datosExportar.find(r => r && r.tipo_registro === 'resumen') || {} };
+        const mesMayuscula = mes ? mes.toUpperCase() : 'SIN_MES'; const anioTexto = anio || '2026';
         descargarArchivo(jsonUnificado, `DATA LUZ ${mesMayuscula} - ${anioTexto}.json`);
     }
 
     async function capturarYCompartir(elementId, nombreArchivo, title, text) {
         const tempCont = document.getElementById('pdf-template-container');
         try {
-            const canvas = await html2canvas(document.getElementById(elementId), { 
-                scale: 2, 
-                useCORS: true, 
-                backgroundColor: '#ffffff' 
-            });
-            
+            const canvas = await html2canvas(document.getElementById(elementId), { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
             const base64Uri = canvas.toDataURL('image/png');
             
             if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
                 try {
                     const { Filesystem, Share } = window.Capacitor.Plugins;
                     const base64Data = base64Uri.split(',')[1];
-                    const savedFile = await Filesystem.writeFile({
-                        path: nombreArchivo, 
-                        data: base64Data, 
-                        directory: 'CACHE'
-                    });
-                    await Share.share({ 
-                        title: title, 
-                        text: text,
-                        url: savedFile.uri, 
-                        dialogTitle: 'Compartir Imagen' 
-                    });
-                    tempCont.innerHTML = '';
-                    return; 
-                } catch (err) { 
-                    console.error('Error con Capacitor Share:', err); 
-                }
+                    const savedFile = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'CACHE' });
+                    await Share.share({ title: title, text: text, url: savedFile.uri, dialogTitle: 'Compartir Imagen' });
+                    tempCont.innerHTML = ''; return; 
+                } catch (err) { console.error('Error con Capacitor Share:', err); }
             }
 
             canvas.toBlob(async (blob) => {
-                if (!blob) {
-                    tempCont.innerHTML = '';
-                    return;
-                }
-                
+                if (!blob) { tempCont.innerHTML = ''; return; }
                 let compartidoNativo = false;
                 if (navigator.share) {
                     const file = new File([blob], nombreArchivo, { type: 'image/png' });
                     if (typeof navigator.canShare !== 'function' || navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: title,
-                                text: text
-                            });
-                            compartidoNativo = true;
-                        } catch (e) {
-                            console.log('Interacción cancelada o error:', e);
-                            if (e.name === 'AbortError' || e.message.includes('Share canceled')) {
-                                compartidoNativo = true; 
-                            }
-                        }
+                        try { await navigator.share({ files: [file], title: title, text: text }); compartidoNativo = true; } 
+                        catch (e) { if (e.name === 'AbortError' || e.message.includes('Share canceled')) compartidoNativo = true; }
                     }
                 }
-
                 if (!compartidoNativo) {
                     alert("La imagen se descargará para que la puedas enviar manualmente.");
-                    const link = document.createElement('a');
-                    link.href = base64Uri;
-                    link.download = nombreArchivo;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    const link = document.createElement('a'); link.href = base64Uri; link.download = nombreArchivo;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
                 }
-
                 tempCont.innerHTML = ''; 
             }, 'image/png');
-
-        } catch (err) {
-            console.error("Error capturando imagen", err);
-            tempCont.innerHTML = '';
-            alert("Hubo un error al generar la imagen.");
-        }
+        } catch (err) { console.error("Error capturando imagen", err); tempCont.innerHTML = ''; alert("Hubo un error al generar la imagen."); }
     }
 
     async function generarImagenRecibo(id) {
@@ -1329,10 +1370,8 @@
         const total_pagar = document.getElementById(`total_pagar_i${id}`).value;
         
         let diasFacturadosTexto = '';
-        let f1m_val = document.getElementById('fec_act_m').value;
-        let f2m_val = document.getElementById('fec_ant_m').value;
-        let d_f1m = parseDateLocal(f1m_val);
-        let d_f2m = parseDateLocal(f2m_val);
+        let f1m_val = document.getElementById('fec_act_m').value; let f2m_val = document.getElementById('fec_ant_m').value;
+        let d_f1m = parseDateLocal(f1m_val); let d_f2m = parseDateLocal(f2m_val);
         let dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
         if(id === 1) {
@@ -1363,7 +1402,7 @@
         } else {
             const diasFct = document.getElementById(`dias_vividos_i${id}`).value;
             diasFacturadosTexto = `<b>DIAS FACTURADOS:</b> ${diasFct}<br>`;
-            let color = '#2563eb'; if (id === 2) color = '#059669'; if (id === 4) color = '#9333ea'; if (id === 5) color = '#ea580c';
+            let color = '#3b82f6'; if (id === 2) color = '#10b981'; if (id === 4) color = '#d946ef'; if (id === 5) color = '#f97316';
             const l_ant = getVal(`lec_ant_i${id}`); const l_act = getVal(`lec_act_i${id}`);
             tempCont.innerHTML = `
                 <div class="modo-recibo" id="recibo-captura">
@@ -1401,8 +1440,7 @@
 
         if(id === 1) {
             const c = window._i1_cache || {kwh:0, ener:0, rep:0, cf:0, alum:0, int:0, igv:0, aporte:0, red_ant:0, red_act:0};
-            const tarifa = getVal('tarifa');
-            const factorLey = (2 * UIT_VIGENTE) / 1000000;
+            const tarifa = getVal('tarifa'); const factorLey = (2 * UIT_VIGENTE) / 1000000;
             const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
             const n_inq_activos = (parseInt(document.getElementById('num_medidores').value) || 0) + (hasSinMedidor ? 1 : 0);
             const n = n_inq_activos > 0 ? n_inq_activos : 1; 
@@ -1418,7 +1456,7 @@
                         <h2>CÁLCULOS MATEMÁTICOS</h2><p>Inquilino: ${nombreInq.toUpperCase()} | Mes: ${mes}</p>
                     </div>
                     <div class="bloque-paso">
-                        <div class="paso-titulo" style="background:#fee2e2; color:#991b1b;">PASO 1: CONSUMO POR DIFERENCIA</div>
+                        <div class="paso-titulo" style="background:#fee2e2 !important; color:#991b1b !important;">PASO 1: CONSUMO POR DIFERENCIA</div>
                         <div class="pregunta">¿Cuál es la diferencia entre los kWh totales y la suma de consumos reales de los inquilinos con medidor?</div>
                         <div class="desarrollo" style="border-left-color:#ef4444;">
                             <div class="formula-box">Fórmula: kWh Totales Recibo - Suma Consumos Reales (Inquilinos con Medidor)</div>
@@ -1426,7 +1464,7 @@
                         </div>
                     </div>
                     <div class="bloque-paso">
-                        <div class="paso-titulo" style="background:#fee2e2; color:#991b1b;">PASO 2: CARGO ENERGÍA</div>
+                        <div class="paso-titulo" style="background:#fee2e2 !important; color:#991b1b !important;">PASO 2: CARGO ENERGÍA</div>
                         <div class="pregunta">¿A cuánto dinero equivale el consumo por diferencia?</div>
                         <div class="desarrollo" style="border-left-color:#ef4444;">
                             <div class="formula-box">Fórmula: Consumo por Diferencia × Tarifa</div>
@@ -1434,7 +1472,7 @@
                         </div>
                     </div>
                     <div class="bloque-paso">
-                        <div class="paso-titulo" style="background:#fee2e2; color:#991b1b;">PASO 3: SERVICIOS COMPARTIDOS</div>
+                        <div class="paso-titulo" style="background:#fee2e2 !important; color:#991b1b !important;">PASO 3: SERVICIOS COMPARTIDOS</div>
                         <div class="pregunta">Los montos fijos del recibo se dividen en partes iguales entre las ${n} divisiones ingresadas.</div>
                         <div class="desarrollo" style="border-left-color:#ef4444;">
                             <div class="formula-box">Fórmula: Montos fijos del Recibo ${texto_op_fijo}</div>
@@ -1449,32 +1487,32 @@
                         </div>
                     </div>
                     <div class="bloque-paso">
-                        <div class="paso-titulo" style="background:#fee2e2; color:#991b1b;">PASO 4: APORTE DE LEY</div>
+                        <div class="paso-titulo" style="background:#fee2e2 !important; color:#991b1b !important;">PASO 4: APORTE DE LEY</div>
                         <div class="desarrollo" style="border-left-color:#ef4444;">
                             <div class="formula-box">Fórmula: Factor (${factorLey.toFixed(6)}) × Consumo por Diferencia</div>
                             <div class="linea-operacion">Operación: ${factorLey.toFixed(6)} × ${c.kwh.toFixed(2)} = <b>S/. ${c.aporte.toFixed(2)} soles.</b></div>
                         </div>
                     </div>
                     <div class="bloque-paso">
-                        <div class="paso-titulo" style="background:#fee2e2; color:#991b1b;">PASO 5: IGV (18%)</div>
+                        <div class="paso-titulo" style="background:#fee2e2 !important; color:#991b1b !important;">PASO 5: IGV (18%)</div>
                         <div class="desarrollo" style="border-left-color:#ef4444;">
                             <div class="formula-box">Fórmula: 18% × (Energía + Reposición + Cargo Fijo + Alumbrado + Interés)</div>
                             <div class="linea-operacion">Operación: S/. ${(c.ener + c.rep + c.cf + c.alum + c.int).toFixed(2)} × 0.18 = <b>S/. ${c.igv.toFixed(2)} soles.</b></div>
                         </div>
                     </div>
-                    <div class="bloque-paso bloque-total" style="border-color:#ef4444;">
-                        <div class="paso-titulo" style="background:#fee2e2; color:#991b1b;">PASO 6: CUENTA FINAL</div>
-                        <div class="desarrollo" style="background:#fafafa;">
+                    <div class="bloque-paso bloque-total" style="border-color:#ef4444 !important;">
+                        <div class="paso-titulo" style="background:#fef08a !important; color:#854d0e !important;">PASO 6: CUENTA FINAL</div>
+                        <div class="desarrollo" style="background:#fafafa !important; border-left-color:#f59e0b !important;">
                             <div class="pregunta">Suma total de conceptos calculados:</div>
-                            <div class="linea-operacion" style="border-top-color:#ef4444; font-size:1.1rem; color:#ef4444;">TOTAL A PAGAR POR EL INQUILINO: S/. ${total_pagar} soles.</div>
+                            <div class="linea-operacion" style="border-top-color:#ef4444 !important; font-size:1.1rem; color:#ef4444 !important;">TOTAL A PAGAR POR EL INQUILINO: S/. ${total_pagar} soles.</div>
                         </div>
                     </div>
                 </div>`;
         } else {
-            let colorFondo = '#3730a3'; let colorTitulo = '#e0e7ff'; let colorTextoTitulo = '#3730a3';
-            if (id === 2) { colorFondo = '#059669'; colorTitulo = '#d1fae5'; colorTextoTitulo = '#065f46'; }
-            if (id === 4) { colorFondo = '#9333ea'; colorTitulo = '#f3e8ff'; colorTextoTitulo = '#7e22ce'; }
-            if (id === 5) { colorFondo = '#ea580c'; colorTitulo = '#ffedd5'; colorTextoTitulo = '#c2410c'; }
+            let colorFondo = '#3b82f6'; let colorTitulo = '#dbeafe'; let colorTextoTitulo = '#1e3a8a';
+            if (id === 2) { colorFondo = '#10b981'; colorTitulo = '#d1fae5'; colorTextoTitulo = '#064e3b'; }
+            if (id === 4) { colorFondo = '#d946ef'; colorTitulo = '#fae8ff'; colorTextoTitulo = '#701a75'; }
+            if (id === 5) { colorFondo = '#f97316'; colorTitulo = '#ffedd5'; colorTextoTitulo = '#7c2d12'; }
 
             const l_ant = getVal(`lec_ant_i${id}`); const l_act = getVal(`lec_act_i${id}`);
             const f1i = document.getElementById(`fec_act_i${id}`).value; const f2i = document.getElementById(`fec_ant_i${id}`).value;
@@ -1507,25 +1545,20 @@
             tempCont.innerHTML = `
                 <div class="pdf-calculos" id="calculos-captura">
                     <div class="main-header" style="background: ${colorFondo};"><h2>CÁLCULOS MATEMÁTICOS</h2><p>Inquilino: ${nombreInq.toUpperCase()} | Mes: ${mes}</p></div>
-                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 1: TIEMPO</div><div class="pregunta">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: (Fecha Actual - Fecha Anterior) + 1 día</div><div class="linea-operacion">Operación: (${fmtF1} - ${fmtF2}) + 1 = <b>${di_lectura} días.</b></div></div></div>
-                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 2: CONSUMO DIARIO</div><div class="pregunta">¿Cuánto consumió el inquilino en promedio por cada día?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: (Lectura Actual - Lectura Anterior) ÷ Número de días</div><div class="linea-operacion">Operación: (${l_act} - ${l_ant}) ÷ ${di_lectura} días = <b>${consumo_diario.toFixed(4)} kWh/día.</b></div></div></div>
-                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 3: CARGO ENERGÍA</div><div class="pregunta">¿A cuánto dinero equivale ese consumo en el recibo completo?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Consumo Diario × Días a Cobrar × Tarifa</div><div class="linea-operacion">Operación: ${consumo_diario.toFixed(4)} × ${dias_facturar} d. × S/. ${tarifa.toFixed(4)} = <b>S/. ${ener_val} soles.</b></div></div></div>
-                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 4: SERVICIOS COMPARTIDOS</div><div class="pregunta">${desc_paso4}</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Montos fijos del Recibo ${texto_op_fijo}</div><div class="lista-valores"><div class="fila-valor"><div class="celda-label">• Reposición y Mant.:</div><div class="celda-operacion">S/. ${main_rep.toFixed(2)} ${texto_op_fijo} = S/. ${rep_val}</div></div><div class="fila-valor"><div class="celda-label">• Cargo Fijo:</div><div class="celda-operacion">S/. ${main_cf.toFixed(2)} ${texto_op_fijo} = S/. ${cf_val}</div></div><div class="fila-valor"><div class="celda-label">• Alumbrado Público:</div><div class="celda-operacion">S/. ${main_alum.toFixed(2)} ${texto_op_fijo} = S/. ${alum_val}</div></div><div class="fila-valor"><div class="celda-label">• Interés Compensat.:</div><div class="celda-operacion">S/. ${main_int.toFixed(2)} ${texto_op_fijo} = S/. ${int_val}</div></div><div class="fila-valor"><div class="celda-label">• Redondeo Anterior:</div><div class="celda-operacion">S/. ${main_red_ant.toFixed(2)} ${texto_op_fijo} = S/. ${red_ant_val}</div></div><div class="fila-valor"><div class="celda-label">• Redondeo Actual:</div><div class="celda-operacion">S/. ${main_red_act.toFixed(2)} ${texto_op_fijo} = S/. ${red_act_val}</div></div></div></div></div>
-                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 5: APORTE DE LEY</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Factor (${factorLey.toFixed(6)}) × Consumo Diario × Días a Cobrar</div><div class="linea-operacion">Operación: ${factorLey.toFixed(6)} × ${consumo_diario.toFixed(4)} × ${dias_facturar} = <b>S/. ${aporte_val} soles.</b></div></div></div>
-                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 6: IGV (18%)</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: 18% × (Energía + Reposición + Cargo Fijo + Alumbrado + Interés)</div><div class="linea-operacion">Operación: S/. ${sub_sin_igv} × 0.18 = <b>S/. ${igv_val} soles.</b></div></div></div>
-                    <div class="bloque-paso bloque-total" style="border-color:${colorFondo};"><div class="paso-titulo" style="background:${colorTitulo}; color:${colorTextoTitulo};">PASO 7: CUENTA FINAL</div><div class="desarrollo" style="background:#fafafa;"><div class="pregunta">Suma total de conceptos calculados:</div><div class="linea-operacion" style="border-top-color:${colorFondo}; font-size:1.1rem; color:${colorFondo};">TOTAL A PAGAR POR EL INQUILINO: S/. ${total_pagar} soles.</div></div></div>
+                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 1: TIEMPO</div><div class="pregunta">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: (Fecha Actual - Fecha Anterior) + 1 día</div><div class="linea-operacion">Operación: (${fmtF1} - ${fmtF2}) + 1 = <b>${di_lectura} días.</b></div></div></div>
+                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 2: CONSUMO DIARIO</div><div class="pregunta">¿Cuánto consumió el inquilino en promedio por cada día?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: (Lectura Actual - Lectura Anterior) ÷ Número de días</div><div class="linea-operacion">Operación: (${l_act} - ${l_ant}) ÷ ${di_lectura} días = <b>${consumo_diario.toFixed(4)} kWh/día.</b></div></div></div>
+                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 3: CARGO ENERGÍA</div><div class="pregunta">¿A cuánto dinero equivale ese consumo en el recibo completo?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Consumo Diario × Días a Cobrar × Tarifa</div><div class="linea-operacion">Operación: ${consumo_diario.toFixed(4)} × ${dias_facturar} d. × S/. ${tarifa.toFixed(4)} = <b>S/. ${ener_val} soles.</b></div></div></div>
+                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 4: SERVICIOS COMPARTIDOS</div><div class="pregunta">${desc_paso4}</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Montos fijos del Recibo ${texto_op_fijo}</div><div class="lista-valores"><div class="fila-valor"><div class="celda-label">• Reposición y Mant.:</div><div class="celda-operacion">S/. ${main_rep.toFixed(2)} ${texto_op_fijo} = S/. ${rep_val}</div></div><div class="fila-valor"><div class="celda-label">• Cargo Fijo:</div><div class="celda-operacion">S/. ${main_cf.toFixed(2)} ${texto_op_fijo} = S/. ${cf_val}</div></div><div class="fila-valor"><div class="celda-label">• Alumbrado Público:</div><div class="celda-operacion">S/. ${main_alum.toFixed(2)} ${texto_op_fijo} = S/. ${alum_val}</div></div><div class="fila-valor"><div class="celda-label">• Interés Compensat.:</div><div class="celda-operacion">S/. ${main_int.toFixed(2)} ${texto_op_fijo} = S/. ${int_val}</div></div><div class="fila-valor"><div class="celda-label">• Redondeo Anterior:</div><div class="celda-operacion">S/. ${main_red_ant.toFixed(2)} ${texto_op_fijo} = S/. ${red_ant_val}</div></div><div class="fila-valor"><div class="celda-label">• Redondeo Actual:</div><div class="celda-operacion">S/. ${main_red_act.toFixed(2)} ${texto_op_fijo} = S/. ${red_act_val}</div></div></div></div></div>
+                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 5: APORTE DE LEY</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Factor (${factorLey.toFixed(6)}) × Consumo Diario × Días a Cobrar</div><div class="linea-operacion">Operación: ${factorLey.toFixed(6)} × ${consumo_diario.toFixed(4)} × ${dias_facturar} = <b>S/. ${aporte_val} soles.</b></div></div></div>
+                    <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 6: IGV (18%)</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: 18% × (Energía + Reposición + Cargo Fijo + Alumbrado + Interés)</div><div class="linea-operacion">Operación: S/. ${sub_sin_igv} × 0.18 = <b>S/. ${igv_val} soles.</b></div></div></div>
+                    <div class="bloque-paso bloque-total" style="border-color:${colorFondo} !important;"><div class="paso-titulo" style="background:#fef08a !important; color:#854d0e !important;">PASO 7: CUENTA FINAL</div><div class="desarrollo" style="background:#fafafa !important; border-left-color:#f59e0b !important;"><div class="pregunta">Suma total de conceptos calculados:</div><div class="linea-operacion" style="border-top-color:${colorFondo} !important; font-size:1.1rem; color:${colorFondo} !important;">TOTAL A PAGAR POR EL INQUILINO: S/. ${total_pagar} soles.</div></div></div>
                 </div>`;
         }
 
         const nombreArchivoCalc = `CALCULOS LUZ ${mes} - ${nombreInq}.pdf`;
-        html2pdf().set({ 
-            margin: [10, 10], 
-            filename: nombreArchivoCalc, 
-            html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, 
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2pdf().set({ margin: [10, 10], filename: nombreArchivoCalc, html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(document.getElementById('calculos-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
-            tempCont.innerHTML = ''; 
-            await guardarOCompartirPDF(nombreArchivoCalc, pdfBase64);
+            tempCont.innerHTML = ''; await guardarOCompartirPDF(nombreArchivoCalc, pdfBase64);
         });
     }
 
@@ -1535,10 +1568,8 @@
         const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
         const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
         
-        let f1m_val = document.getElementById('fec_act_m').value;
-        let f2m_val = document.getElementById('fec_ant_m').value;
-        let d_f1m = parseDateLocal(f1m_val);
-        let d_f2m = parseDateLocal(f2m_val);
+        let f1m_val = document.getElementById('fec_act_m').value; let f2m_val = document.getElementById('fec_ant_m').value;
+        let d_f1m = parseDateLocal(f1m_val); let d_f2m = parseDateLocal(f2m_val);
         let dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
         let filasTabla = '';
@@ -1547,58 +1578,30 @@
             const nombreI1 = document.getElementById('titulo_i1').value || 'Inquilino sin medidor';
             const totalI1 = document.getElementById('total_pagar_i1').value || '0.00';
             const c = window._i1_cache || {kwh:0};
-            filasTabla += `<tr>
-                <td><b>${nombreI1}</b><br><small>Sin medidor (Diferencia)</small></td>
-                <td style="text-align:center">${c.kwh.toFixed(2)} kWh</td>
-                <td style="text-align:center">${dm} días</td>
-                <td style="text-align:right"><b>S/. ${totalI1}</b></td>
-            </tr>`;
+            filasTabla += `<tr><td><b>${nombreI1}</b><br><small>Sin medidor (Diferencia)</small></td><td style="text-align:center">${c.kwh.toFixed(2)} kWh</td><td style="text-align:center">${dm} días</td><td style="text-align:right"><b>S/. ${totalI1}</b></td></tr>`;
         }
 
         for (let i = 2; i <= (numMedidores + 1); i++) {
             const nombreInq = document.getElementById(`titulo_i${i}`).value || `Inquilino ${i-1}`;
-            const lAnt = getVal(`lec_ant_i${i}`);
-            const lAct = getVal(`lec_act_i${i}`);
-            const f1i = document.getElementById(`fec_act_i${i}`).value; 
-            const f2i = document.getElementById(`fec_ant_i${i}`).value;
+            const lAnt = getVal(`lec_ant_i${i}`); const lAct = getVal(`lec_act_i${i}`);
+            const f1i = document.getElementById(`fec_act_i${i}`).value; const f2i = document.getElementById(`fec_ant_i${i}`).value;
             const di_lectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
-            const ki = Math.max(0, lAct - lAnt);
-            const kd = di_lectura > 0 ? (ki / di_lectura) : 0;
-
+            const ki = Math.max(0, lAct - lAnt); const kd = di_lectura > 0 ? (ki / di_lectura) : 0;
             const modo = document.getElementById(`modo_dias_i${i}`).value;
             let dias_facturar = modo === 'recibo' ? dm : getVal(`dias_vividos_i${i}`);
-            
             const kwhConsumidoReal = (kd * dias_facturar).toFixed(2);
             const totalInq = document.getElementById(`total_pagar_i${i}`).value || '0.00';
-
-            filasTabla += `<tr>
-                <td><b>${nombreInq}</b><br><small>Con medidor</small></td>
-                <td style="text-align:center">${kwhConsumidoReal} kWh</td>
-                <td style="text-align:center">${dias_facturar} días</td>
-                <td style="text-align:right"><b>S/. ${totalInq}</b></td>
-            </tr>`;
+            filasTabla += `<tr><td><b>${nombreInq}</b><br><small>Con medidor</small></td><td style="text-align:center">${kwhConsumidoReal} kWh</td><td style="text-align:center">${dias_facturar} días</td><td style="text-align:right"><b>S/. ${totalInq}</b></td></tr>`;
         }
 
         tempCont.innerHTML = `
             <div class="modo-recibo" id="resumen-captura">
-                <div class="header-pdf" style="border-bottom-color:#6366f1;">
-                    <div><b style="color:#6366f1; font-size:1.6rem">RESUMEN DE CONSUMO DE LUZ</b><br>MES: ${mes}</div>
-                    <div class="total-box-pdf" style="background:#6366f1;"><small>TOTAL GENERAL</small><br><b style="font-size:1.5rem">S/. ${document.getElementById('total_pagar_m').value}</b></div>
+                <div class="header-pdf" style="border-bottom-color:#8b5cf6;">
+                    <div><b style="color:#8b5cf6; font-size:1.6rem">RESUMEN DE CONSUMO DE LUZ</b><br>MES: ${mes}</div>
+                    <div class="total-box-pdf" style="background:#8b5cf6;"><small>TOTAL GENERAL</small><br><b style="font-size:1.5rem">S/. ${document.getElementById('total_pagar_m').value}</b></div>
                 </div>
                 <div style="margin-bottom:15px"><b>ESTADO:</b> Reporte consolidado de cobros por inquilino.</div>
-                <table class="tabla-pdf">
-                    <thead>
-                        <tr>
-                            <th>INQUILINO</th>
-                            <th style="text-align:center">CONSUMO REAL</th>
-                            <th style="text-align:center">DÍAS FACTURADOS</th>
-                            <th style="text-align:right">MONTO A PAGAR</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filasTabla}
-                    </tbody>
-                </table>
+                <table class="tabla-pdf"><thead><tr><th>INQUILINO</th><th style="text-align:center">CONSUMO REAL</th><th style="text-align:center">DÍAS FACTURADOS</th><th style="text-align:right">MONTO A PAGAR</th></tr></thead><tbody>${filasTabla}</tbody></table>
             </div>`;
 
         const nombreArchivoResumen = `RESUMEN DE LUZ - ${mes}.pdf`;
@@ -1624,152 +1627,88 @@
     toggleModoDias(2, false); toggleModoDias(3, false); toggleModoDias(4, false); toggleModoDias(5, false); actualizarVista(); 
     document.addEventListener('wheel', function(event) { if (document.activeElement.type === 'number') event.preventDefault(); }, { passive: false });
 
-    let arrayFotos = [];
-    const MAX_FOTOS = 5;
+    let arrayFotos = []; const MAX_FOTOS = 5;
 
     function manejarSeleccionFotos(event) {
         const files = Array.from(event.target.files);
         for (let file of files) {
-            if (arrayFotos.length < MAX_FOTOS) {
-                arrayFotos.push(file);
-            } else {
-                alert("Has alcanzado el límite máximo de 5 fotos.");
-                break;
-            }
+            if (arrayFotos.length < MAX_FOTOS) { arrayFotos.push(file); } else { alert("Has alcanzado el límite máximo de 5 fotos."); break; }
         }
-        dibujarGaleria();
-        event.target.value = ''; 
+        dibujarGaleria(); event.target.value = ''; 
     }
 
-    function removerFoto(index) {
-        arrayFotos.splice(index, 1);
-        dibujarGaleria();
-    }
+    function removerFoto(index) { arrayFotos.splice(index, 1); dibujarGaleria(); }
 
     function dibujarGaleria() {
-        const galleryUI = document.getElementById('gallery-ui');
-        const btnProcesar = document.getElementById('btn-procesar-ocr');
+        const galleryUI = document.getElementById('gallery-ui'); const btnProcesar = document.getElementById('btn-procesar-ocr');
         galleryUI.innerHTML = ''; 
-        
         arrayFotos.forEach((file, index) => {
             const url = URL.createObjectURL(file);
-            const thumbWrap = document.createElement('div');
-            thumbWrap.className = 'thumb-wrapper';
-            
-            const img = document.createElement('img');
-            img.src = url;
-            
-            const delBtn = document.createElement('div');
-            delBtn.className = 'btn-remove-thumb';
-            delBtn.innerHTML = '✕';
+            const thumbWrap = document.createElement('div'); thumbWrap.className = 'thumb-wrapper';
+            const img = document.createElement('img'); img.src = url;
+            const delBtn = document.createElement('div'); delBtn.className = 'btn-remove-thumb'; delBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
             delBtn.onclick = () => removerFoto(index);
-            
-            thumbWrap.appendChild(img);
-            thumbWrap.appendChild(delBtn);
-            galleryUI.appendChild(thumbWrap);
+            thumbWrap.appendChild(img); thumbWrap.appendChild(delBtn); galleryUI.appendChild(thumbWrap);
         });
-
         if (arrayFotos.length < MAX_FOTOS) {
-            const addBtn = document.createElement('div');
-            addBtn.className = 'btn-add-photo';
-            addBtn.innerHTML = '+';
-            addBtn.onclick = () => document.getElementById('input_subir').click();
-            galleryUI.appendChild(addBtn);
+            const addBtn = document.createElement('div'); addBtn.className = 'btn-add-photo'; addBtn.innerHTML = '<i class="bi bi-plus"></i>';
+            addBtn.onclick = () => document.getElementById('input_subir').click(); galleryUI.appendChild(addBtn);
         }
-
-        if (arrayFotos.length > 0) {
-            btnProcesar.style.display = 'block';
-        } else {
-            btnProcesar.style.display = 'none';
-        }
+        btnProcesar.style.display = arrayFotos.length > 0 ? 'inline-flex' : 'none';
     }
 
     dibujarGaleria();
 
     async function procesarFotosConOCR() {
         if (arrayFotos.length === 0) return;
-
         const statusLabel = document.getElementById('ocr_status');
-        statusLabel.style.display = 'block';
-        statusLabel.innerText = '⏳ Iniciando el motor de lectura...';
+        statusLabel.style.display = 'block'; statusLabel.innerHTML = '<i class="bi bi-hourglass-split"></i> Iniciando motor de lectura OCR...';
 
         try {
             const worker = await Tesseract.createWorker('spa');
             let combinedText = "";
-
             for (let i = 0; i < arrayFotos.length; i++) {
-                statusLabel.innerText = `🔍 Analizando imagen ${i + 1} de ${arrayFotos.length}...`;
+                statusLabel.innerHTML = `<i class="bi bi-search"></i> Analizando imagen ${i + 1} de ${arrayFotos.length}...`;
                 const ret = await worker.recognize(arrayFotos[i]);
                 combinedText += " " + ret.data.text.toLowerCase();
             }
             
-            statusLabel.innerText = '⚙️ Extrayendo valores al formulario...';
+            statusLabel.innerHTML = '<i class="bi bi-gear-fill"></i> Extrayendo valores al formulario...';
             const text = combinedText;
 
-            const buscarNumero = (regex, texto) => {
-                const coincidencia = texto.match(regex);
-                if (coincidencia) {
-                    const limpio = coincidencia[1].replace(/\s+/g, '').replace(',', '.');
-                    return parseFloat(limpio);
-                }
-                return null;
-            };
+            const buscarNumero = (regex, texto) => { const coincidencia = texto.match(regex); if (coincidencia) { const limpio = coincidencia[1].replace(/\s+/g, '').replace(',', '.'); return parseFloat(limpio); } return null; };
+            const buscarFecha = (regex, texto) => { const coincidencia = texto.match(regex); if (coincidencia) { const limpio = coincidencia[1].replace(/\s+/g, ''); const partes = limpio.split(/[-/]/); if (partes.length === 3) { return partes[0].length === 4 ? `${partes[0]}-${partes[1].padStart(2,'0')}-${partes[2].padStart(2,'0')}` : `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`; } } return null; };
 
-            const buscarFecha = (regex, texto) => {
-                const coincidencia = texto.match(regex);
-                if (coincidencia) {
-                    const limpio = coincidencia[1].replace(/\s+/g, '');
-                    const partes = limpio.split(/[-/]/);
-                    if (partes.length === 3) {
-                        return partes[0].length === 4 
-                            ? `${partes[0]}-${partes[1].padStart(2,'0')}-${partes[2].padStart(2,'0')}`
-                            : `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
-                    }
-                }
-                return null;
-            };
-
-            const v_rep = buscarNumero(/reposic.*?mant[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-            const v_fijo = buscarNumero(/cargo\s*fijo[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-            const v_alum = buscarNumero(/alumbrado[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-            const v_int = buscarNumero(/inter[eé]s[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-            const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_rep = buscarNumero(/reposic.*?mant[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text); const v_fijo = buscarNumero(/cargo\s*fijo[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_alum = buscarNumero(/alumbrado[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text); const v_int = buscarNumero(/inter[eé]s[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
+            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text); const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
             const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*[^0-9]*?(-?\d+\s*[.,]\s*\d+)/i, text); 
             
-            const f_act = buscarFecha(/lectura\s*actual[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
-            const f_ant = buscarFecha(/lectura\s*anterior[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
+            const f_act = buscarFecha(/lectura\s*actual[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text); const f_ant = buscarFecha(/lectura\s*anterior[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
 
             const textWithoutDates = text.replace(/\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4}/g, '');
-            const v_lec_act = buscarNumero(/lectura\s*actual[^0-9]*?(\d+)/i, textWithoutDates); 
-            const v_lec_ant = buscarNumero(/lectura\s*anterior[^0-9]*?(\d+)/i, textWithoutDates);
+            const v_lec_act = buscarNumero(/lectura\s*actual[^0-9]*?(\d+)/i, textWithoutDates); const v_lec_ant = buscarNumero(/lectura\s*anterior[^0-9]*?(\d+)/i, textWithoutDates);
 
-            document.getElementById('rep_m').value = v_rep !== null ? v_rep : 0;
-            document.getElementById('cargo_fijo_m').value = v_fijo !== null ? v_fijo : 0;
-            document.getElementById('alum_m').value = v_alum !== null ? v_alum : 0;
-            document.getElementById('int_m').value = v_int !== null ? v_int : 0;
-            document.getElementById('red_ant_m').value = v_red_ant !== null ? v_red_ant : 0;
-            document.getElementById('red_act_m').value = v_red_act !== null ? v_red_act : 0;
-            document.getElementById('tarifa').value = v_tarifa !== null ? v_tarifa : 0;
-            document.getElementById('lec_act_m').value = v_lec_act !== null ? v_lec_act : 0;
+            document.getElementById('rep_m').value = v_rep !== null ? v_rep : 0; document.getElementById('cargo_fijo_m').value = v_fijo !== null ? v_fijo : 0;
+            document.getElementById('alum_m').value = v_alum !== null ? v_alum : 0; document.getElementById('int_m').value = v_int !== null ? v_int : 0;
+            document.getElementById('red_ant_m').value = v_red_ant !== null ? v_red_ant : 0; document.getElementById('red_act_m').value = v_red_act !== null ? v_red_act : 0;
+            document.getElementById('tarifa').value = v_tarifa !== null ? v_tarifa : 0; document.getElementById('lec_act_m').value = v_lec_act !== null ? v_lec_act : 0;
             document.getElementById('lec_ant_m').value = v_lec_ant !== null ? v_lec_ant : 0;
 
             if (f_act !== null) document.getElementById('fec_act_m').value = f_act;
             if (f_ant !== null) document.getElementById('fec_ant_m').value = f_ant;
 
             calculate();
-
-            statusLabel.style.background = '#d1fae5'; statusLabel.style.color = '#065f46';
-            statusLabel.innerText = '✅ ¡Lectura Exitosa! Revisa los datos en el formulario.';
+            statusLabel.style.background = 'rgba(16, 185, 129, 0.1)'; statusLabel.style.color = '#10b981';
+            statusLabel.innerHTML = '<i class="bi bi-check-circle-fill"></i> ¡Lectura Exitosa! Revisa los datos en el formulario.';
             
-            setTimeout(() => { statusLabel.style.display = 'none'; statusLabel.style.background = '#ede9fe'; statusLabel.style.color = '#6d28d9'; }, 5000);
-            
+            setTimeout(() => { statusLabel.style.display = 'none'; statusLabel.style.background = 'rgba(139, 92, 246, 0.1)'; statusLabel.style.color = 'var(--accent-main)'; }, 5000);
             await worker.terminate();
 
         } catch (error) {
             console.error("Error en OCR:", error);
-            statusLabel.style.background = '#fee2e2'; statusLabel.style.color = '#991b1b';
-            statusLabel.innerText = '❌ Error al procesar las imágenes.';
+            statusLabel.style.background = 'rgba(239, 68, 68, 0.1)'; statusLabel.style.color = '#ef4444';
+            statusLabel.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error al procesar las imágenes.';
             setTimeout(() => { statusLabel.style.display = 'none'; }, 4000);
         }
     }
