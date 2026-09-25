@@ -34,6 +34,19 @@
         
         #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
 
+        /* Estilo para el botón de actualizar ciclo */
+        .btn-ciclo {
+            cursor: pointer;
+            font-size: 0.95rem;
+            background: #e2e8f0;
+            border-radius: 4px;
+            padding: 1px 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        .btn-ciclo:active { background: #cbd5e1; transform: scale(0.95); }
+
         @media (max-width: 768px) { 
             .container { padding: 10px; } 
             
@@ -88,7 +101,16 @@
                     </select>
                 </div>
                 <div class="col-6 col-md-2"><label class="small-label">Lectura Anterior</label><input type="number" id="m_prev_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
-                <div class="col-6 col-md-2"><label class="small-label">Lectura Actual</label><input type="number" id="m_curr_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
+                
+                <!-- Botón Ciclo Principal Agregado Aquí -->
+                <div class="col-6 col-md-2">
+                    <label class="small-label" style="display: flex; justify-content: space-between; align-items: center;">
+                        Lectura Actual
+                        <span class="btn-ciclo" onclick="avanzarCicloPrincipalAgua()" title="Pasar datos actuales a anteriores y limpiar">🔄</span>
+                    </label>
+                    <input type="number" id="m_curr_r" class="form-control form-control-sm input-editable" oninput="calc()">
+                </div>
+                
                 <div class="col-6 col-md-2"><label class="small-label">Fecha Anterior</label><input type="date" id="m_prev_d" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                 <div class="col-6 col-md-2"><label class="small-label">Fecha Actual</label><input type="date" id="m_curr_d" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                 <div class="col-6 col-md-2"><label class="small-label">Agua S/.</label><input type="number" id="v_water" class="form-control form-control-sm input-editable" oninput="calc()"></div>
@@ -176,11 +198,55 @@
     }
 
     // =========================================================================
+    // NUEVAS FUNCIONES: ROTACIÓN DE CICLO ACTUAL A ANTERIOR
+    // =========================================================================
+    
+    function avanzarCicloPrincipalAgua() {
+        if(confirm("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores? Los datos actuales quedarán en blanco para que ingreses los nuevos.")) {
+            // Lecturas
+            const lecAct = document.getElementById('m_curr_r');
+            const lecAnt = document.getElementById('m_prev_r');
+            if(lecAct && lecAnt) {
+                lecAnt.value = lecAct.value;
+                lecAct.value = '';
+            }
+
+            // Fechas
+            const fecAct = document.getElementById('m_curr_d');
+            const fecAnt = document.getElementById('m_prev_d');
+            if(fecAct && fecAnt) {
+                fecAnt.value = fecAct.value;
+                fecAct.value = '';
+            }
+            calc();
+        }
+    }
+
+    function avanzarCicloInquilinoAgua(id) {
+        const nombreInq = document.getElementById(`i${id}_name`)?.value || `Inquilino #${id}`;
+        if(confirm(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores? Los campos actuales quedarán en blanco para el nuevo mes.`)) {
+            // Lecturas
+            const lecAct = document.getElementById(`i${id}_curr_r`);
+            const lecAnt = document.getElementById(`i${id}_prev_r`);
+            if(lecAct && lecAnt) {
+                lecAnt.value = lecAct.value;
+                lecAct.value = '';
+            }
+
+            // Fechas
+            const fecAct = document.getElementById(`i${id}_curr_d`);
+            const fecAnt = document.getElementById(`i${id}_prev_d`);
+            if(fecAct && fecAnt) {
+                fecAnt.value = fecAct.value;
+                fecAct.value = '';
+            }
+            calc();
+        }
+    }
+
+
+    // =========================================================================
     // JSON ÚNICO AGUA
-    // Un solo archivo sirve para:
-    // 1) restaurar completamente Agua Cayrán;
-    // 2) importar montos/consumos/fechas/mes en redondeos_montos;
-    // 3) conservar una base histórica con entradas, cálculos y resultados.
     // =========================================================================
 
     function numeroAgua(valor, decimales = 6) {
@@ -362,7 +428,6 @@
                 id_interno: i,
                 con_medidor: true,
 
-                // Campos de interoperabilidad que usa redondeos_montos.
                 consumo_m3: consumoM3,
                 dias_facturados: diasFacturados,
                 monto_pagar: total,
@@ -420,7 +485,6 @@
                 id_interno: 'nometer',
                 con_medidor: false,
 
-                // Campos de interoperabilidad que usa redondeos_montos.
                 consumo_m3: consumoM3,
                 dias_facturados: diasFacturados,
                 monto_pagar: total,
@@ -460,7 +524,6 @@
             periodo: { mes: mes, anio: anio },
             fecha_exportacion: new Date().toISOString(),
 
-            // Copia exacta de los campos para reabrir el trabajo en Agua Cayrán.
             estado_app: capturarEstadoAppAgua(),
 
             configuracion: {
@@ -520,11 +583,9 @@
             }
         };
 
-        // AQUÍ ESTÁ EL CAMBIO SOLICITADO PARA EL NOMBRE DEL ARCHIVO:
         descargarJSONAgua(jsonUnificado, `DATA AGUA ${mes} - ${anio || 'SIN_ANIO'}.json`);
     }
 
-    // El botón superior es el ÚNICO generador de JSON.
     function guardarEstadoApp() {
         exportarJSONAgua();
     }
@@ -573,7 +634,6 @@
                     const mes = String(datos.mes_cobro || datos.mes || '').trim().toUpperCase();
                     alert(`¡JSON único de AGUA${mes ? ' (' + mes + ')' : ''} restaurado correctamente!`);
                 } else if (datos && typeof datos === 'object' && !Array.isArray(datos)) {
-                    // Compatibilidad con archivos antiguos de "Guardar Datos".
                     cargarEstadoLegacyAgua(datos);
                     alert('¡Datos antiguos de Agua Cayrán restaurados correctamente!');
                 } else if (Array.isArray(datos)) {
@@ -770,7 +830,16 @@
 
                         <div class="row g-2 mb-2" id="inputs_${i}">
                             <div class="col-6"><label class="small-label">Lectura Anterior</label><input type="number" id="i${i}_prev_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
-                            <div class="col-6"><label class="small-label">Lectura Actual</label><input type="number" id="i${i}_curr_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
+                            
+                            <!-- Botón Ciclo Inquilino Agregado Aquí -->
+                            <div class="col-6">
+                                <label class="small-label" style="display: flex; justify-content: space-between; align-items: center;">
+                                    Lectura Actual
+                                    <span class="btn-ciclo" onclick="avanzarCicloInquilinoAgua(${i})" title="Pasar datos actuales a anteriores y limpiar">🔄</span>
+                                </label>
+                                <input type="number" id="i${i}_curr_r" class="form-control form-control-sm input-editable" oninput="calc()">
+                            </div>
+                            
                             <div class="col-6"><label class="small-label">Fecha Anterior</label><input type="date" id="i${i}_prev_d" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                             <div class="col-6"><label class="small-label">Fecha Actual</label><input type="date" id="i${i}_curr_d" class="form-control form-control-sm input-editable" oninput="calc()"></div>
                             
@@ -877,16 +946,12 @@
         calc();
     }
 
-    // =========================================================================
-    // EXPORTACIÓN DE REPORTE RESUMEN (DISEÑO REPLICADO A LA IMAGEN)
-    // =========================================================================
     async function exportResumenPDF() {
         const mes = document.getElementById('m_mes').value || '';
         const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalPrincipalText = document.getElementById('v_total_main').value; 
         
-        // Formatear fechas para el encabezado
         const formatFecha = (fechaStr) => {
             if (!fechaStr) return '';
             const meses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SETIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
@@ -984,9 +1049,6 @@
         }
     }
 
-    // =========================================================================
-    // EXPORTACIÓN EXCLUSIVA DEL RECIBO PRINCIPAL
-    // =========================================================================
     async function exportPDF(id) {
         const tempCont = document.getElementById('pdf-template-container');
         const mes = document.getElementById('m_mes').value;
@@ -1093,9 +1155,6 @@
         }
     }
 
-    // =========================================================================
-    // EXPORTACIÓN EXCLUSIVA DE LOS CÁLCULOS MATEMÁTICOS
-    // =========================================================================
     async function exportCalculos(id) {
         const mes = document.getElementById('m_mes').value;
         const tenantNameInput = document.getElementById(id === 'nometer' ? 'inometer_name' : `i${id}_name`);
