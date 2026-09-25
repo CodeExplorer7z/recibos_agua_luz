@@ -220,6 +220,60 @@
         exportarJSON();
     }
 
+    // NUEVA FUNCIÓN: Descarga real y nativa para móviles
+    async function descargarArchivo(datos, nombreArchivo) {
+        const jsonString = JSON.stringify(datos, null, 2);
+        
+        // 1. Intento con Capacitor (si estás usando Android/iOS nativo)
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+            try {
+                const { Filesystem, Share } = window.Capacitor.Plugins;
+                // Capacitor requiere base64 para algunos sistemas, lo convertimos de forma segura
+                const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+                const savedFile = await Filesystem.writeFile({
+                    path: nombreArchivo,
+                    data: base64Data,
+                    directory: 'CACHE'
+                });
+                await Share.share({
+                    title: nombreArchivo,
+                    url: savedFile.uri,
+                    dialogTitle: 'Guardar o Compartir JSON'
+                });
+                return;
+            } catch (err) {
+                console.error('Error con Capacitor Share:', err);
+            }
+        }
+
+        // 2. Intento con Web Share API (Navegadores móviles modernos como Chrome en Android)
+        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+        const file = new File([blob], nombreArchivo, { type: 'application/json' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Respaldo JSON de Luz',
+                    text: nombreArchivo
+                });
+                return;
+            } catch (error) {
+                console.error('Error compartiendo vía Web Share API:', error);
+            }
+        }
+
+        // 3. Método tradicional (Computadoras de escritorio)
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
     // Carga compatible con tres generaciones:
     // 1) JSON ÚNICO v3 (formato actual y recomendado).
     // 2) JSON completo v2 (array) de versiones anteriores.
@@ -995,11 +1049,6 @@
             }
         });
 
-        const metadata = datosExportar.find(r => r && r.tipo_registro === 'metadata') || {};
-        const reciboPrincipal = datosExportar.find(r => r && r.tipo_registro === 'recibo_principal') || {};
-        const inquilinosExportados = datosExportar.filter(r => r && r.tipo_registro === 'inquilino');
-        const resumen = datosExportar.find(r => r && r.tipo_registro === 'resumen') || {};
-
         const jsonUnificado = {
             schema: 'luz_cayran_unificado',
             schema_version: '3.0',
@@ -1008,27 +1057,22 @@
             mes_cobro: mesCobro,
             anio: anio,
             periodo: { mes: mes, anio: anio },
-            fecha_exportacion: metadata.fecha_exportacion || new Date().toISOString(),
+            fecha_exportacion: datosExportar[0].fecha_exportacion || new Date().toISOString(),
 
             // Para reabrir exactamente el trabajo en Luz Cayrán.
             estado_app: estadoApp,
 
             // Para análisis y para otras webs.
-            configuracion: metadata.configuracion || {},
-            recibo_principal: reciboPrincipal,
-            inquilinos: inquilinosExportados,
-            resumen: resumen
+            configuracion: datosExportar[0].configuracion || {},
+            recibo_principal: datosExportar[1] || {},
+            inquilinos: datosExportar.filter(r => r && r.tipo_registro === 'inquilino'),
+            resumen: datosExportar.find(r => r && r.tipo_registro === 'resumen') || {}
         };
 
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonUnificado, null, 2));
-        const nombreArchivo = `luz_${mes ? mes.toLowerCase() : 'sin_mes'}_${anio || 'sin_anio'}.json`;
-
-        const anchorDescarga = document.createElement('a');
-        anchorDescarga.setAttribute("href", dataStr);
-        anchorDescarga.setAttribute("download", nombreArchivo);
-        document.body.appendChild(anchorDescarga);
-        anchorDescarga.click();
-        anchorDescarga.remove();
+        // AQUÍ ESTÁ EL CAMBIO PARA DESCARGAR CON WEB SHARE API Y NOMENCLATURA EXACTA
+        const mesMayuscula = mes ? mes.toUpperCase() : 'SIN_MES';
+        const anioTexto = anio || '2026';
+        descargarArchivo(jsonUnificado, `DATA LUZ ${mesMayuscula} - ${anioTexto}.json`);
     }
 
     async function capturarYCompartir(elementId, nombreArchivo, title, text) {
