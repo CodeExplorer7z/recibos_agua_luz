@@ -92,6 +92,18 @@
         .btn-remove-thumb { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .btn-add-photo { width: 75px; height: 75px; flex-shrink: 0; background: #e2e8f0; border: 2px dashed #94a3b8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #64748b; cursor: pointer; }
         .btn-add-photo:active { background: #cbd5e1; }
+        
+        /* Estilo para el botón de actualizar ciclo */
+        .btn-ciclo {
+            cursor: pointer;
+            font-size: 1.1rem;
+            background: #e2e8f0;
+            border-radius: 4px;
+            padding: 2px 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        .btn-ciclo:active { background: #cbd5e1; transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -169,7 +181,13 @@
         <div class="section-title">Fechas y Lecturas (Recibo Principal)</div>
         <div class="grid-2">
             <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
+            <div class="form-group">
+                <label style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    Lectura Actual:
+                    <span class="btn-ciclo" onclick="avanzarCicloPrincipal()" title="Pasar datos actuales a anteriores y limpiar">🔄</span>
+                </label>
+                <input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()">
+            </div>
             <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
             <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
         </div>
@@ -209,26 +227,16 @@
     // NUEVAS FUNCIONES: GUARDAR Y CARGAR ESTADO (SESIÓN) PARA LUZ
     // =========================================================================
 
-    // -------------------------------------------------------------------------
-    // UN SOLO JSON PARA TODO
-    // El botón superior "Guardar JSON único" descarga el único archivo de datos.
-    // Ese JSON sirve para:
-    //   1) restaurar por completo esta web Luz Cayrán;
-    //   2) importar los datos necesarios en redondeos_montos.
-    // -------------------------------------------------------------------------
     function guardarEstadoAppLuz() {
         exportarJSON();
     }
 
-    // NUEVA FUNCIÓN: Descarga real y nativa para móviles
     async function descargarArchivo(datos, nombreArchivo) {
         const jsonString = JSON.stringify(datos, null, 2);
         
-        // 1. Intento con Capacitor (si estás usando Android/iOS nativo)
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
             try {
                 const { Filesystem, Share } = window.Capacitor.Plugins;
-                // Capacitor requiere base64 para algunos sistemas, lo convertimos de forma segura
                 const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
                 const savedFile = await Filesystem.writeFile({
                     path: nombreArchivo,
@@ -246,7 +254,6 @@
             }
         }
 
-        // 2. Intento con Web Share API (Navegadores móviles modernos como Chrome en Android)
         const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
         const file = new File([blob], nombreArchivo, { type: 'application/json' });
 
@@ -263,7 +270,6 @@
             }
         }
 
-        // 3. Método tradicional (Computadoras de escritorio)
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -274,10 +280,6 @@
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // Carga compatible con tres generaciones:
-    // 1) JSON ÚNICO v3 (formato actual y recomendado).
-    // 2) JSON completo v2 (array) de versiones anteriores.
-    // 3) JSON antiguo de "Guardar Datos" (objeto con IDs de inputs).
     function cargarEstadoAppLuz(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -287,18 +289,14 @@
             try {
                 const datos = JSON.parse(e.target.result);
 
-                // Formato unificado v3: contiene una copia exacta del estado de
-                // la app y, a la vez, datos estructurados para redondeos_montos.
                 if (datos && typeof datos === 'object' && !Array.isArray(datos) &&
                     datos.schema === 'luz_cayran_unificado' && datos.estado_app) {
                     cargarEstadoLegacyLuz(datos.estado_app);
                     const mesTxt = String(datos.mes_cobro || datos.mes || '').trim().toUpperCase();
                     alert(`¡JSON único${mesTxt ? ' (' + mesTxt + ')' : ''} restaurado correctamente!`);
                 } else if (Array.isArray(datos)) {
-                    // Compatibilidad con exportaciones v2 anteriores.
                     cargarExportacionCompletaLuz(datos);
                 } else if (datos && typeof datos === 'object') {
-                    // Compatibilidad con antiguos archivos de "Guardar Datos".
                     cargarEstadoLegacyLuz(datos);
                     alert("¡Datos de sesión antiguos restaurados correctamente!");
                 } else {
@@ -316,7 +314,6 @@
     }
 
     function cargarEstadoLegacyLuz(estado) {
-        // Restaurar primero las variables que definen la estructura visual.
         if (estado['num_medidores'] !== undefined) {
             document.getElementById('num_medidores').value = estado['num_medidores'];
         }
@@ -326,7 +323,6 @@
 
         actualizarVista();
 
-        // Volcar el resto de datos por ID, igual que en el formato original.
         for (const id in estado) {
             const elemento = document.getElementById(id);
             if (elemento && id !== 'num_medidores' && id !== 'has_sin_medidor') {
@@ -359,7 +355,6 @@
         const conMedidor = inquilinos.filter(r => r.con_medidor !== false);
         const sinMedidor = inquilinos.find(r => r.con_medidor === false) || null;
 
-        // 1. Restaurar la estructura de la pantalla.
         let numMedidores = metadata && metadata.configuracion
             ? parseInt(metadata.configuracion.num_medidores)
             : conMedidor.length;
@@ -378,7 +373,6 @@
         document.getElementById('has_sin_medidor').checked = hasSinMedidor;
         actualizarVista();
 
-        // 2. Mes de cobro. Se acepta cualquiera de las ubicaciones previstas.
         const mesImportado =
             (metadata && (metadata.mes_cobro || metadata.mes || (metadata.periodo && metadata.periodo.mes))) ||
             reciboPrincipal.mes_cobro || reciboPrincipal.mes ||
@@ -391,7 +385,6 @@
             if (opcion) selectMes.value = opcion.value;
         }
 
-        // 3. Datos del recibo principal.
         const lecturasM = reciboPrincipal.lecturas || {};
         const importesM = reciboPrincipal.importes || {};
 
@@ -407,8 +400,6 @@
         asignarValorLuz('red_ant_m', importesM.redondeo_anterior);
         asignarValorLuz('red_act_m', importesM.redondeo_actual);
 
-        // 4. Limpiar primero los medidores dinámicos para evitar que queden
-        // datos de una importación anterior en tarjetas no utilizadas.
         for (let i = 2; i <= 5; i++) {
             asignarValorLuz(`titulo_i${i}`, '');
             asignarValorLuz(`lec_ant_i${i}`, '');
@@ -420,13 +411,10 @@
         }
         asignarValorLuz('titulo_i1', '');
 
-        // 5. Inquilino sin medidor.
         if (hasSinMedidor && sinMedidor) {
             asignarValorLuz('titulo_i1', sinMedidor.nombre || 'Inquilino sin medidor');
         }
 
-        // 6. Inquilinos con medidor. Para archivos nuevos se usa id_interno;
-        // para los ya exportados con esquema 2.0 se conserva el orden del array.
         conMedidor.forEach((inq, indice) => {
             let i = parseInt(inq.id_interno);
             if (!Number.isFinite(i) || i < 2 || i > 5) i = indice + 2;
@@ -447,9 +435,6 @@
             toggleModoDias(i, false);
         });
 
-        // 7. Recalcular a partir de los datos originales. Los resultados calculados
-        // del JSON sirven como histórico, pero la interfaz siempre vuelve a obtenerlos
-        // mediante la lógica vigente de Luz Cayrán.
         calculate();
 
         const mesTexto = mesImportado ? ` (${String(mesImportado).toUpperCase()})` : '';
@@ -467,6 +452,57 @@
             elemento.value = valor;
         }
     }
+
+    // =========================================================================
+    // NUEVAS FUNCIONES: ROTACIÓN DE CICLO ACTUAL A ANTERIOR
+    // =========================================================================
+
+    function avanzarCicloPrincipal() {
+        if(confirm("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores? Los datos actuales quedarán en blanco para que ingreses los nuevos.")) {
+            // Lecturas
+            const lecAct = document.getElementById('lec_act_m');
+            const lecAnt = document.getElementById('lec_ant_m');
+            if(lecAct && lecAnt) {
+                lecAnt.value = lecAct.value;
+                lecAct.value = '';
+            }
+
+            // Fechas
+            const fecAct = document.getElementById('fec_act_m');
+            const fecAnt = document.getElementById('fec_ant_m');
+            if(fecAct && fecAnt) {
+                fecAnt.value = fecAct.value;
+                fecAct.value = '';
+            }
+
+            calculate();
+        }
+    }
+
+    function avanzarCicloInquilino(id) {
+        const nombreInq = document.getElementById(`titulo_i${id}`).value || `Inquilino ${id-1}`;
+        if(confirm(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores? Los campos actuales quedarán en blanco para el nuevo mes.`)) {
+            // Lecturas
+            const lecAct = document.getElementById(`lec_act_i${id}`);
+            const lecAnt = document.getElementById(`lec_ant_i${id}`);
+            if(lecAct && lecAnt) {
+                lecAnt.value = lecAct.value;
+                lecAct.value = '';
+            }
+
+            // Fechas
+            const fecAct = document.getElementById(`fec_act_i${id}`);
+            const fecAnt = document.getElementById(`fec_ant_i${id}`);
+            if(fecAct && fecAnt) {
+                fecAnt.value = fecAct.value;
+                fecAct.value = '';
+            }
+
+            calculate();
+        }
+    }
+
+    // =========================================================================
 
     function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault, alertBg) {
         return `
@@ -489,7 +525,13 @@
                 <div class="section-title">1. DATOS DE LECTURA (Promedio diario)</div>
                 <div class="grid-2">
                     <div class="form-group"><label>Lectura Anterior:</label><input type="number" id="lec_ant_i${id}" inputmode="decimal" oninput="calculate()"></div>
-                    <div class="form-group"><label>Lectura Actual:</label><input type="number" id="lec_act_i${id}" inputmode="decimal" oninput="calculate()"></div>
+                    <div class="form-group">
+                        <label style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            Lectura Actual:
+                            <span class="btn-ciclo" onclick="avanzarCicloInquilino(${id})" title="Pasar datos actuales a anteriores y limpiar">🔄</span>
+                        </label>
+                        <input type="number" id="lec_act_i${id}" inputmode="decimal" oninput="calculate()">
+                    </div>
                     <div class="form-group"><label>Fecha Lectura Anterior:</label><input type="date" id="fec_ant_i${id}" onchange="calculate()"></div>
                     <div class="form-group"><label>Fecha Lectura Actual:</label><input type="date" id="fec_act_i${id}" onchange="calculate()"></div>
                 </div>
@@ -761,8 +803,6 @@
     }
 
     function exportarJSON() {
-        // Asegurar que todos los cálculos visibles e internos estén actualizados
-        // justo antes de construir el archivo histórico.
         calculate();
 
         const f1m_val = document.getElementById('fec_act_m').value;
@@ -781,8 +821,6 @@
         const totalInquilinosReales = numMedidores + (hasSinMedidor ? 1 : 0);
         const n = totalInquilinosReales > 0 ? totalInquilinosReales : 1;
 
-        // MES: se guarda explícitamente con dos nombres para facilitar la
-        // compatibilidad futura con redondeos_montos (su campo se llama mes_cobro).
         const mes = document.getElementById('mes_principal').value || '';
         const mesCobro = mes;
         const anio = d_f1m ? d_f1m.getFullYear() : null;
@@ -796,8 +834,6 @@
         const aporteLeyPrincipal = km * factorLey;
         const totalPrincipal = getVal('total_pagar_m');
 
-        // Mantener números como números (no como texto) y conservar precisión
-        // suficiente para futuros análisis.
         const numero = (valor, decimales = 6) => {
             const n = Number(valor);
             if (!Number.isFinite(n)) return 0;
@@ -819,9 +855,6 @@
             return formatoYYYYMMDD(startDate);
         };
 
-        // La raíz continúa siendo un ARRAY para no romper el importador actual
-        // de redondeos_montos. Los registros no reconocidos por nombre simplemente
-        // serán ignorados por esa web hasta que la adaptemos al esquema v2.
         const datosExportar = [];
 
         datosExportar.push({
@@ -904,7 +937,6 @@
                 id_interno: 1,
                 con_medidor: false,
 
-                // CAMPOS LEGACY: se mantienen exactamente para redondeos_montos.
                 kwh_real: kwhI1,
                 dias_facturados: dm,
                 monto_pagar: totalI1,
@@ -978,7 +1010,6 @@
                 id_interno: i,
                 con_medidor: true,
 
-                // CAMPOS LEGACY: se mantienen exactamente para redondeos_montos.
                 kwh_real: kwhConsumidoReal,
                 dias_facturados: diasFacturar,
                 monto_pagar: totalInq,
@@ -1036,12 +1067,6 @@
             cantidad_inquilinos: totalInquilinosReales
         });
 
-        // ---------------------------------------------------------------------
-        // FORMATO JSON ÚNICO v3
-        // "estado_app" permite restaurar exactamente Luz Cayrán.
-        // "inquilinos" mantiene los campos que redondeos_montos necesita.
-        // El resto queda disponible para análisis histórico futuro.
-        // ---------------------------------------------------------------------
         const estadoApp = {};
         document.querySelectorAll('input, select').forEach(input => {
             if (input.id && input.type !== 'file' && input.type !== 'button') {
@@ -1059,17 +1084,14 @@
             periodo: { mes: mes, anio: anio },
             fecha_exportacion: datosExportar[0].fecha_exportacion || new Date().toISOString(),
 
-            // Para reabrir exactamente el trabajo en Luz Cayrán.
             estado_app: estadoApp,
 
-            // Para análisis y para otras webs.
             configuracion: datosExportar[0].configuracion || {},
             recibo_principal: datosExportar[1] || {},
             inquilinos: datosExportar.filter(r => r && r.tipo_registro === 'inquilino'),
             resumen: datosExportar.find(r => r && r.tipo_registro === 'resumen') || {}
         };
 
-        // AQUÍ ESTÁ EL CAMBIO PARA DESCARGAR CON WEB SHARE API Y NOMENCLATURA EXACTA
         const mesMayuscula = mes ? mes.toUpperCase() : 'SIN_MES';
         const anioTexto = anio || '2026';
         descargarArchivo(jsonUnificado, `DATA LUZ ${mesMayuscula} - ${anioTexto}.json`);
