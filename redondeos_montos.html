@@ -236,7 +236,7 @@
             
             <div class="boletas-container">
                 <!-- Boleta Mariluz -->
-                <div class="boleta-wrapper">
+                <div class="boleta-wrapper" id="wrapper-mariluz">
                     <div class="boleta-card" id="boleta-mariluz">
                         <div class="boleta-header">
                             <span>MES: <span class="txt-mes"></span></span>
@@ -255,7 +255,7 @@
                 </div>
 
                 <!-- Boleta Kendra -->
-                <div class="boleta-wrapper">
+                <div class="boleta-wrapper" id="wrapper-kendra">
                     <div class="boleta-card" id="boleta-kendra">
                         <div class="boleta-header">
                             <span>MES: <span class="txt-mes"></span></span>
@@ -274,7 +274,7 @@
                 </div>
 
                 <!-- Boleta Sonia -->
-                <div class="boleta-wrapper">
+                <div class="boleta-wrapper" id="wrapper-sonia">
                     <div class="boleta-card" id="boleta-sonia">
                         <div class="boleta-header">
                             <span>MES: <span class="txt-mes"></span></span>
@@ -703,6 +703,10 @@
             let aguaM = datosRedondeados.mariluz.agua; let luzM = datosRedondeados.mariluz.luz;
             const hayAguaM = tieneValor('agua_mariluz') || tieneValor('m3_mariluz') || tieneValor('fecha_inicio_mariluz') || tieneValor('fecha_fin_mariluz');
             const hayLuzM = tieneValor('luz_mariluz') || tieneValor('kwh_mariluz') || tieneValor('fecha_inicio_mariluz_luz') || tieneValor('fecha_fin_mariluz_luz');
+            
+            // Ocultar wrapper si no hay inputs de Mariluz
+            document.getElementById('wrapper-mariluz').style.display = (hayAguaM || hayLuzM) ? 'flex' : 'none';
+
             ponerImporte('out_agua_mariluz', hayAguaM, aguaM);
             ponerImporte('out_luz_mariluz', hayLuzM, luzM);
             ponerTotal('out_total_mariluz', hayAguaM || hayLuzM, (hayAguaM ? aguaM : 0) + (hayLuzM ? luzM : 0));
@@ -719,6 +723,10 @@
                 ? (tieneValor('agua_compartida') || tieneValor('m3_compartida') || tieneValor('fecha_inicio_ks_agua') || tieneValor('fecha_fin_ks_agua'))
                 : (tieneValor('agua_kendra') || tieneValor('m3_kendra') || tieneValor('fecha_inicio_kendra_agua') || tieneValor('fecha_fin_kendra_agua'));
             const hayLuzK = tieneValor('luz_kendra') || tieneValor('kwh_kendra') || tieneValor('fecha_inicio_kendra_luz') || tieneValor('fecha_fin_kendra_luz');
+            
+            // Ocultar wrapper si no hay inputs de Kendra
+            document.getElementById('wrapper-kendra').style.display = (hayAguaK || hayLuzK) ? 'flex' : 'none';
+
             ponerImporte('out_agua_kendra', hayAguaK, comparteAgua && !tieneValor('prorrateo_kendra') ? '' : aguaK);
             ponerImporte('out_luz_kendra', hayLuzK, luzK);
             const aguaKDisponible = hayAguaK && (!comparteAgua || tieneValor('prorrateo_kendra'));
@@ -736,6 +744,10 @@
                 ? (tieneValor('agua_compartida') || tieneValor('m3_compartida') || tieneValor('fecha_inicio_ks_agua') || tieneValor('fecha_fin_ks_agua'))
                 : (tieneValor('agua_sonia') || tieneValor('m3_sonia') || tieneValor('fecha_inicio_sonia_agua') || tieneValor('fecha_fin_sonia_agua'));
             const hayLuzS = tieneValor('luz_sonia') || tieneValor('kwh_sonia') || tieneValor('fecha_inicio_sonia_luz') || tieneValor('fecha_fin_sonia_luz');
+            
+            // Ocultar wrapper si no hay inputs de Sonia
+            document.getElementById('wrapper-sonia').style.display = (hayAguaS || hayLuzS) ? 'flex' : 'none';
+
             ponerImporte('out_agua_sonia', hayAguaS, comparteAgua && !tieneValor('prorrateo_sonia') ? '' : aguaS);
             ponerImporte('out_luz_sonia', hayLuzS, luzS);
             const aguaSDisponible = hayAguaS && (!comparteAgua || tieneValor('prorrateo_sonia'));
