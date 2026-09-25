@@ -1,4 +1,3 @@
-<!-- Nombre del archivo: agua_cayran_v6.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,219 +6,270 @@
     <title>CÁLCULO RECIBO AGUA</title>
     <link rel="icon" type="image/x-icon" href="recibo_agua.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
-        :root { --blue-dark: #1e293b; --blue-light: #0ea5e9; }
-        body { background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow-x: hidden; padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px; }
+        :root { 
+            --blue-dark: #0f172a; 
+            --blue-light: #0ea5e9; 
+            --bg-body: #f8fafc;
+            --card-border: #e2e8f0;
+            --text-main: #334155;
+            --text-muted: #64748b;
+        }
         
-        .nav-back-bar { max-width: 1500px; margin: 0 auto 10px auto; padding: 0 5px; }
-        .btn-back { display: inline-flex; align-items: center; gap: 6px; background: #334155; color: white !important; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
+        body { 
+            background-color: var(--bg-body); 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            overflow-x: hidden; 
+            padding-bottom: max(20px, env(safe-area-inset-bottom)); 
+            color: var(--text-main);
+        }
+        
+        /* Navbar Fija y Moderna */
+        .nav-back-bar-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .nav-back-bar { max-width: 1500px; margin: 0 auto; }
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569 !important; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; }
+        .btn-back:hover { background: #e2e8f0; color: #0f172a !important; }
         
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
         
-        /* Sidebar Recibo Principal */
-        .main-card { border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-top: 5px solid var(--blue-light); border-radius: 8px; }
+        /* Tarjetas (Cards) mejoradas */
+        .main-card { border: none; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border-radius: 12px; background: white; overflow: hidden; }
+        .card-header-custom { background: var(--blue-dark); color: white; padding: 16px 20px; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
         
-        /* Ajustes de inputs generales */
-        .input-editable { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; font-size: 14px !important; border-radius: 4px; color: #334155; padding: 6px 10px; }
-        .input-editable:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25) !important; outline: none; }
-        .input-total-main { background-color: #f0fdf4 !important; border: 1px solid #22c55e !important; font-weight: bold; color: #15803d !important; font-size: 1.15rem !important; border-radius: 4px; }
+        /* Ajustes de inputs generales (Más grandes para móvil) */
+        .input-editable { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; font-size: 15px !important; border-radius: 8px; color: #1e293b; padding: 10px 14px; transition: border-color 0.2s, box-shadow 0.2s; }
+        .input-editable:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.15) !important; outline: none; }
+        .input-total-main { background-color: #f0fdf4 !important; border: 1px solid #22c55e !important; font-weight: 800; color: #15803d !important; font-size: 1.4rem !important; border-radius: 8px; padding: 12px !important; }
+        
+        .section-divider { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700; margin: 20px 0 10px 0; border-bottom: 1px solid var(--card-border); padding-bottom: 6px; display: flex; align-items: center; gap: 6px; }
         
         /* Estilos Inquilinos */
         .receipt-container { 
             background: white; 
-            padding: 10px 20px 20px 20px; 
-            border-right: 1px solid #f1f5f9;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
             height: 100%; 
             width: 100%; 
             box-sizing: border-box; 
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
+        
+        .tenant-header { background: #f8fafc; padding: 16px 20px; border-bottom: 1px solid var(--card-border); }
+        .tenant-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
         .tenant-client-label {
             font-size: 0.75rem;
-            color: #94a3b8;
+            color: var(--text-muted);
             text-transform: uppercase;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.5px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         
         .tenant-name-input { 
             border: none !important;
-            border-bottom: 1px solid #e2e8f0 !important;
             background-color: transparent !important;
             font-weight: 800; 
-            font-size: 1.25rem; 
-            padding: 4px 0 8px 0; 
+            font-size: 1.3rem; 
+            padding: 0; 
             border-radius: 0; 
             color: #0f172a; 
             width: 100%; 
-            margin-bottom: 15px;
             box-shadow: none !important;
             text-transform: uppercase;
         }
-        .tenant-name-input:focus {
-            outline: none;
-            border-bottom-color: #0ea5e9 !important;
-        }
+        .tenant-name-input:focus { outline: none; color: var(--blue-light); }
         
         .btn-action-mobile {
-            border-radius: 6px !important;
-            padding: 10px !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
             font-weight: 600 !important;
-            font-size: 0.9rem !important;
+            font-size: 0.95rem !important;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             transition: all 0.2s;
         }
         .btn-action-mobile:active { transform: scale(0.97); }
         .btn-whatsapp-style { background-color: #22c55e !important; color: white !important; border: none !important; }
         .btn-whatsapp-style:hover { background-color: #16a34a !important; }
         .btn-calc-style { background-color: #ffffff !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; }
-        .btn-calc-style:hover { background-color: #f8fafc !important; }
+        .btn-calc-style:hover { background-color: #f1f5f9 !important; }
 
-        .small-label { font-size: 0.75rem; font-weight: 600; display: block; color: #64748b; margin-bottom: 4px; }
+        .small-label { font-size: 0.85rem; font-weight: 600; display: block; color: var(--text-main); margin-bottom: 6px; }
         
-        /* Ocultamiento seguro para que exportPDF lea los valores sin afectar la UI visual */
+        /* Ocultamiento seguro para PDF */
         .pdf-only-section, .hidden-data { position: absolute; left: -9999px; top: 0; visibility: hidden; height: 0; overflow: hidden; }
         #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
 
         /* Botón Ciclo */
         .btn-ciclo {
-            background-color: var(--blue-light) !important;
-            color: white !important;
-            border-radius: 4px;
-            width: 24px;
-            height: 24px;
+            background-color: #f1f5f9 !important;
+            color: var(--blue-light) !important;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
+            border: 1px solid #cbd5e1;
         }
-        .btn-ciclo:hover { background-color: #0284c7 !important; }
+        .btn-ciclo:hover { background-color: #e0f2fe !important; border-color: #7dd3fc; }
         .btn-ciclo:active { transform: scale(0.9); }
-        .btn-ciclo svg { width: 14px; height: 14px; }
-
-        /* Fondo contenedor inquilinos y divisiones */
-        #tenants_grid > div {
-            border-right: 1px solid #f1f5f9;
-        }
-        #tenants_grid > div:last-child {
-            border-right: none;
-        }
+        .btn-ciclo svg { width: 16px; height: 16px; }
 
         @media (max-width: 991px) { 
             .container-fluid { padding: 10px; } 
-            .action-buttons-container { width: 100% !important; margin-top: 4px; }
-            .btn-action-mobile { flex: 1 1 0 !important; }
-            #tenants_grid > div { border-right: none; border-bottom: 1px solid #f1f5f9; margin-bottom: 15px; }
+            .action-buttons-container { width: 100% !important; margin-top: 15px; flex-direction: column; }
+            .btn-action-mobile { width: 100% !important; }
+            #tenants_grid > div { margin-bottom: 20px; }
+            .nav-back-bar { flex-direction: column; gap: 15px; align-items: stretch !important; }
+            .nav-back-bar .d-flex { justify-content: space-between; }
+            .btn-back { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-<div class="nav-back-bar d-flex justify-content-between align-items-center">
-    <a href="./index.html" class="btn-back">&#8592; Menú Principal</a>
-    <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-success fw-bold text-white shadow-sm" style="border-radius: 6px;" onclick="guardarEstadoApp()">💾 GUARDAR JSON</button>
-        <button class="btn btn-sm btn-secondary fw-bold text-white shadow-sm" style="border-radius: 6px;" onclick="document.getElementById('file_import').click()">📤 IMPORTAR</button>
-        <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
+<div class="nav-back-bar-container">
+    <div class="nav-back-bar d-flex justify-content-between align-items-center">
+        <a href="./index.html" class="btn-back"><i class="bi bi-arrow-left"></i> Menú Principal</a>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success fw-bold text-white shadow-sm px-4" style="border-radius: 8px;" onclick="guardarEstadoApp()"><i class="bi bi-floppy"></i> Guardar JSON</button>
+            <button class="btn btn-secondary fw-bold text-white shadow-sm px-4" style="border-radius: 8px;" onclick="document.getElementById('file_import').click()"><i class="bi bi-upload"></i> Importar</button>
+            <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
+        </div>
     </div>
 </div>
 
 <div id="pdf-template-container"></div>
 
-<div class="container-fluid py-2" style="max-width: 1500px;">
+<div class="container-fluid" style="max-width: 1500px;">
     <div class="row" id="main_row">
         <!-- SECCIÓN VERTICAL: RECIBO PRINCIPAL -->
-        <div class="col-lg-3 col-md-4 mb-4" id="main_card_col">
-            <div class="card main-card h-100">
-                <div class="card-body">
-                    <!-- align-items-end alinea los inputs en la base, ignorando diferencias de altura en los labels -->
+        <div class="col-lg-3 col-md-12 mb-4" id="main_card_col">
+            <div class="main-card h-100">
+                <div class="card-header-custom">
+                    <i class="bi bi-droplet-half fs-5"></i> Recibo Principal
+                </div>
+                <div class="card-body p-4">
                     <div class="row g-3 align-items-end">
-                        <div class="col-12">
-                            <label class="small-label">Mes</label>
-                            <select id="m_mes" class="form-select form-select-sm input-editable" onchange="calc()">
-                                <option value="" selected></option>
+                        
+                        <!-- Categoría 1: Período -->
+                        <div class="col-12 mt-0">
+                            <div class="section-divider mt-0"><i class="bi bi-calendar3"></i> Período</div>
+                            <label class="small-label">Mes a Facturar</label>
+                            <select id="m_mes" class="form-select input-editable fw-bold" onchange="calc()">
+                                <option value="" selected>Seleccione un mes...</option>
                                 <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option>
                                 <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option>AGOSTO</option>
                                 <option>SETIEMBRE</option><option>OCTUBRE</option><option>NOVIEMBRE</option><option>DICIEMBRE</option>
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="small-label">Lectura Anterior</label>
-                            <input type="number" id="m_prev_r" class="form-control form-control-sm input-editable" oninput="calc()">
+                            <label class="small-label">Fecha Ant.</label>
+                            <input type="date" id="m_prev_d" class="form-control input-editable" oninput="calc()">
+                        </div>
+                        <div class="col-6">
+                            <label class="small-label">Fecha Act.</label>
+                            <input type="date" id="m_curr_d" class="form-control input-editable" oninput="calc()">
+                        </div>
+
+                        <!-- Categoría 2: Lecturas Generales -->
+                        <div class="col-12">
+                            <div class="section-divider"><i class="bi bi-speedometer2"></i> Medidor Principal</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="small-label">Lectura Ant.</label>
+                            <input type="number" id="m_prev_r" class="form-control input-editable" oninput="calc()">
                         </div>
                         <div class="col-6">
                             <label class="small-label d-flex justify-content-between align-items-center">
-                                <span>Lectura Actual</span>
+                                <span>Lectura Act.</span>
                                 <span class="btn-ciclo" onclick="avanzarCicloPrincipalAgua()" title="Pasar datos actuales a anteriores y limpiar">
                                     <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                                 </span>
                             </label>
-                            <input type="number" id="m_curr_r" class="form-control form-control-sm input-editable" oninput="calc()">
+                            <input type="number" id="m_curr_r" class="form-control input-editable" oninput="calc()">
+                        </div>
+
+                        <!-- Categoría 3: Importes -->
+                        <div class="col-12">
+                            <div class="section-divider"><i class="bi bi-cash-stack"></i> Importes Recibo (S/.)</div>
                         </div>
                         <div class="col-6">
-                            <label class="small-label">Fecha Anterior</label>
-                            <input type="date" id="m_prev_d" class="form-control form-control-sm input-editable" oninput="calc()">
-                        </div>
-                        <div class="col-6">
-                            <label class="small-label">Fecha Actual</label>
-                            <input type="date" id="m_curr_d" class="form-control form-control-sm input-editable" oninput="calc()">
-                        </div>
-                        <div class="col-6">
-                            <label class="small-label">Agua S/.</label>
-                            <input type="number" id="v_water" class="form-control form-control-sm input-editable" oninput="calc()">
+                            <label class="small-label">Agua</label>
+                            <input type="number" id="v_water" class="form-control input-editable" oninput="calc()">
                         </div>
                         <div class="col-6">
                             <label class="small-label">Alcantarillado</label>
-                            <input type="number" id="v_sewer" class="form-control form-control-sm input-editable" oninput="calc()">
+                            <input type="number" id="v_sewer" class="form-control input-editable" oninput="calc()">
                         </div>
                         <div class="col-6">
                             <label class="small-label">Cargo Fijo</label>
-                            <input type="number" id="v_fixed" class="form-control form-control-sm input-editable" oninput="calc()">
+                            <input type="number" id="v_fixed" class="form-control input-editable" oninput="calc()">
                         </div>
                         <div class="col-6">
                             <label class="small-label">Mora</label>
-                            <input type="number" id="v_mora" class="form-control form-control-sm input-editable" oninput="calc()">
+                            <input type="number" id="v_mora" class="form-control input-editable" oninput="calc()">
+                        </div>
+                        <div class="col-6">
+                            <label class="small-label">Redondeo Ant.</label>
+                            <input type="number" id="v_red_ant" class="form-control input-editable" oninput="calc()">
+                        </div>
+                        <div class="col-6">
+                            <label class="small-label">Redondeo Act.</label>
+                            <input type="number" id="v_red_act" class="form-control input-editable" oninput="calc()">
                         </div>
                         
-                        <div class="col-12 mt-3 py-3 px-3" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #f1f5f9;">
-                            <label class="small-label text-primary" style="color: #0ea5e9 !important;">N° Inq. (Con Medidor)</label>
-                            <select id="n_tenants_meter" class="form-select form-select-sm input-editable mb-2" style="font-weight: bold; border-color: #0ea5e9 !important; background-color: #fff !important;" onchange="render()">
-                                <option value="" selected></option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
+                        <!-- Categoría 4: Configuración Inquilinos -->
+                        <div class="col-12 mt-4 p-4" style="background-color: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0;">
+                            <label class="small-label text-primary d-flex align-items-center gap-2 mb-3" style="color: #0284c7 !important;">
+                                <i class="bi bi-people-fill"></i> N° Inquilinos (Con Medidor)
+                            </label>
+                            <select id="n_tenants_meter" class="form-select input-editable mb-3 fw-bold" style="border-color: #0ea5e9 !important; box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);" onchange="render()">
+                                <option value="" selected>Seleccionar...</option>
+                                <option value="1">1 Inquilino</option>
+                                <option value="2">2 Inquilinos</option>
+                                <option value="3">3 Inquilinos</option>
+                                <option value="4">4 Inquilinos</option>
+                                <option value="5">5 Inquilinos</option>
+                                <option value="6">6 Inquilinos</option>
                             </select>
-                            <div class="form-check ms-1">
-                                <input class="form-check-input" type="checkbox" id="has_nometer" onchange="render()">
-                                <label class="form-check-label small-label pt-1" for="has_nometer" style="color: #1e293b;">Incluir Sin Medidor</label>
+                            <div class="form-check ms-1 mt-2">
+                                <input class="form-check-input" type="checkbox" id="has_nometer" style="transform: scale(1.2); cursor: pointer;" onchange="render()">
+                                <label class="form-check-label small-label ms-2" for="has_nometer" style="cursor: pointer; padding-top: 2px;">Incluir Inquilino Sin Medidor</label>
                             </div>
                         </div>
 
-                        <div class="col-6 mt-3">
-                            <label class="small-label">Redondeo Anterior</label>
-                            <input type="number" id="v_red_ant" class="form-control form-control-sm input-editable" oninput="calc()">
-                        </div>
-                        <div class="col-6 mt-3">
-                            <label class="small-label">Redondeo Actual</label>
-                            <input type="number" id="v_red_act" class="form-control form-control-sm input-editable" oninput="calc()">
-                        </div>
+                        <!-- TOTAL -->
                         <div class="col-12 mt-4">
-                            <label class="small-label">Total Recibo Principal</label>
-                            <input type="text" id="v_total_main" class="form-control form-control-sm input-total-main text-center py-2" value="S/. 0.00" readonly>
+                            <label class="small-label text-center d-block text-uppercase fw-bold text-success mb-2">Total Recibo Principal</label>
+                            <input type="text" id="v_total_main" class="form-control input-total-main text-center" value="S/. 0.00" readonly>
                         </div>
-                        <div class="col-12 mt-2">
-                            <button class="btn w-100 fw-bold shadow-sm py-2" style="background-color: var(--blue-dark); color: white; border-radius: 6px;" onclick="exportResumenPDF()">RESUMEN</button>
+                        <div class="col-12 mt-3">
+                            <button class="btn w-100 fw-bold shadow-sm p-3" style="background-color: var(--blue-dark); color: white; border-radius: 8px; font-size: 1.05rem;" onclick="exportResumenPDF()"><i class="bi bi-file-earmark-pdf-fill me-2"></i> GENERAR RESUMEN</button>
                         </div>
                     </div>
                 </div>
@@ -227,8 +277,8 @@
         </div>
 
         <!-- SECCIÓN GRILLA: INQUILINOS -->
-        <div class="col-lg-9 col-md-8" id="tenants_col">
-            <div class="row g-0" id="tenants_grid"></div>
+        <div class="col-lg-9 col-md-12" id="tenants_col">
+            <div class="row g-3" id="tenants_grid"></div>
         </div>
     </div>
 </div>
@@ -245,14 +295,16 @@
         const input = document.getElementById(`i${id}_manual_days`);
         if (mode === 'manual') {
             input.disabled = false;
-            input.style.setProperty('background-color', '#fffde7', 'important');
+            input.style.setProperty('background-color', '#fef9c3', 'important');
+            input.style.setProperty('border-color', '#eab308', 'important');
             if (fromUser) {
                 input.value = ''; 
                 input.focus();
             }
         } else {
             input.disabled = true;
-            input.style.setProperty('background-color', '#ffffff', 'important');
+            input.style.setProperty('background-color', '#f1f5f9', 'important');
+            input.style.setProperty('border-color', '#cbd5e1', 'important');
         }
         if (fromUser) calc();
     }
@@ -622,11 +674,11 @@
         const tenantsCol = document.getElementById('tenants_col');
         
         if (totalTenants === 0) {
-            mainCol.className = 'col-lg-4 col-md-6 col-12 mb-4 mx-auto';
+            mainCol.className = 'col-lg-4 col-md-8 col-12 mb-4 mx-auto';
             tenantsCol.style.display = 'none';
         } else {
-            mainCol.className = 'col-lg-3 col-md-4 mb-4';
-            tenantsCol.className = 'col-lg-9 col-md-8';
+            mainCol.className = 'col-lg-3 col-md-12 mb-4';
+            tenantsCol.className = 'col-lg-9 col-md-12';
             tenantsCol.style.display = 'block';
         }
 
@@ -639,9 +691,9 @@
         
         for(let i = 1; i <= nMetered; i++) {
             html += `
-            <div class="col-xl-4 col-lg-6 col-md-12 col-12">
+            <div class="col-xl-4 col-lg-6 col-md-6 col-12">
                 <div class="receipt-container" id="pdf_area_${i}">
-                    <div id="pdf_content_wrapper_${i}">
+                    <div id="pdf_content_wrapper_${i}" class="d-flex flex-column h-100">
                         
                         <div id="pdf_header_${i}" class="pdf-only-section">
                             <span id="pdf_mes_${i}">---</span>
@@ -652,63 +704,63 @@
                             <span id="pdf_lec_txt_${i}">0.00 (ANT) - 0.00 (ACT)</span>
                         </div>
 
-                        <div id="web_header_${i}">
-                            <div class="tenant-client-label">CLIENTE</div>
+                        <div class="tenant-header" id="web_header_${i}">
+                            <div class="tenant-client-label"><i class="bi bi-person-badge"></i> CLIENTE MEDIDOR #${i}</div>
                             <input type="text" id="i${i}_name" class="tenant-name-input" value="" placeholder="Nombre del inquilino" oninput="calc()">
                         </div>
 
-                        <!-- align-items-end alinea los inputs en la base, ignorando diferencias de altura en los labels -->
-                        <div class="row g-2 mb-2 align-items-end" id="inputs_${i}">
-                            <div class="col-6"><label class="small-label">Lectura Anterior</label><input type="number" id="i${i}_prev_r" class="form-control form-control-sm input-editable" oninput="calc()"></div>
-                            
-                            <div class="col-6">
-                                <label class="small-label d-flex justify-content-between align-items-center">
-                                    <span>Lectura Actual</span>
-                                    <span class="btn-ciclo" onclick="avanzarCicloInquilinoAgua(${i})" title="Pasar datos actuales a anteriores">
-                                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                                    </span>
-                                </label>
-                                <input type="number" id="i${i}_curr_r" class="form-control form-control-sm input-editable" oninput="calc()">
+                        <div class="tenant-body">
+                            <div class="row g-3 align-items-end" id="inputs_${i}">
+                                <div class="col-6"><label class="small-label">Lectura Anterior</label><input type="number" id="i${i}_prev_r" class="form-control input-editable" oninput="calc()"></div>
+                                
+                                <div class="col-6">
+                                    <label class="small-label d-flex justify-content-between align-items-center">
+                                        <span>Lectura Actual</span>
+                                        <span class="btn-ciclo" onclick="avanzarCicloInquilinoAgua(${i})" title="Pasar datos actuales a anteriores">
+                                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="i${i}_curr_r" class="form-control input-editable" oninput="calc()">
+                                </div>
+                                
+                                <div class="col-6"><label class="small-label">Fecha Anterior</label><input type="date" id="i${i}_prev_d" class="form-control input-editable" oninput="calc()"></div>
+                                <div class="col-6"><label class="small-label">Fecha Actual</label><input type="date" id="i${i}_curr_d" class="form-control input-editable" oninput="calc()"></div>
+                                
+                                <div class="col-12 mt-3 pt-3" style="border-top: 1px dashed #cbd5e1;">
+                                    <label class="small-label text-primary" style="color: #0ea5e9 !important;">Modo de cálculo:</label>
+                                    <select id="i${i}_calc_mode" class="form-select input-editable fw-bold" onchange="toggleMode(${i}, true)">
+                                        <option value="auto" selected>Asumir días del recibo</option>
+                                        <option value="manual">Escribir días manualmente</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <label class="small-label text-primary" style="color: #0ea5e9 !important;">Días a Facturar (Manual):</label>
+                                    <input type="number" id="i${i}_manual_days" class="form-control input-editable" value="" disabled oninput="calc()">
+                                </div>
                             </div>
-                            
-                            <div class="col-6"><label class="small-label">Fecha Anterior</label><input type="date" id="i${i}_prev_d" class="form-control form-control-sm input-editable" oninput="calc()"></div>
-                            <div class="col-6"><label class="small-label">Fecha Actual</label><input type="date" id="i${i}_curr_d" class="form-control form-control-sm input-editable" oninput="calc()"></div>
-                            
-                            <div class="col-6 mt-2">
-                                <label class="small-label text-primary" style="color: #0ea5e9 !important;">Modo de cálculo:</label>
-                                <select id="i${i}_calc_mode" class="form-select form-select-sm input-editable" style="font-weight: 600;" onchange="toggleMode(${i}, true)">
-                                    <option value="auto" selected>Asumir días del recibo</option>
-                                    <option value="manual">Escribir días manualmente</option>
-                                </select>
-                            </div>
-                            <div class="col-6 mt-2">
-                                <label class="small-label text-primary" style="color: #0ea5e9 !important;">Días a Facturar:</label>
-                                <input type="number" id="i${i}_manual_days" class="form-control form-control-sm input-editable" value="" disabled oninput="calc()">
-                            </div>
-                        </div>
 
-                        <!-- Datos ocultos para exportación y cálculos -->
-                        <div class="hidden-data">
-                            <span id="i${i}_pdf_total_val">0.00</span>
-                            <span id="i${i}_res_cons">0.00</span>
-                            <span id="i${i}_val_water">0.00</span>
-                            <span id="i${i}_val_sewer">0.00</span>
-                            <span id="i${i}_val_fixed">0.00</span>
-                            <span id="i${i}_val_igv">0.00</span>
-                            <span id="i${i}_val_mora">0.00</span>
-                            <span id="i${i}_val_red_ant">0.00</span>
-                            <span id="i${i}_val_red_act">0.00</span>
-                            <span id="i${i}_val_total">0.00</span>
-                        </div>
+                            <!-- Datos ocultos para exportación y cálculos -->
+                            <div class="hidden-data">
+                                <span id="i${i}_pdf_total_val">0.00</span>
+                                <span id="i${i}_res_cons">0.00</span>
+                                <span id="i${i}_val_water">0.00</span>
+                                <span id="i${i}_val_sewer">0.00</span>
+                                <span id="i${i}_val_fixed">0.00</span>
+                                <span id="i${i}_val_igv">0.00</span>
+                                <span id="i${i}_val_mora">0.00</span>
+                                <span id="i${i}_val_red_ant">0.00</span>
+                                <span id="i${i}_val_red_act">0.00</span>
+                                <span id="i${i}_val_total">0.00</span>
+                            </div>
 
-                        <div class="d-flex gap-2 mt-4 action-buttons-container">
-                            <button class="btn btn-action-mobile btn-whatsapp-style flex-fill shadow-sm" onclick="exportPDF(${i})">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                Enviar Recibo
-                            </button>
-                            <button class="btn btn-action-mobile btn-calc-style flex-fill shadow-sm" onclick="exportCalculos(${i})">
-                                CÁLCULOS
-                            </button>
+                            <div class="d-flex gap-2 mt-4 action-buttons-container">
+                                <button class="btn btn-action-mobile btn-whatsapp-style flex-fill shadow-sm" onclick="exportPDF(${i})">
+                                    <i class="bi bi-file-earmark-ruled"></i> Recibo
+                                </button>
+                                <button class="btn btn-action-mobile btn-calc-style flex-fill shadow-sm" onclick="exportCalculos(${i})">
+                                    <i class="bi bi-calculator"></i> Cálculos
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -717,9 +769,9 @@
 
         if (hasNoMeter) {
             html += `
-            <div class="col-xl-4 col-lg-6 col-md-12 col-12">
-                <div class="receipt-container" id="pdf_area_nometer">
-                    <div id="pdf_content_wrapper_nometer">
+            <div class="col-xl-4 col-lg-6 col-md-6 col-12">
+                <div class="receipt-container" id="pdf_area_nometer" style="border: 2px solid #e2e8f0; border-top: 5px solid #64748b;">
+                    <div id="pdf_content_wrapper_nometer" class="d-flex flex-column h-100">
                         
                         <div id="pdf_header_nometer" class="pdf-only-section">
                             <span id="pdf_mes_nometer">---</span>
@@ -730,37 +782,39 @@
                             <span id="pdf_lec_txt_nometer">Cálculo Diferencial</span>
                         </div>
 
-                        <div id="web_header_nometer">
-                            <div class="tenant-client-label">CLIENTE</div>
+                        <div class="tenant-header" id="web_header_nometer">
+                            <div class="tenant-client-label text-secondary"><i class="bi bi-person-fill-exclamation"></i> SIN MEDIDOR</div>
                             <input type="text" id="inometer_name" class="tenant-name-input" value="" placeholder="PROPIETARIO" oninput="calc()">
                         </div>
                         
-                        <div class="alert mt-2 py-3 px-3 text-center" style="font-size: 0.85rem; margin-bottom: 25px; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc;">
-                            <strong>Aviso:</strong> Se calcula restando los consumos de inquilinos con medidor al recibo principal.
-                        </div>
+                        <div class="tenant-body">
+                            <div class="alert mt-2 py-4 px-3 text-center d-flex flex-column justify-content-center h-100" style="font-size: 0.95rem; margin-bottom: 25px; color: #475569; border: 1px dashed #cbd5e1; border-radius: 8px; background-color: #f8fafc;">
+                                <i class="bi bi-info-circle fs-3 text-secondary mb-2"></i>
+                                <span>El consumo de esta sección se calcula <strong>automáticamente</strong> restando los consumos individuales de los inquilinos con medidor al recibo principal.</span>
+                            </div>
 
-                        <!-- Datos ocultos para exportación y cálculos -->
-                        <div class="hidden-data">
-                            <span id="inometer_pdf_total_val">0.00</span>
-                            <span id="inometer_res_cons">0.00</span>
-                            <span id="inometer_val_water">0.00</span>
-                            <span id="inometer_val_sewer">0.00</span>
-                            <span id="inometer_val_fixed">0.00</span>
-                            <span id="inometer_val_igv">0.00</span>
-                            <span id="inometer_val_mora">0.00</span>
-                            <span id="inometer_val_red_ant">0.00</span>
-                            <span id="inometer_val_red_act">0.00</span>
-                            <span id="inometer_val_total">0.00</span>
-                        </div>
+                            <!-- Datos ocultos para exportación y cálculos -->
+                            <div class="hidden-data">
+                                <span id="inometer_pdf_total_val">0.00</span>
+                                <span id="inometer_res_cons">0.00</span>
+                                <span id="inometer_val_water">0.00</span>
+                                <span id="inometer_val_sewer">0.00</span>
+                                <span id="inometer_val_fixed">0.00</span>
+                                <span id="inometer_val_igv">0.00</span>
+                                <span id="inometer_val_mora">0.00</span>
+                                <span id="inometer_val_red_ant">0.00</span>
+                                <span id="inometer_val_red_act">0.00</span>
+                                <span id="inometer_val_total">0.00</span>
+                            </div>
 
-                        <div class="d-flex gap-2 mt-4 action-buttons-container">
-                            <button class="btn btn-action-mobile btn-whatsapp-style flex-fill shadow-sm" onclick="exportPDF('nometer')">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                Enviar Recibo
-                            </button>
-                            <button class="btn btn-action-mobile btn-calc-style flex-fill shadow-sm" onclick="exportCalculos('nometer')">
-                                CÁLCULOS
-                            </button>
+                            <div class="d-flex gap-2 mt-4 action-buttons-container">
+                                <button class="btn btn-action-mobile btn-whatsapp-style flex-fill shadow-sm" onclick="exportPDF('nometer')">
+                                    <i class="bi bi-file-earmark-ruled"></i> Recibo
+                                </button>
+                                <button class="btn btn-action-mobile btn-calc-style flex-fill shadow-sm" onclick="exportCalculos('nometer')">
+                                    <i class="bi bi-calculator"></i> Cálculos
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
