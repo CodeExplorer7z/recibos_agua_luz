@@ -236,8 +236,49 @@
         return estado;
     }
 
-    function descargarJSONAgua(datos, nombreArchivo) {
-        const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json;charset=utf-8' });
+    async function descargarJSONAgua(datos, nombreArchivo) {
+        const jsonString = JSON.stringify(datos, null, 2);
+        
+        // 1. Intento con Capacitor (si estás usando Android/iOS nativo)
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+            try {
+                const { Filesystem, Share } = window.Capacitor.Plugins;
+                // Capacitor requiere base64 para algunos sistemas, lo convertimos de forma segura
+                const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
+                const savedFile = await Filesystem.writeFile({
+                    path: nombreArchivo,
+                    data: base64Data,
+                    directory: 'CACHE'
+                });
+                await Share.share({
+                    title: nombreArchivo,
+                    url: savedFile.uri,
+                    dialogTitle: 'Guardar o Compartir JSON'
+                });
+                return;
+            } catch (err) {
+                console.error('Error con Capacitor Share:', err);
+            }
+        }
+
+        // 2. Intento con Web Share API (Navegadores móviles modernos como Chrome en Android)
+        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+        const file = new File([blob], nombreArchivo, { type: 'application/json' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Respaldo JSON',
+                    text: nombreArchivo
+                });
+                return;
+            } catch (error) {
+                console.error('Error compartiendo vía Web Share API:', error);
+            }
+        }
+
+        // 3. Método tradicional (Computadoras de escritorio)
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
