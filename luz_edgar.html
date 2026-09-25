@@ -1,3 +1,4 @@
+<!-- Nombre del archivo: luz_edgar_v1.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -374,10 +375,10 @@
 
         <div class="section-title">LLENAR DATOS DEL RECIBO PRINCIPAL</div>
         <div class="grid-2">
-            <div class="form-group"><label>LECTURA ANTERIOR:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>LECTURA ACTUAL:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()"></div>
-            <div class="form-group"><label>FECHA LECT. ANTERIOR:</label><input type="date" id="fec_ant_m" onchange="calculate()"></div>
-            <div class="form-group"><label>FECHA LECT. ACTUAL:</label><input type="date" id="fec_act_m" onchange="calculate()"></div>
+            <div class="form-group"><label>LECTURA ANTERIOR:</label><input type="number" id="lec_ant_m" inputmode="decimal" oninput="calculate()" onkeydown="moveNextOnEnter(event, 'lec_act_m')"></div>
+            <div class="form-group"><label>LECTURA ACTUAL:</label><input type="number" id="lec_act_m" inputmode="decimal" oninput="calculate()" onkeydown="moveNextOnEnter(event, 'fec_ant_m')"></div>
+            <div class="form-group"><label>FECHA LECT. ANTERIOR:</label><input type="date" id="fec_ant_m" onchange="calculate()" onkeydown="moveNextOnEnter(event, 'fec_act_m')"></div>
+            <div class="form-group"><label>FECHA LECT. ACTUAL:</label><input type="date" id="fec_act_m" onchange="calculate()" onkeydown="moveNextOnEnter(event, 'tarifa')"></div>
         </div>
 
         <div class="section-title">Importes del Recibo (S/.)</div>
@@ -411,9 +412,9 @@
             </div>
             
             <div class="grid-2">
-                <div class="form-group"><label>LECTURA ANTERIOR:</label><input type="number" id="lec_ant_i1" inputmode="decimal" oninput="calculate()"></div>
-                <div class="form-group"><label>LECTURA ACTUAL:</label><input type="number" id="lec_act_i1" inputmode="decimal" oninput="calculate()"></div>
-                <div class="form-group"><label>FECHA LECT. ANTERIOR:</label><input type="date" id="fec_ant_i1" onchange="calculate()"></div>
+                <div class="form-group"><label>LECTURA ANTERIOR:</label><input type="number" id="lec_ant_i1" inputmode="decimal" oninput="calculate()" onkeydown="moveNextOnEnter(event, 'lec_act_i1')"></div>
+                <div class="form-group"><label>LECTURA ACTUAL:</label><input type="number" id="lec_act_i1" inputmode="decimal" oninput="calculate()" onkeydown="moveNextOnEnter(event, 'fec_ant_i1')"></div>
+                <div class="form-group"><label>FECHA LECT. ANTERIOR:</label><input type="date" id="fec_ant_i1" onchange="calculate()" onkeydown="moveNextOnEnter(event, 'fec_act_i1')"></div>
                 <div class="form-group"><label>FECHA LECT. ACTUAL:</label><input type="date" id="fec_act_i1" onchange="calculate()"></div>
             </div>
             
@@ -487,6 +488,21 @@
             document.activeElement.blur();
         }
     });
+
+    // Función para manejar el salto automático con la tecla "Enter" en móviles
+    function moveNextOnEnter(e, nextId) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault();
+            const nextEl = document.getElementById(nextId);
+            if (nextEl) {
+                nextEl.focus();
+                // Intentar abrir el selector nativo de fecha si es posible
+                if (nextEl.type === 'date' && typeof nextEl.showPicker === 'function') {
+                    try { nextEl.showPicker(); } catch (err) {}
+                }
+            }
+        }
+    }
 
     function mostrarMensajeEmergente(texto, esError = false) {
         const toast = document.getElementById("toast");
@@ -917,3 +933,4 @@
 </script>
 </body>
 </html>
+``` Si tienes más modificaciones en mente, estaré encantado de hacerlas.
