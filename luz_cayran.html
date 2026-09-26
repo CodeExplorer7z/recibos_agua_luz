@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: luz_cayran_v6.html -->
+<!-- Nombre del archivo: luz_cayran_v8.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -78,7 +78,7 @@
             z-index: 1000;
             margin-bottom: 30px;
             display: flex;
-            justify-content: flex-end; /* Alineado al extremo derecho */
+            justify-content: flex-end;
             padding: max(10px, env(safe-area-inset-top)) 20px 8px 20px;
             pointer-events: none;
         }
@@ -91,11 +91,11 @@
             padding: 10px 20px;
             border-radius: 50px;
             display: flex;
-            justify-content: flex-end; /* Todo alineado a la derecha */
+            justify-content: flex-end;
             align-items: center;
             gap: 15px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            width: auto; /* Ancho automático para que se ajuste al contenido a la derecha */
+            width: auto;
             max-width: 1260px;
             pointer-events: auto;
             transition: all 0.3s;
@@ -116,6 +116,14 @@
         }
         .nav-island .btn-back:hover { background: var(--input-bg); }
         
+        /* Botones extras de NavBar */
+        .btn-trash {
+            background-color: var(--input-bg) !important;
+            color: #fb7185 !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        .btn-trash:hover { background-color: rgba(251, 113, 133, 0.1) !important; }
+
         /* === TARJETAS ESTILO PANEL === */
         .panel { 
             background: var(--surface); 
@@ -146,7 +154,6 @@
         .header-hero { text-align: center; margin-bottom: 30px; }
         .header-hero h1 { font-size: 1.8rem; font-weight: 900; color: var(--text-main); margin: 0; }
         .header-hero h1 span { color: var(--accent-main); }
-        .header-hero p { color: var(--text-muted); font-size: 0.95rem; margin-top: 5px; }
         
         .titulo-editable { 
             font-size: 1.4rem; font-weight: 800; color: var(--text-main); 
@@ -210,6 +217,46 @@
         }
         .switch-wrapper:hover { border-color: var(--accent-main); }
         .switch-wrapper input[type="checkbox"] { width: 24px; height: 24px; cursor: pointer; accent-color: var(--accent-main); }
+
+        /* === Estilos para Modales Personalizados === */
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .custom-modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .custom-modal-box {
+            background: var(--surface); border-radius: 16px;
+            padding: 28px 24px; width: 90%; max-width: 360px;
+            text-align: center; box-shadow: var(--shadow-md);
+            transform: scale(0.95) translateY(10px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--border-color);
+        }
+        .custom-modal-overlay.active .custom-modal-box { transform: scale(1) translateY(0); }
+        
+        .custom-modal-icon { font-size: 3.5rem; margin-bottom: 15px; line-height: 1; }
+        .icon-warning { color: #fb7185; }
+        .icon-success { color: #10b981; }
+        .icon-info { color: var(--accent-main); }
+        
+        .custom-modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 24px; line-height: 1.4; }
+        
+        .custom-modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; flex: 1; transition: all 0.2s; font-size: 1rem; }
+        .btn-modal-cancel { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+        .btn-modal-cancel:hover { filter: brightness(0.9); }
+        .btn-modal-cancel:active { transform: scale(0.95); }
+        .btn-modal-confirm { background: #fb7185; color: white; }
+        .btn-modal-confirm:hover { background: #e11d48; }
+        .btn-modal-confirm:active { transform: scale(0.95); }
+        .btn-modal-ok { background: #10b981; color: white; width: 100%; flex: none; }
+        .btn-modal-ok:hover { background: #059669; }
+        .btn-modal-ok:active { transform: scale(0.95); }
         
         /* === Responsive & Menú Comprimido en Móvil (Estilo App) === */
         @media (max-width: 768px) { 
@@ -217,12 +264,10 @@
             .panel { padding: 16px; border-radius: 16px; }
             .grid-2 { grid-template-columns: 1fr; gap: 12px; }
             
-            /* Menú altamente comprimido en una sola línea a la derecha */
             .nav-island-container { top: 0; margin-bottom: 20px; padding: max(6px, env(safe-area-inset-top)) 10px 6px 10px; justify-content: flex-end; }
             .nav-island { padding: 6px 10px; border-radius: 16px; gap: 6px; flex-direction: row; width: auto; }
             .nav-island .btn-back { width: auto; justify-content: center; padding: 6px 10px; font-size: 0.9rem; margin: 0; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border-color); }
             
-            /* Botones en una sola fila compacta */
             .nav-island .d-flex { width: auto; flex-direction: row !important; gap: 6px !important; flex-wrap: nowrap !important; align-items: center; }
             .btn-pill { padding: 6px 10px; font-size: 0.8rem; flex: 0 0 auto; flex-direction: row; gap: 4px; border-radius: 10px; min-height: 38px; height: 38px; }
             .btn-pill i { font-size: 1rem; margin: 0; }
@@ -275,12 +320,6 @@
         .pdf-calculos .bloque-total .desarrollo { background: #fafafa !important; border-left-color: #f59e0b !important; color: #1e293b !important; }
         .pdf-calculos .bloque-total .linea-operacion { border-top: 2px solid #6d28d9 !important; color: #d97706 !important; font-size: 1.05rem; padding-top: 6px; }
 
-
-        /* ==============================================================
-           UX REDESIGN 2026 · RESPONSIVE WEB + MOBILE
-           Se mantiene intacta la lógica de cálculo y generación de PDFs.
-           ============================================================== */
-
         html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
         body {
@@ -290,7 +329,6 @@
             padding-bottom: max(24px, env(safe-area-inset-bottom));
         }
 
-        /* Contenido principal: ancho fluido sin desbordes */
         .container {
             width: min(100%, 1320px);
             max-width: 1320px;
@@ -307,7 +345,6 @@
         .header-card,
         .d-flex { min-width: 0; }
 
-        /* Barra superior: alineada a la derecha */
         .nav-island-container {
             position: sticky;
             top: 0;
@@ -393,7 +430,6 @@
             margin: 0;
         }
 
-        /* Superficies más limpias */
         .panel {
             padding: clamp(18px, 2.5vw, 28px);
             border-radius: clamp(16px, 2vw, 22px);
@@ -410,12 +446,6 @@
             font-size: clamp(1.45rem, 3vw, 1.9rem);
             line-height: 1.08;
             letter-spacing: -.02em;
-        }
-
-        .header-hero p {
-            max-width: 48ch;
-            margin: 7px auto 0;
-            line-height: 1.45;
         }
 
         .panel-title {
@@ -452,8 +482,6 @@
             line-height: 1.35;
         }
 
-        .switch-wrapper span { min-width: 0; }
-
         .alert-box {
             padding: 13px 14px;
             border-radius: 12px;
@@ -465,7 +493,6 @@
             font-size: clamp(2rem, 7vw, 2.5rem) !important;
         }
 
-        /* Botones generales: táctiles sin ser gigantes */
         .btn-pill {
             min-height: 44px;
             padding: 10px 16px;
@@ -478,13 +505,11 @@
             font-size: clamp(1.08rem, 2vw, 1.35rem);
         }
 
-        /* Tablet */
         @media (max-width: 900px) {
             .container { grid-template-columns: 1fr; }
             #inquilinos-container { gap: 18px !important; }
         }
 
-        /* Mobile: experiencia tipo app */
         @media (max-width: 640px) {
             .nav-island-container {
                 padding: max(6px, env(safe-area-inset-top)) 10px 6px;
@@ -518,160 +543,51 @@
             }
 
             .nav-island .btn-back span,
-            .nav-island .btn-pill span {
-                display: none !important; /* Muestra solo iconos en pantallas pequeñas si se prefiere, o déjalos visibles si hay espacio */
-            }
+            .nav-island .btn-pill span { display: none !important; }
 
-            .nav-island .btn-back i,
-            .nav-island .btn-pill i {
-                font-size: 1rem;
-                margin: 0;
-            }
-
-            .container {
-                padding-inline: 10px;
-                gap: 14px;
-            }
-
-            .panel {
-                padding: 16px 14px;
-                border-radius: 16px;
-            }
-
-            .grid-2 {
-                grid-template-columns: 1fr;
-                gap: 11px;
-            }
+            .container { padding-inline: 10px; gap: 14px; }
+            .panel { padding: 16px 14px; border-radius: 16px; }
+            .grid-2 { grid-template-columns: 1fr; gap: 11px; }
 
             .header-hero { margin-bottom: 20px; }
             .header-hero h1 { font-size: 1.38rem; }
-            .header-hero p { font-size: .88rem; }
 
-            .panel-title {
-                margin-top: 22px;
-                margin-bottom: 12px;
-                font-size: .88rem;
-                letter-spacing: .045em;
-            }
-
-            .panel-title i { font-size: 1.12rem; }
-
+            .panel-title { margin-top: 22px; margin-bottom: 12px; font-size: .88rem; letter-spacing: .045em; }
             .input-group-custom label { font-size: .72rem; }
 
             input.filled,
-            select.filled {
-                min-height: 47px;
-                padding: 11px 12px;
-                font-size: 16px; /* evita zoom automático en iOS */
-            }
+            select.filled { min-height: 47px; padding: 11px 12px; font-size: 16px; }
 
-            .switch-wrapper {
-                padding: 12px;
-                align-items: flex-start;
-            }
-
-            .switch-wrapper input[type="checkbox"] {
-                width: 21px;
-                height: 21px;
-                flex: 0 0 21px;
-                margin-top: 1px;
-            }
-
+            .switch-wrapper { padding: 12px; align-items: flex-start; }
+            .switch-wrapper input[type="checkbox"] { width: 21px; height: 21px; flex: 0 0 21px; margin-top: 1px; }
             .switch-wrapper span { font-size: .9rem !important; }
+            .alert-box { font-size: .82rem; gap: 8px; }
 
-            .alert-box {
-                font-size: .82rem;
-                gap: 8px;
-            }
-
-            .alert-box.d-flex {
-                align-items: flex-start !important;
-            }
-
-            .btn-pill {
-                min-height: 38px;
-                padding: 6px 10px;
-                font-size: .8rem;
-                flex-direction: row;
-                gap: 4px;
-                border-radius: 10px;
-            }
-
-            .btn-pill i { font-size: .95rem; }
-
-            .titulo-editable {
-                width: 100%;
-                font-size: 1.08rem;
-            }
-
-            .header-card > .d-flex:first-child {
-                gap: 8px !important;
-            }
-
-            .header-card .btn-group .btn-pill {
-                min-width: 42px;
-                width: 42px;
-                padding: 0 !important;
-            }
-
-            .ocr-zone {
-                padding: 14px;
-                border-radius: 14px;
-            }
-
-            .gallery-container {
-                justify-content: flex-start;
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                scroll-snap-type: x proximity;
-            }
-
-            .thumb-wrapper,
-            .btn-add-photo {
-                width: 76px;
-                height: 76px;
-                scroll-snap-align: start;
-            }
-
-            .mt-5.p-4.rounded-4.text-center {
-                margin-top: 26px !important;
-                padding: 18px 10px !important;
-            }
+            .btn-pill { min-height: 38px; padding: 6px 10px; font-size: .8rem; flex-direction: row; gap: 4px; border-radius: 10px; }
+            .titulo-editable { width: 100%; font-size: 1.08rem; }
+            
+            .ocr-zone { padding: 14px; border-radius: 14px; }
+            .gallery-container { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x proximity; }
+            .thumb-wrapper, .btn-add-photo { width: 76px; height: 76px; scroll-snap-align: start; }
+            .mt-5.p-4.rounded-4.text-center { margin-top: 26px !important; padding: 18px 10px !important; }
         }
 
-        /* Pantallas muy estrechas */
         @media (max-width: 360px) {
             .container { padding-inline: 7px; }
             .panel { padding-inline: 11px; }
             .nav-island-container { padding-inline: 7px; }
             .nav-island .btn-back,
-            .nav-island .btn-pill {
-                width: 36px;
-                min-width: 36px;
-                height: 36px;
-                min-height: 36px;
-                padding: 0;
-            }
+            .nav-island .btn-pill { width: 36px; min-width: 36px; height: 36px; min-height: 36px; padding: 0; }
         }
 
-        /* Accesibilidad y dispositivos táctiles */
         @media (hover: none) {
             .btn-pill:hover,
             .nav-island .btn-pill:hover,
-            .nav-island .btn-back:hover {
-                transform: none;
-                filter: none;
-                box-shadow: none;
-            }
+            .nav-island .btn-back:hover { transform: none; filter: none; box-shadow: none; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                scroll-behavior: auto !important;
-                transition-duration: .01ms !important;
-                animation-duration: .01ms !important;
-                animation-iteration-count: 1 !important;
-            }
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
         }
 
     </style>
@@ -684,6 +600,9 @@
             <i class="bi bi-arrow-left"></i> <span>Menú</span>
         </a>
         <div class="d-flex justify-content-end align-items-center">
+            <button class="btn-pill btn-trash" onclick="borrarTodosLosDatosLuz()" title="Borrar Todos los Datos">
+                <i class="bi bi-trash-fill"></i> <span>Borrar</span>
+            </button>
             <button id="btn-theme-toggle" class="btn-pill btn-secondary-custom" onclick="toggleTheme()" title="Cambiar Tema">
                 <!-- Se inyecta por JS -->
             </button>
@@ -698,13 +617,34 @@
     </div>
 </div>
 
+<!-- Modales Globales -->
+<div class="custom-modal-overlay" id="globalConfirmModal">
+    <div class="custom-modal-box">
+        <div class="custom-modal-icon icon-warning"><i class="bi bi-exclamation-circle-fill"></i></div>
+        <div class="custom-modal-title" id="globalConfirmMsg">¿Estás seguro?</div>
+        <div class="custom-modal-actions">
+            <button class="btn-modal btn-modal-cancel" onclick="closeGlobalConfirm()">No</button>
+            <button class="btn-modal btn-modal-confirm" id="globalConfirmBtn">Sí</button>
+        </div>
+    </div>
+</div>
+
+<div class="custom-modal-overlay" id="globalAlertModal">
+    <div class="custom-modal-box">
+        <div class="custom-modal-icon" id="globalAlertIcon"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="custom-modal-title" id="globalAlertMsg">Mensaje</div>
+        <div class="custom-modal-actions">
+            <button class="btn-modal btn-modal-ok" onclick="closeGlobalAlert()">Aceptar</button>
+        </div>
+    </div>
+</div>
+
 <div id="pdf-template-container"></div> 
 
 <div class="container">
     <div class="panel" id="main-receipt">
         <div class="header-hero">
-            <h1>CONTROL DE <span>ENERGÍA</span></h1>
-            <p>Configura los datos del recibo principal para distribuir los gastos.</p>
+            <h1>RECIBO LUZ <span>PRINCIPAL</span></h1>
         </div>
 
         <div class="ocr-zone" style="display: none;">
@@ -728,24 +668,21 @@
             <div id="ocr_status" style="display:none; background: rgba(139, 92, 246, 0.1); color: var(--accent-main); padding: 15px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; margin-top: 15px;"></div>
         </div>
 
-        <div class="d-flex gap-3 mb-4 flex-wrap">
-            <button class="btn-pill btn-danger-custom flex-grow-1" onclick="limpiarPrincipal()">
-                <i class="bi bi-trash3-fill"></i> <span>Limpiar Todo</span>
-            </button>
-            <button id="btn-descargar-resumen" class="btn-pill btn-primary-custom flex-grow-1" style="display: none;" onclick="descargarResumenPDF()">
+        <div class="d-flex mb-4">
+            <button id="btn-descargar-resumen" class="btn-pill btn-primary-custom w-100" onclick="descargarResumenPDF()">
                 <i class="bi bi-file-earmark-pdf-fill"></i> <span>Resumen PDF</span>
             </button>
         </div>
 
-        <div class="alert-box d-flex align-items-center justify-content-between">
-            <span><b>APORTE LEY (UIT S/. 5500):</b></span>
-            <span id="detalle_factor" style="font-weight:900; color:var(--accent-main); font-size:1.15rem;">-</span>
+        <div class="alert-box text-center">
+            <span><b>UIT: 5500 – AÑO 2026</b></span>
         </div>
 
         <div class="grid-2">
             <div class="input-group-custom">
                 <label>Mes de Facturación</label>
                 <select id="mes_principal" class="filled" onchange="calculate()">
+                    <option value="" selected>Seleccione...</option>
                     <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option>
                     <option>MAYO</option><option>JUNIO</option><option>JULIO</option><option>AGOSTO</option>
                     <option>SETIEMBRE</option><option>OCTUBRE</option><option>NOVIEMBRE</option><option>DICIEMBRE</option>
@@ -805,6 +742,52 @@
     const container = document.getElementById('inquilinos-container');
 
     // =========================================================================
+    // LÓGICA DE MODALES PERSONALIZADOS
+    // =========================================================================
+    let currentConfirmAction = null;
+
+    function showConfirmModal(msg, actionCallback) {
+        document.getElementById('globalConfirmMsg').textContent = msg;
+        currentConfirmAction = actionCallback;
+        document.getElementById('globalConfirmModal').classList.add('active');
+    }
+
+    function closeGlobalConfirm() {
+        document.getElementById('globalConfirmModal').classList.remove('active');
+        currentConfirmAction = null;
+    }
+
+    document.getElementById('globalConfirmBtn').addEventListener('click', () => {
+        if (currentConfirmAction) currentConfirmAction();
+        closeGlobalConfirm();
+    });
+
+    function showAlertModal(msg, type = 'success') {
+        document.getElementById('globalAlertMsg').textContent = msg;
+        const iconDiv = document.getElementById('globalAlertIcon');
+        const btn = document.querySelector('#globalAlertModal .btn-modal-ok');
+        
+        if (type === 'success') {
+            iconDiv.className = 'custom-modal-icon icon-success';
+            iconDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+            btn.style.backgroundColor = '#10b981';
+        } else if (type === 'error') {
+            iconDiv.className = 'custom-modal-icon icon-warning';
+            iconDiv.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
+            btn.style.backgroundColor = '#fb7185';
+        } else {
+            iconDiv.className = 'custom-modal-icon icon-info';
+            iconDiv.innerHTML = '<i class="bi bi-info-circle-fill"></i>';
+            btn.style.backgroundColor = 'var(--accent-main)';
+        }
+        document.getElementById('globalAlertModal').classList.add('active');
+    }
+
+    function closeGlobalAlert() {
+        document.getElementById('globalAlertModal').classList.remove('active');
+    }
+
+    // =========================================================================
     // MODO OSCURO (THEME TOGGLE)
     // =========================================================================
     function toggleTheme() {
@@ -832,8 +815,35 @@
     }
 
     // =========================================================================
-    // FUNCIONES: GUARDAR Y CARGAR ESTADO (SESIÓN) PARA LUZ
+    // FUNCIONES PRINCIPALES Y DE INTERFAZ
     // =========================================================================
+
+    function borrarTodosLosDatosLuz() {
+        showConfirmModal("¿Estás seguro de borrar todos los datos?", () => {
+            setTimeout(() => {
+                ['lec_ant_m','lec_act_m','fec_ant_m','fec_act_m','tarifa','rep_m','cargo_fijo_m','alum_m','int_m','red_ant_m','red_act_m'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+                document.getElementById('mes_principal').value = '';
+                document.getElementById('num_medidores').value = '';
+                
+                const cb = document.getElementById('has_sin_medidor');
+                if(cb) cb.checked = false;
+
+                for(let i=2; i<=5; i++) { limpiarInquilino(i, true); }
+                limpiarInquilino(1, true);
+
+                actualizarVista();
+                calculate();
+                guardarAutomaticoLuz();
+            }, 300);
+        });
+    }
+
+    function limpiarInquilino(i, skipCalc = false) {
+        [`lec_ant_i${i}`, `lec_act_i${i}`, `fec_ant_i${i}`, `fec_act_i${i}`, `titulo_i${i}`, `dias_vividos_i${i}`].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+        const selectModo = document.getElementById(`modo_dias_i${i}`);
+        if(selectModo) { selectModo.value = 'recibo'; toggleModoDias(i, false); }
+        if(!skipCalc) calculate();
+    }
 
     function guardarEstadoAppLuz() {
         exportarJSON();
@@ -879,17 +889,16 @@
 
                 if (datos && typeof datos === 'object' && !Array.isArray(datos) && datos.schema === 'luz_cayran_unificado' && datos.estado_app) {
                     cargarEstadoLegacyLuz(datos.estado_app);
-                    const mesTxt = String(datos.mes_cobro || datos.mes || '').trim().toUpperCase();
-                    alert(`¡JSON único${mesTxt ? ' (' + mesTxt + ')' : ''} restaurado correctamente!`);
+                    showAlertModal("Los datos se han restaurado correctamente", "success");
                 } else if (Array.isArray(datos)) {
                     cargarExportacionCompletaLuz(datos);
                 } else if (datos && typeof datos === 'object') {
                     cargarEstadoLegacyLuz(datos);
-                    alert("¡Datos de sesión antiguos restaurados correctamente!");
+                    showAlertModal("Los datos se han restaurado correctamente", "success");
                 } else { throw new Error("Formato JSON no reconocido."); }
                 event.target.value = "";
             } catch (error) {
-                alert("Error al leer el archivo JSON. Asegúrate de que sea un archivo generado por Luz Cayrán.");
+                showAlertModal("Error al leer el archivo JSON.", "error");
                 console.error(error); event.target.value = "";
             }
         };
@@ -973,8 +982,7 @@
         });
 
         calculate();
-        const mesTexto = mesImportado ? ` (${String(mesImportado).toUpperCase()})` : '';
-        alert(`¡Archivo completo de LUZ${mesTexto} restaurado correctamente!`);
+        showAlertModal("Los datos se han restaurado correctamente", "success");
     }
 
     function asignarValorLuz(id, valor) {
@@ -989,24 +997,23 @@
     // =========================================================================
 
     function avanzarCicloPrincipal() {
-        if(confirm("¿Pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores? Los actuales quedarán en blanco.")) {
+        showConfirmModal("Sobrescribir estos valores como lectura anterior", () => {
             const lecAct = document.getElementById('lec_act_m'); const lecAnt = document.getElementById('lec_ant_m');
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
             const fecAct = document.getElementById('fec_act_m'); const fecAnt = document.getElementById('fec_ant_m');
             if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calculate();
-        }
+        });
     }
 
     function avanzarCicloInquilino(id) {
-        const nombreInq = document.getElementById(`titulo_i${id}`).value || `Inquilino ${id-1}`;
-        if(confirm(`¿Pasar datos actuales de "${nombreInq.toUpperCase()}" a anteriores?`)) {
+        showConfirmModal("Sobrescribir estos valores como lectura anterior", () => {
             const lecAct = document.getElementById(`lec_act_i${id}`); const lecAnt = document.getElementById(`lec_ant_i${id}`);
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
             const fecAct = document.getElementById(`fec_act_i${id}`); const fecAnt = document.getElementById(`fec_ant_i${id}`);
             if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calculate();
-        }
+        });
     }
 
     // =========================================================================
@@ -1015,12 +1022,11 @@
         return `
         <div class="panel" id="recibo_i${id}" style="border-top: 4px solid ${colorBorde};">
             <div class="header-card">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">
+                    <i class="bi bi-person-badge"></i> CLIENTE MEDIDOR #${id - 1}
+                </div>
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <input type="text" id="titulo_i${id}" class="titulo-editable flex-grow-1" placeholder="${titulo}" style="color:${colorBorde}; min-width: 200px;" oninput="sincronizarNombre(${id})">
-                    <div class="btn-group flex-nowrap" style="width: auto;">
-                        <button class="btn-pill btn-secondary-custom btn-sm px-3" onclick="toggleCardBody(${id})" title="Ocultar/Mostrar"><i class="bi bi-eye-fill"></i></button>
-                        <button class="btn-pill btn-danger-custom btn-sm px-3" onclick="limpiarInquilino(${id})" title="Borrar datos"><i class="bi bi-trash-fill"></i></button>
-                    </div>
+                    <input type="text" id="titulo_i${id}" class="titulo-editable flex-grow-1" placeholder="" style="color:${colorBorde}; min-width: 200px;" oninput="sincronizarNombre(${id})">
                 </div>
                 <div class="d-flex gap-2 mt-3 flex-wrap">
                     <button class="btn-pill flex-grow-1" style="background:#25D366; color:white;" onclick="generarImagenRecibo(${id})">
@@ -1086,12 +1092,11 @@
     container.innerHTML += `
         <div class="panel" id="recibo_i1" style="border-top: 4px solid #ef4444;">
             <div class="header-card">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">
+                    <i class="bi bi-person-fill-exclamation"></i> CLIENTE SIN MEDIDOR
+                </div>
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <input type="text" id="titulo_i1" class="titulo-editable flex-grow-1" placeholder="Inquilino sin medidor" style="color:#ef4444; border-bottom-color:#fca5a5; min-width: 200px;" oninput="sincronizarNombre(1)">
-                    <div class="btn-group flex-nowrap" style="width: auto;">
-                        <button class="btn-pill btn-secondary-custom btn-sm px-3" onclick="toggleCardBody(1)"><i class="bi bi-eye-fill"></i></button>
-                        <button class="btn-pill btn-danger-custom btn-sm px-3" onclick="limpiarInquilino(1)"><i class="bi bi-trash-fill"></i></button>
-                    </div>
+                    <input type="text" id="titulo_i1" class="titulo-editable flex-grow-1" placeholder="" style="color:#ef4444; border-bottom-color:#fca5a5; min-width: 200px;" oninput="sincronizarNombre(1)">
                 </div>
                 <div class="d-flex gap-2 mt-3 flex-wrap">
                     <button class="btn-pill flex-grow-1" style="background:#25D366; color:white;" onclick="generarImagenRecibo(1)">
@@ -1103,9 +1108,6 @@
                 </div>
             </div>
             <div id="body_i1">
-                <div class="alert-box" style="background:rgba(239, 68, 68, 0.1); border-left-color:#ef4444; color:#ef4444; margin-top: 20px;">
-                    <i class="bi bi-info-circle-fill me-2"></i> El monto de este inquilino se calcula restando al recibo principal los montos de los demás inquilinos con medidor.
-                </div>
                 <div class="mt-4 p-3 rounded-4 d-flex justify-content-between align-items-center" style="display: none !important; background: var(--input-bg); border: 2px solid #ef4444;">
                     <div style="font-weight: 800; color: #ef4444; text-transform: uppercase;">Total a Pagar</div>
                     <input type="text" id="total_pagar_i1" class="readonly" style="font-size:1.8rem; font-weight:900; border:none; background:transparent; text-align: right; color: #ef4444; width: 60%; padding: 0;" readonly value="0.00">
@@ -1113,11 +1115,6 @@
             </div>
         </div>
     `;
-
-    function toggleCardBody(id) {
-        const bodyEl = document.getElementById(`body_i${id}`);
-        if(bodyEl) { bodyEl.style.display = bodyEl.style.display === 'none' ? 'block' : 'none'; }
-    }
 
     function verificarDatosCompletos() {
         const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
@@ -1189,7 +1186,6 @@
 
     function calculate() {
         const factorLey = (2 * UIT_VIGENTE) / 1000000;
-        document.getElementById('detalle_factor').innerText = factorLey.toFixed(6);
         const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
         const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
         const totalInquilinosReales = numMedidores + (hasSinMedidor ? 1 : 0);
@@ -1263,16 +1259,13 @@
             window._i1_cache = { kwh: kwhDiferencia, ener: en_i1, rep: rep_i1_val, cf: cf_i1_val, alum: alum_i1_val, int: int_i1_val, igv: igv_i1, aporte: ap_i1_val, red_ant: red_ant_i1_val, red_act: red_act_i1_val, total: total_i1 };
             setVal('total_pagar_i1', total_i1);
         }
-
-        const btnResumen = document.getElementById('btn-descargar-resumen');
-        if (verificarDatosCompletos()) { btnResumen.style.display = 'inline-flex'; } else { btnResumen.style.display = 'none'; }
     }
 
     function exportarJSON() {
         calculate();
 
         const f1m_val = document.getElementById('fec_act_m').value;
-        if (!f1m_val) { alert("Es necesario tener la fecha actual del recibo principal completada."); return; }
+        if (!f1m_val) { showAlertModal("Es necesario tener la fecha actual del recibo principal completada.", "error"); return; }
 
         const f2m_val = document.getElementById('fec_ant_m').value;
         const d_f1m = parseDateLocal(f1m_val); const d_f2m = parseDateLocal(f2m_val);
@@ -1624,26 +1617,12 @@
         });
     }
 
-    function limpiarPrincipal() {
-        ['lec_ant_m','lec_act_m','fec_ant_m','fec_act_m','tarifa','rep_m','cargo_fijo_m','alum_m','int_m','red_ant_m','red_act_m'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-        calculate();
-    }
-    function limpiarInquilino(i) {
-        if(i === 1) return;
-        [`lec_ant_i${i}`, `lec_act_i${i}`, `fec_ant_i${i}`, `fec_act_i${i}`].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-        const selectModo = document.getElementById(`modo_dias_i${i}`);
-        if(selectModo) { selectModo.value = 'recibo'; toggleModoDias(i); }
-        document.getElementById(`body_i${i}`).style.display = 'block';
-        calculate();
-    }
-    
     toggleModoDias(2, false); toggleModoDias(3, false); toggleModoDias(4, false); toggleModoDias(5, false); actualizarVista(); 
     document.addEventListener('wheel', function(event) { if (document.activeElement.type === 'number') event.preventDefault(); }, { passive: false });
 
 
     // =========================================================================
     // SINCRONIZACIÓN AUTOMÁTICA LOCAL - LUZ CAYRÁN
-    // Conserva el formulario y deja un resumen listo para Redondeos.
     // =========================================================================
     const STORAGE_LUZ_BORRADOR = 'recibos_cayran_luz_borrador_v1';
     const STORAGE_LUZ_SYNC = 'recibos_cayran_luz_sync_v1';
@@ -1792,7 +1771,7 @@
     function manejarSeleccionFotos(event) {
         const files = Array.from(event.target.files);
         for (let file of files) {
-            if (arrayFotos.length < MAX_FOTOS) { arrayFotos.push(file); } else { alert("Has alcanzado el límite máximo de 5 fotos."); break; }
+            if (arrayFotos.length < MAX_FOTOS) { arrayFotos.push(file); } else { showAlertModal("Has alcanzado el límite máximo de 5 fotos.", "error"); break; }
         }
         dibujarGaleria(); event.target.value = ''; 
     }
