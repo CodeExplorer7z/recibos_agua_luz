@@ -1124,7 +1124,125 @@
         try { const pdfBase64 = await html2pdf().set(opt).from(document.getElementById('calculos-captura')).outputPdf('datauristring'); await guardarOCompartirPDF(exportFileName, pdfBase64); } finally { tempCont.innerHTML = ''; }
     }
 
-    window.onload = render;
+
+    // =========================================================================
+    // SINCRONIZACIÓN AUTOMÁTICA LOCAL - AGUA CAYRÁN
+    // Conserva el formulario al volver al menú y publica los datos necesarios
+    // para que redondeos_montos.html los lea sin importar JSON manualmente.
+    // =========================================================================
+    const STORAGE_AGUA_BORRADOR = 'recibos_cayran_agua_borrador_v1';
+    const STORAGE_AGUA_SYNC = 'recibos_cayran_agua_sync_v1';
+    let timerAutosaveAgua = null;
+    let restaurandoAguaLocal = false;
+
+    function construirSyncAgua() {
+        calc();
+
+        const mes = String(document.getElementById('m_mes')?.value || '').trim().toUpperCase();
+        const mPrevD = document.getElementById('m_prev_d')?.value || '';
+        const mCurrD = document.getElementById('m_curr_d')?.value || '';
+        const fechaActualObj = fechaAguaLocal(mCurrD);
+        const anio = fechaActualObj ? fechaActualObj.getFullYear() : null;
+        const nMetered = parseInt(document.getElementById('n_tenants_meter')?.value) || 0;
+        const hasNoMeter = !!document.getElementById('has_nometer')?.checked;
+        const diasRecibo = diasInclusivosAgua(mPrevD, mCurrD);
+        const inquilinos = [];
+
+        for (let i = 1; i <= nMetered; i++) {
+            const nombre = document.getElementById(`i${i}_name`)?.value || `Inquilino #${i}`;
+            const modo = document.getElementById(`i${i}_calc_mode`)?.value || 'auto';
+            const diasFacturados = modo === 'manual'
+                ? Math.max(0, parseFloat(document.getElementById(`i${i}_manual_days`)?.value) || 0)
+                : diasRecibo;
+            const consumoM3 = numeroAgua(textoNumeroAgua(`i${i}_res_cons`), 2);
+            const total = numeroAgua(textoNumeroAgua(`i${i}_pdf_total_val`), 2);
+            inquilinos.push({
+                nombre,
+                id_interno: i,
+                con_medidor: true,
+                consumo_m3: consumoM3,
+                monto_pagar: total,
+                fecha_inicio: calcularInicioFacturadoAgua(mCurrD, diasFacturados),
+                fecha_fin: mCurrD,
+                dias_facturados: diasFacturados
+            });
+        }
+
+        if (hasNoMeter && document.getElementById('inometer_name')) {
+            const nombre = document.getElementById('inometer_name').value || 'Inquilino Sin Medidor';
+            const consumoM3 = numeroAgua(textoNumeroAgua('inometer_res_cons'), 2);
+            const total = numeroAgua(textoNumeroAgua('inometer_pdf_total_val'), 2);
+            inquilinos.push({
+                nombre,
+                id_interno: 'nometer',
+                con_medidor: false,
+                consumo_m3: consumoM3,
+                monto_pagar: total,
+                fecha_inicio: calcularInicioFacturadoAgua(mCurrD, diasRecibo),
+                fecha_fin: mCurrD,
+                dias_facturados: diasRecibo
+            });
+        }
+
+        return {
+            schema: 'agua_cayran_sync',
+            schema_version: '1.0',
+            tipo: 'agua',
+            mes,
+            mes_cobro: mes,
+            anio,
+            periodo: { mes, anio },
+            actualizado_en: new Date().toISOString(),
+            inquilinos
+        };
+    }
+
+    function guardarAutomaticoAgua() {
+        if (restaurandoAguaLocal) return;
+        try {
+            localStorage.setItem(STORAGE_AGUA_BORRADOR, JSON.stringify(capturarEstadoAppAgua()));
+            const sync = construirSyncAgua();
+            localStorage.setItem(STORAGE_AGUA_SYNC, JSON.stringify(sync));
+        } catch (error) {
+            console.warn('No se pudo guardar automáticamente Agua Cayrán:', error);
+        }
+    }
+
+    function programarGuardadoAutomaticoAgua() {
+        clearTimeout(timerAutosaveAgua);
+        timerAutosaveAgua = setTimeout(guardarAutomaticoAgua, 250);
+    }
+
+    function restaurarAutomaticoAgua() {
+        try {
+            const raw = localStorage.getItem(STORAGE_AGUA_BORRADOR);
+            if (!raw) return false;
+            const estado = JSON.parse(raw);
+            restaurandoAguaLocal = true;
+            cargarEstadoLegacyAgua(estado);
+            return true;
+        } catch (error) {
+            console.warn('No se pudo restaurar automáticamente Agua Cayrán:', error);
+            return false;
+        } finally {
+            restaurandoAguaLocal = false;
+        }
+    }
+
+    function instalarAutosaveAgua() {
+        document.addEventListener('input', programarGuardadoAutomaticoAgua, true);
+        document.addEventListener('change', programarGuardadoAutomaticoAgua, true);
+        window.addEventListener('pagehide', guardarAutomaticoAgua);
+        window.addEventListener('beforeunload', guardarAutomaticoAgua);
+    }
+
+    window.onload = function() {
+        render();
+        restaurarAutomaticoAgua();
+        instalarAutosaveAgua();
+        guardarAutomaticoAgua();
+    };
+
 </script>
 
 </body>
