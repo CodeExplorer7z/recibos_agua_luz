@@ -62,6 +62,7 @@
             background-color: var(--bg-app); 
             color: var(--text-main); 
             margin: 0; 
+            padding-top: env(safe-area-inset-top);
             padding-bottom: max(30px, env(safe-area-inset-bottom)); 
             transition: background-color 0.3s, color 0.3s;
             overflow-x: hidden;
@@ -73,12 +74,12 @@
         /* === NAVEGACIÓN FLOTANTE (ESTILO ISLA) === */
         .nav-island-container {
             position: sticky;
-            top: 15px;
+            top: 0;
             z-index: 1000;
             margin-bottom: 30px;
             display: flex;
-            justify-content: center;
-            padding: 0 20px;
+            justify-content: flex-end; /* Alineado al extremo derecho */
+            padding: max(10px, env(safe-area-inset-top)) 20px 8px 20px;
             pointer-events: none;
         }
         
@@ -90,11 +91,11 @@
             padding: 10px 20px;
             border-radius: 50px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end; /* Todo alineado a la derecha */
             align-items: center;
             gap: 15px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            width: 100%;
+            width: auto; /* Ancho automático para que se ajuste al contenido a la derecha */
             max-width: 1260px;
             pointer-events: auto;
             transition: all 0.3s;
@@ -216,16 +217,16 @@
             .panel { padding: 16px; border-radius: 16px; }
             .grid-2 { grid-template-columns: 1fr; gap: 12px; }
             
-            /* Menú altamente comprimido */
-            .nav-island-container { top: 8px; margin-bottom: 20px; padding: 0 10px; }
-            .nav-island { padding: 8px; border-radius: 16px; gap: 8px; flex-direction: column; }
-            .nav-island .btn-back { width: 100%; justify-content: center; padding: 8px; font-size: 0.9rem; margin: 0; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border-color); }
+            /* Menú altamente comprimido en una sola línea a la derecha */
+            .nav-island-container { top: 0; margin-bottom: 20px; padding: max(6px, env(safe-area-inset-top)) 10px 6px 10px; justify-content: flex-end; }
+            .nav-island { padding: 6px 10px; border-radius: 16px; gap: 6px; flex-direction: row; width: auto; }
+            .nav-island .btn-back { width: auto; justify-content: center; padding: 6px 10px; font-size: 0.9rem; margin: 0; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border-color); }
             
             /* Botones en una sola fila compacta */
-            .nav-island .d-flex { width: 100%; flex-direction: row !important; gap: 6px !important; flex-wrap: nowrap !important; }
-            .btn-pill { padding: 8px 4px; font-size: 0.75rem; flex: 1; flex-direction: column; gap: 4px; border-radius: 10px; }
-            .btn-pill i { font-size: 1.2rem; margin: 0; }
-            .btn-pill span { display: block; text-align: center; line-height: 1.1; }
+            .nav-island .d-flex { width: auto; flex-direction: row !important; gap: 6px !important; flex-wrap: nowrap !important; align-items: center; }
+            .btn-pill { padding: 6px 10px; font-size: 0.8rem; flex: 0 0 auto; flex-direction: row; gap: 4px; border-radius: 10px; min-height: 38px; height: 38px; }
+            .btn-pill i { font-size: 1rem; margin: 0; }
+            .btn-pill span { display: inline-block; }
 
             .input-group-custom label { font-size: 0.75rem; }
             input.filled, select.filled { padding: 12px 14px; font-size: 1rem; }
@@ -285,6 +286,7 @@
         body {
             min-width: 0;
             min-height: 100dvh;
+            padding-top: env(safe-area-inset-top);
             padding-bottom: max(24px, env(safe-area-inset-bottom));
         }
 
@@ -305,13 +307,15 @@
         .header-card,
         .d-flex { min-width: 0; }
 
-        /* Barra superior: deja de ser una isla flotante */
+        /* Barra superior: alineada a la derecha */
         .nav-island-container {
             position: sticky;
             top: 0;
             z-index: 1000;
             margin: 0 0 clamp(16px, 2vw, 26px);
             padding: max(8px, env(safe-area-inset-top)) clamp(12px, 2.6vw, 28px) 8px;
+            display: flex;
+            justify-content: flex-end;
             background: color-mix(in srgb, var(--bg-app) 88%, transparent);
             border-bottom: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
             backdrop-filter: blur(16px) saturate(150%);
@@ -320,16 +324,20 @@
         }
 
         .nav-island {
-            width: min(100%, 1264px);
+            width: auto;
             max-width: 1264px;
             min-height: 50px;
-            margin: 0 auto;
+            margin: 0;
+            margin-left: auto;
             padding: 4px;
             border: 0;
             border-radius: 14px;
             background: transparent;
             box-shadow: none;
             gap: 10px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
         }
 
         .nav-island > .d-flex {
@@ -481,39 +489,43 @@
             .nav-island-container {
                 padding: max(6px, env(safe-area-inset-top)) 10px 6px;
                 margin-bottom: 12px;
+                justify-content: flex-end;
             }
 
             .nav-island {
                 min-height: 46px;
                 padding: 2px 0;
-                gap: 6px;
+                gap: 5px;
                 border-radius: 0;
+                width: auto;
+                justify-content: flex-end;
             }
 
             .nav-island > .d-flex {
-                margin-left: auto;
+                margin-left: 0;
                 gap: 5px !important;
             }
 
             .nav-island .btn-back,
             .nav-island .btn-pill {
-                width: 40px;
-                min-width: 40px;
-                height: 40px;
-                min-height: 40px;
-                padding: 0;
-                border-radius: 11px;
+                width: auto;
+                min-width: 38px;
+                height: 38px;
+                min-height: 38px;
+                padding: 0 8px;
+                border-radius: 10px;
                 justify-content: center;
             }
 
             .nav-island .btn-back span,
             .nav-island .btn-pill span {
-                display: none !important;
+                display: none !important; /* Muestra solo iconos en pantallas pequeñas si se prefiere, o déjalos visibles si hay espacio */
             }
 
             .nav-island .btn-back i,
             .nav-island .btn-pill i {
-                font-size: 1.08rem;
+                font-size: 1rem;
+                margin: 0;
             }
 
             .container {
@@ -577,15 +589,15 @@
             }
 
             .btn-pill {
-                min-height: 43px;
-                padding: 9px 12px;
-                font-size: .84rem;
+                min-height: 38px;
+                padding: 6px 10px;
+                font-size: .8rem;
                 flex-direction: row;
-                gap: 6px;
-                border-radius: 11px;
+                gap: 4px;
+                border-radius: 10px;
             }
 
-            .btn-pill i { font-size: 1rem; }
+            .btn-pill i { font-size: .95rem; }
 
             .titulo-editable {
                 width: 100%;
@@ -634,10 +646,11 @@
             .nav-island-container { padding-inline: 7px; }
             .nav-island .btn-back,
             .nav-island .btn-pill {
-                width: 38px;
-                min-width: 38px;
-                height: 38px;
-                min-height: 38px;
+                width: 36px;
+                min-width: 36px;
+                height: 36px;
+                min-height: 36px;
+                padding: 0;
             }
         }
 
@@ -670,7 +683,7 @@
         <a href="./index.html" class="btn-back">
             <i class="bi bi-arrow-left"></i> <span>Menú</span>
         </a>
-        <div class="d-flex justify-content-center">
+        <div class="d-flex justify-content-end align-items-center">
             <button id="btn-theme-toggle" class="btn-pill btn-secondary-custom" onclick="toggleTheme()" title="Cambiar Tema">
                 <!-- Se inyecta por JS -->
             </button>
