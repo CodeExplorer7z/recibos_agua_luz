@@ -1640,6 +1640,153 @@
     toggleModoDias(2, false); toggleModoDias(3, false); toggleModoDias(4, false); toggleModoDias(5, false); actualizarVista(); 
     document.addEventListener('wheel', function(event) { if (document.activeElement.type === 'number') event.preventDefault(); }, { passive: false });
 
+
+    // =========================================================================
+    // SINCRONIZACIÓN AUTOMÁTICA LOCAL - LUZ CAYRÁN
+    // Conserva el formulario y deja un resumen listo para Redondeos.
+    // =========================================================================
+    const STORAGE_LUZ_BORRADOR = 'recibos_cayran_luz_borrador_v1';
+    const STORAGE_LUZ_SYNC = 'recibos_cayran_luz_sync_v1';
+    let timerAutosaveLuz = null;
+    let restaurandoLuzLocal = false;
+
+    function capturarEstadoLocalLuz() {
+        const estado = {};
+        document.querySelectorAll('input, select').forEach(input => {
+            if (input.id && input.type !== 'file' && input.type !== 'button') {
+                estado[input.id] = input.type === 'checkbox' ? input.checked : input.value;
+            }
+        });
+        return estado;
+    }
+
+    function fechaInicioSyncLuz(fechaFinStr, dias) {
+        const fin = parseDateLocal(fechaFinStr);
+        const n = Number(dias) || 0;
+        if (!fin || n < 1) return '';
+        const ini = new Date(fin.getTime() - (n - 1) * 86400000);
+        const y = ini.getFullYear();
+        const m = String(ini.getMonth() + 1).padStart(2, '0');
+        const d = String(ini.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function construirSyncLuz() {
+        calculate();
+
+        const fechaFin = document.getElementById('fec_act_m')?.value || '';
+        const fechaAnt = document.getElementById('fec_ant_m')?.value || '';
+        const dFin = parseDateLocal(fechaFin);
+        const dAnt = parseDateLocal(fechaAnt);
+        const diasRecibo = dFin && dAnt ? Math.max(1, Math.floor((dFin - dAnt) / 864e5) + 1) : 0;
+        const mes = String(document.getElementById('mes_principal')?.value || '').trim().toUpperCase();
+        const anio = dFin ? dFin.getFullYear() : null;
+        const numMedidores = parseInt(document.getElementById('num_medidores')?.value) || 0;
+        const hasSinMedidor = !!document.getElementById('has_sin_medidor')?.checked;
+        const numero = (v, dec = 2) => {
+            const n = Number(v);
+            return Number.isFinite(n) ? Number(n.toFixed(dec)) : 0;
+        };
+        const inquilinos = [];
+
+        if (hasSinMedidor) {
+            const c = window._i1_cache || { kwh: 0 };
+            inquilinos.push({
+                nombre: document.getElementById('titulo_i1')?.value || 'Inquilino sin medidor',
+                id_interno: 1,
+                con_medidor: false,
+                kwh_real: numero(c.kwh),
+                monto_pagar: numero(getVal('total_pagar_i1')),
+                fecha_inicio: fechaInicioSyncLuz(fechaFin, diasRecibo),
+                fecha_fin: fechaFin,
+                dias_facturados: diasRecibo
+            });
+        }
+
+        for (let i = 2; i <= numMedidores + 1; i++) {
+            const lAnt = getVal(`lec_ant_i${i}`);
+            const lAct = getVal(`lec_act_i${i}`);
+            const fAnt = document.getElementById(`fec_ant_i${i}`)?.value || '';
+            const fAct = document.getElementById(`fec_act_i${i}`)?.value || '';
+            const da = fAnt ? parseDateLocal(fAnt) : null;
+            const df = fAct ? parseDateLocal(fAct) : null;
+            const diasLectura = da && df ? Math.max(1, Math.floor((df - da) / 864e5) + 1) : 0;
+            const consumoMedidor = Math.max(0, lAct - lAnt);
+            const consumoDiario = diasLectura > 0 ? consumoMedidor / diasLectura : 0;
+            const modo = document.getElementById(`modo_dias_i${i}`)?.value || 'recibo';
+            const diasFacturados = modo === 'recibo'
+                ? diasRecibo
+                : Math.max(0, parseInt(getVal(`dias_vividos_i${i}`)) || 0);
+            const kwh = numero(consumoDiario * diasFacturados);
+
+            inquilinos.push({
+                nombre: document.getElementById(`titulo_i${i}`)?.value || `Inquilino ${i - 1}`,
+                id_interno: i,
+                con_medidor: true,
+                kwh_real: kwh,
+                monto_pagar: numero(getVal(`total_pagar_i${i}`)),
+                fecha_inicio: fechaInicioSyncLuz(fechaFin, diasFacturados),
+                fecha_fin: fechaFin,
+                dias_facturados: diasFacturados
+            });
+        }
+
+        return {
+            schema: 'luz_cayran_sync',
+            schema_version: '1.0',
+            tipo: 'luz',
+            mes,
+            mes_cobro: mes,
+            anio,
+            periodo: { mes, anio },
+            actualizado_en: new Date().toISOString(),
+            inquilinos
+        };
+    }
+
+    function guardarAutomaticoLuz() {
+        if (restaurandoLuzLocal) return;
+        try {
+            localStorage.setItem(STORAGE_LUZ_BORRADOR, JSON.stringify(capturarEstadoLocalLuz()));
+            localStorage.setItem(STORAGE_LUZ_SYNC, JSON.stringify(construirSyncLuz()));
+        } catch (error) {
+            console.warn('No se pudo guardar automáticamente Luz Cayrán:', error);
+        }
+    }
+
+    function programarGuardadoAutomaticoLuz() {
+        clearTimeout(timerAutosaveLuz);
+        timerAutosaveLuz = setTimeout(guardarAutomaticoLuz, 250);
+    }
+
+    function restaurarAutomaticoLuz() {
+        try {
+            const raw = localStorage.getItem(STORAGE_LUZ_BORRADOR);
+            if (!raw) return false;
+            restaurandoLuzLocal = true;
+            cargarEstadoLegacyLuz(JSON.parse(raw));
+            return true;
+        } catch (error) {
+            console.warn('No se pudo restaurar automáticamente Luz Cayrán:', error);
+            return false;
+        } finally {
+            restaurandoLuzLocal = false;
+        }
+    }
+
+    function instalarAutosaveLuz() {
+        document.addEventListener('input', programarGuardadoAutomaticoLuz, true);
+        document.addEventListener('change', programarGuardadoAutomaticoLuz, true);
+        window.addEventListener('pagehide', guardarAutomaticoLuz);
+        window.addEventListener('beforeunload', guardarAutomaticoLuz);
+    }
+
+    window.addEventListener('load', () => {
+        restaurarAutomaticoLuz();
+        instalarAutosaveLuz();
+        guardarAutomaticoLuz();
+    });
+
     let arrayFotos = []; const MAX_FOTOS = 5;
 
     function manejarSeleccionFotos(event) {
