@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v8.html -->
+<!-- Nombre del archivo: agua_cayran_v9.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -95,10 +95,40 @@
             border: 1px solid var(--card-border);
         }
         .btn-back:hover { background: var(--card-border); filter: brightness(0.95); }
+
+        /* Nuevos estilos de botones superiores */
+        .btn-trash {
+            background-color: var(--bg-subtle) !important;
+            color: #fb7185 !important;
+            border: 1px solid var(--card-border) !important;
+        }
+        .btn-trash:hover { background-color: rgba(251, 113, 133, 0.1) !important; }
+
+        .btn-import {
+            background-color: var(--bg-subtle) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--card-border) !important;
+        }
+        .btn-import:hover { filter: brightness(0.9); }
+
+        .btn-save-json {
+            background-color: #10b981 !important;
+            color: white !important;
+            border: none !important;
+        }
+        .btn-save-json:hover { background-color: #059669 !important; }
         
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
         
+        /* Ajuste específico para Inputs de Fecha (Evita año cortado) */
+        input[type="date"].input-editable {
+            padding-left: 6px !important;
+            padding-right: 6px !important;
+            font-size: 14px !important;
+            letter-spacing: -0.5px;
+        }
+
         /* Tarjetas (Cards) */
         .main-card { border: 1px solid var(--card-border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border-radius: 12px; background: var(--bg-surface); overflow: hidden; transition: background-color 0.3s; }
         .card-header-custom { background: var(--blue-dark); color: white; padding: 16px 20px; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: background-color 0.3s; }
@@ -202,7 +232,6 @@
             #tenants_grid > div { margin-bottom: 20px; }
         }
 
-        /* En pantallas móviles transformamos los botones superiores en iconos cuadrados */
         @media (max-width: 640px) {
             .hide-mobile { display: none !important; }
             
@@ -227,24 +256,36 @@
                 margin: 0;
             }
         }
+        
+        @media (max-width: 380px) {
+            /* Fix extra para celulares muy pequeños */
+            input[type="date"].input-editable {
+                font-size: 12px !important;
+                padding-left: 2px !important;
+                padding-right: 2px !important;
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="nav-back-bar-container">
     <div class="nav-back-bar">
-        <a href="./index.html" class="btn-top-action btn-back">
+        <a href="./index.html" class="btn-top-action btn-back shadow-sm">
             <i class="bi bi-arrow-left"></i> <span class="hide-mobile">Menú</span>
         </a>
         <div class="d-flex gap-2 align-items-center">
-            <button id="btn-theme-toggle" class="btn-top-action btn btn-outline-secondary shadow-sm" onclick="toggleTheme()" title="Cambiar Tema" style="border: 1px solid var(--card-border); color: var(--text-main);">
+            <button class="btn-top-action btn-trash shadow-sm" onclick="borrarTodosLosDatos()" title="Borrar Todos los Datos">
+                <i class="bi bi-trash-fill"></i> <span class="hide-mobile">Borrar</span>
+            </button>
+            <button id="btn-theme-toggle" class="btn-top-action btn-import shadow-sm" onclick="toggleTheme()" title="Cambiar Tema">
                 <!-- Se inyecta por JS -->
             </button>
-            <button class="btn-top-action btn btn-success text-white shadow-sm" onclick="guardarEstadoApp()">
-                <i class="bi bi-floppy"></i> <span class="hide-mobile">Guardar JSON</span>
+            <button class="btn-top-action btn-save-json shadow-sm" onclick="guardarEstadoApp()">
+                <i class="bi bi-cloud-arrow-down-fill"></i> <span class="hide-mobile">Guardar JSON</span>
             </button>
-            <button class="btn-top-action btn btn-secondary text-white shadow-sm" onclick="document.getElementById('file_import').click()">
-                <i class="bi bi-upload"></i> <span class="hide-mobile">Importar</span>
+            <button class="btn-top-action btn-import shadow-sm" onclick="document.getElementById('file_import').click()">
+                <i class="bi bi-folder-symlink-fill"></i> <span class="hide-mobile">Importar</span>
             </button>
             <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
         </div>
@@ -276,11 +317,11 @@
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="small-label">Fecha Ant.</label>
+                            <label class="small-label d-flex align-items-center" style="min-height: 32px;">Fecha Ant.</label>
                             <input type="date" id="m_prev_d" class="form-control input-editable" oninput="calc()">
                         </div>
                         <div class="col-6">
-                            <label class="small-label">Fecha Act.</label>
+                            <label class="small-label d-flex align-items-center" style="min-height: 32px;">Fecha Act.</label>
                             <input type="date" id="m_curr_d" class="form-control input-editable" oninput="calc()">
                         </div>
 
@@ -289,11 +330,11 @@
                             <div class="section-divider"><i class="bi bi-speedometer2"></i> Medidor Principal</div>
                         </div>
                         <div class="col-6">
-                            <label class="small-label">Lectura Ant.</label>
+                            <label class="small-label d-flex align-items-center" style="min-height: 32px;">Lectura Ant.</label>
                             <input type="number" id="m_prev_r" class="form-control input-editable" oninput="calc()">
                         </div>
                         <div class="col-6">
-                            <label class="small-label d-flex justify-content-between align-items-center">
+                            <label class="small-label d-flex justify-content-between align-items-center" style="min-height: 32px;">
                                 <span>Lectura Act.</span>
                                 <span class="btn-ciclo" onclick="avanzarCicloPrincipalAgua()" title="Pasar datos actuales a anteriores y limpiar">
                                     <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
@@ -373,8 +414,32 @@
 
 <script>
     // =========================================================================
-    // MODO OSCURO (THEME TOGGLE)
+    // FUNCIONES PRINCIPALES Y DE INTERFAZ
     // =========================================================================
+
+    function borrarTodosLosDatos() {
+        if(confirm("¿Estás seguro de que deseas borrar TODOS los datos de Agua? Esta acción reiniciará los inquilinos, lecturas y costos, y no se puede deshacer.")) {
+            // Limpiar inputs
+            document.querySelectorAll('#main_card_col input').forEach(inp => {
+                if(inp.type === 'number' || inp.type === 'text' || inp.type === 'date') {
+                    if(inp.id !== 'v_total_main') inp.value = '';
+                }
+            });
+            // Limpiar Selects Principales
+            document.getElementById('m_mes').value = '';
+            document.getElementById('n_tenants_meter').value = '';
+            
+            // Desmarcar Inquilino sin medidor
+            const cb = document.getElementById('has_nometer');
+            if(cb) cb.checked = false;
+
+            // Render borra las tarjetas al no tener valor en n_tenants_meter
+            render();
+            calc();
+            guardarAutomaticoAgua();
+        }
+    }
+
     function toggleTheme() {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -818,15 +883,18 @@
 
                         <div class="tenant-header" id="web_header_${i}">
                             <div class="tenant-client-label"><i class="bi bi-person-badge"></i> CLIENTE MEDIDOR #${i}</div>
-                            <input type="text" id="i${i}_name" class="tenant-name-input" value="" placeholder="Nombre del inquilino" oninput="calc()">
+                            <input type="text" id="i${i}_name" class="tenant-name-input" value="" placeholder="" oninput="calc()">
                         </div>
 
                         <div class="tenant-body">
                             <div class="row g-3 align-items-end" id="inputs_${i}">
-                                <div class="col-6"><label class="small-label">Lectura Anterior</label><input type="number" id="i${i}_prev_r" class="form-control input-editable" oninput="calc()"></div>
+                                <div class="col-6">
+                                    <label class="small-label d-flex align-items-center" style="min-height: 32px;">Lectura Anterior</label>
+                                    <input type="number" id="i${i}_prev_r" class="form-control input-editable" oninput="calc()">
+                                </div>
                                 
                                 <div class="col-6">
-                                    <label class="small-label d-flex justify-content-between align-items-center">
+                                    <label class="small-label d-flex justify-content-between align-items-center" style="min-height: 32px;">
                                         <span>Lectura Actual</span>
                                         <span class="btn-ciclo" onclick="avanzarCicloInquilinoAgua(${i})" title="Pasar datos actuales a anteriores">
                                             <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
@@ -835,8 +903,14 @@
                                     <input type="number" id="i${i}_curr_r" class="form-control input-editable" oninput="calc()">
                                 </div>
                                 
-                                <div class="col-6"><label class="small-label">Fecha Anterior</label><input type="date" id="i${i}_prev_d" class="form-control input-editable" oninput="calc()"></div>
-                                <div class="col-6"><label class="small-label">Fecha Actual</label><input type="date" id="i${i}_curr_d" class="form-control input-editable" oninput="calc()"></div>
+                                <div class="col-6">
+                                    <label class="small-label d-flex align-items-center" style="min-height: 32px;">Fecha Anterior</label>
+                                    <input type="date" id="i${i}_prev_d" class="form-control input-editable" oninput="calc()">
+                                </div>
+                                <div class="col-6">
+                                    <label class="small-label d-flex align-items-center" style="min-height: 32px;">Fecha Actual</label>
+                                    <input type="date" id="i${i}_curr_d" class="form-control input-editable" oninput="calc()">
+                                </div>
                                 
                                 <div class="col-12 mt-3 pt-3" style="border-top: 1px dashed var(--card-border);">
                                     <label class="small-label text-primary" style="color: var(--blue-light) !important;">Modo de cálculo:</label>
@@ -896,7 +970,7 @@
 
                         <div class="tenant-header" id="web_header_nometer">
                             <div class="tenant-client-label"><i class="bi bi-person-fill-exclamation"></i> SIN MEDIDOR</div>
-                            <input type="text" id="inometer_name" class="tenant-name-input" value="" placeholder="PROPIETARIO" oninput="calc()">
+                            <input type="text" id="inometer_name" class="tenant-name-input" value="" placeholder="" oninput="calc()">
                         </div>
                         
                         <div class="tenant-body">
@@ -1127,8 +1201,6 @@
 
     // =========================================================================
     // SINCRONIZACIÓN AUTOMÁTICA LOCAL - AGUA CAYRÁN
-    // Conserva el formulario al volver al menú y publica los datos necesarios
-    // para que redondeos_montos.html los lea sin importar JSON manualmente.
     // =========================================================================
     const STORAGE_AGUA_BORRADOR = 'recibos_cayran_agua_borrador_v1';
     const STORAGE_AGUA_SYNC = 'recibos_cayran_agua_sync_v1';
@@ -1204,7 +1276,7 @@
             const sync = construirSyncAgua();
             localStorage.setItem(STORAGE_AGUA_SYNC, JSON.stringify(sync));
         } catch (error) {
-            console.warn('No se pudo guardar automáticamente Agua Cayrán:', error);
+            console.warn('No se pudo guardar automáticamente:', error);
         }
     }
 
@@ -1222,7 +1294,7 @@
             cargarEstadoLegacyAgua(estado);
             return true;
         } catch (error) {
-            console.warn('No se pudo restaurar automáticamente Agua Cayrán:', error);
+            console.warn('No se pudo restaurar automáticamente:', error);
             return false;
         } finally {
             restaurandoAguaLocal = false;
