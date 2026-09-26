@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v9.html -->
+<!-- Nombre del archivo: agua_cayran_v10.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -96,7 +96,7 @@
         }
         .btn-back:hover { background: var(--card-border); filter: brightness(0.95); }
 
-        /* Nuevos estilos de botones superiores */
+        /* Estilos de botones superiores */
         .btn-trash {
             background-color: var(--bg-subtle) !important;
             color: #fb7185 !important;
@@ -224,6 +224,46 @@
         .btn-ciclo:active { transform: scale(0.9); }
         .btn-ciclo svg { width: 16px; height: 16px; }
 
+        /* === Estilos para Modales Personalizados === */
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .custom-modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .custom-modal-box {
+            background: var(--bg-surface); border-radius: 16px;
+            padding: 28px 24px; width: 90%; max-width: 360px;
+            text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            transform: scale(0.95) translateY(10px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--card-border);
+        }
+        .custom-modal-overlay.active .custom-modal-box { transform: scale(1) translateY(0); }
+        
+        .custom-modal-icon { font-size: 3.5rem; margin-bottom: 15px; line-height: 1; }
+        .icon-warning { color: #fb7185; }
+        .icon-success { color: #10b981; }
+        .icon-info { color: var(--blue-light); }
+        
+        .custom-modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 24px; line-height: 1.4; }
+        
+        .custom-modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; flex: 1; transition: all 0.2s; font-size: 1rem; }
+        .btn-modal-cancel { background: var(--bg-subtle); color: var(--text-main); border: 1px solid var(--card-border); }
+        .btn-modal-cancel:hover { filter: brightness(0.9); }
+        .btn-modal-cancel:active { transform: scale(0.95); }
+        .btn-modal-confirm { background: #fb7185; color: white; }
+        .btn-modal-confirm:hover { background: #e11d48; }
+        .btn-modal-confirm:active { transform: scale(0.95); }
+        .btn-modal-ok { background: #10b981; color: white; width: 100%; flex: none; }
+        .btn-modal-ok:hover { background: #059669; }
+        .btn-modal-ok:active { transform: scale(0.95); }
+
         /* === MEDIA QUERIES === */
         @media (max-width: 991px) { 
             .container-fluid { padding: 10px; } 
@@ -288,6 +328,28 @@
                 <i class="bi bi-folder-symlink-fill"></i> <span class="hide-mobile">Importar</span>
             </button>
             <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
+        </div>
+    </div>
+</div>
+
+<!-- Estructuras HTML de los Modales Globales -->
+<div class="custom-modal-overlay" id="globalConfirmModal">
+    <div class="custom-modal-box">
+        <div class="custom-modal-icon icon-warning"><i class="bi bi-exclamation-circle-fill"></i></div>
+        <div class="custom-modal-title" id="globalConfirmMsg">¿Estás seguro?</div>
+        <div class="custom-modal-actions">
+            <button class="btn-modal btn-modal-cancel" onclick="closeGlobalConfirm()">No</button>
+            <button class="btn-modal btn-modal-confirm" id="globalConfirmBtn">Sí</button>
+        </div>
+    </div>
+</div>
+
+<div class="custom-modal-overlay" id="globalAlertModal">
+    <div class="custom-modal-box">
+        <div class="custom-modal-icon" id="globalAlertIcon"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="custom-modal-title" id="globalAlertMsg">Mensaje</div>
+        <div class="custom-modal-actions">
+            <button class="btn-modal btn-modal-ok" onclick="closeGlobalAlert()">Aceptar</button>
         </div>
     </div>
 </div>
@@ -414,30 +476,74 @@
 
 <script>
     // =========================================================================
+    // LÓGICA DE MODALES PERSONALIZADOS
+    // =========================================================================
+    let currentConfirmAction = null;
+
+    function showConfirmModal(msg, actionCallback) {
+        document.getElementById('globalConfirmMsg').textContent = msg;
+        currentConfirmAction = actionCallback;
+        document.getElementById('globalConfirmModal').classList.add('active');
+    }
+
+    function closeGlobalConfirm() {
+        document.getElementById('globalConfirmModal').classList.remove('active');
+        currentConfirmAction = null;
+    }
+
+    document.getElementById('globalConfirmBtn').addEventListener('click', () => {
+        if (currentConfirmAction) currentConfirmAction();
+        closeGlobalConfirm();
+    });
+
+    function showAlertModal(msg, type = 'success') {
+        document.getElementById('globalAlertMsg').textContent = msg;
+        const iconDiv = document.getElementById('globalAlertIcon');
+        const btn = document.querySelector('#globalAlertModal .btn-modal-ok');
+        
+        if (type === 'success') {
+            iconDiv.className = 'custom-modal-icon icon-success';
+            iconDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+            btn.style.backgroundColor = '#10b981';
+        } else if (type === 'error') {
+            iconDiv.className = 'custom-modal-icon icon-warning';
+            iconDiv.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
+            btn.style.backgroundColor = '#fb7185';
+        } else {
+            iconDiv.className = 'custom-modal-icon icon-info';
+            iconDiv.innerHTML = '<i class="bi bi-info-circle-fill"></i>';
+            btn.style.backgroundColor = 'var(--blue-light)';
+        }
+        document.getElementById('globalAlertModal').classList.add('active');
+    }
+
+    function closeGlobalAlert() {
+        document.getElementById('globalAlertModal').classList.remove('active');
+    }
+
+    // =========================================================================
     // FUNCIONES PRINCIPALES Y DE INTERFAZ
     // =========================================================================
 
     function borrarTodosLosDatos() {
-        if(confirm("¿Estás seguro de que deseas borrar TODOS los datos de Agua? Esta acción reiniciará los inquilinos, lecturas y costos, y no se puede deshacer.")) {
-            // Limpiar inputs
-            document.querySelectorAll('#main_card_col input').forEach(inp => {
-                if(inp.type === 'number' || inp.type === 'text' || inp.type === 'date') {
-                    if(inp.id !== 'v_total_main') inp.value = '';
-                }
-            });
-            // Limpiar Selects Principales
-            document.getElementById('m_mes').value = '';
-            document.getElementById('n_tenants_meter').value = '';
-            
-            // Desmarcar Inquilino sin medidor
-            const cb = document.getElementById('has_nometer');
-            if(cb) cb.checked = false;
+        showConfirmModal("¿Estas seguro de borrar todos los datos?", () => {
+            setTimeout(() => { // Esperamos la transición del modal para limpiar
+                document.querySelectorAll('#main_card_col input').forEach(inp => {
+                    if(inp.type === 'number' || inp.type === 'text' || inp.type === 'date') {
+                        if(inp.id !== 'v_total_main') inp.value = '';
+                    }
+                });
+                document.getElementById('m_mes').value = '';
+                document.getElementById('n_tenants_meter').value = '';
+                
+                const cb = document.getElementById('has_nometer');
+                if(cb) cb.checked = false;
 
-            // Render borra las tarjetas al no tener valor en n_tenants_meter
-            render();
-            calc();
-            guardarAutomaticoAgua();
-        }
+                render();
+                calc();
+                guardarAutomaticoAgua();
+            }, 300);
+        });
     }
 
     function toggleTheme() {
@@ -513,7 +619,7 @@
     }
 
     function avanzarCicloPrincipalAgua() {
-        if(confirm("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores? Los datos actuales quedarán en blanco para que ingreses los nuevos.")) {
+        showConfirmModal("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores? Los datos actuales quedarán en blanco para que ingreses los nuevos.", () => {
             const lecAct = document.getElementById('m_curr_r');
             const lecAnt = document.getElementById('m_prev_r');
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
@@ -521,12 +627,12 @@
             const fecAnt = document.getElementById('m_prev_d');
             if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calc();
-        }
+        });
     }
 
     function avanzarCicloInquilinoAgua(id) {
         const nombreInq = document.getElementById(`i${id}_name`)?.value || `Inquilino #${id}`;
-        if(confirm(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores? Los campos actuales quedarán en blanco para el nuevo mes.`)) {
+        showConfirmModal(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores? Los campos actuales quedarán en blanco para el nuevo mes.`, () => {
             const lecAct = document.getElementById(`i${id}_curr_r`);
             const lecAnt = document.getElementById(`i${id}_prev_r`);
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
@@ -534,7 +640,7 @@
             const fecAnt = document.getElementById(`i${id}_prev_d`);
             if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calc();
-        }
+        });
     }
 
     function numeroAgua(valor, decimales = 6) {
@@ -615,8 +721,8 @@
         const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
         const mPrevD = document.getElementById('m_prev_d').value;
         const mCurrD = document.getElementById('m_curr_d').value;
-        if (!mes) { alert('Selecciona el MES antes de guardar el JSON.'); return; }
-        if (!mCurrD) { alert('Es necesario ingresar la Fecha Actual del recibo principal.'); return; }
+        if (!mes) { showAlertModal('Selecciona el MES antes de guardar el JSON.', 'error'); return; }
+        if (!mCurrD) { showAlertModal('Es necesario ingresar la Fecha Actual del recibo principal.', 'error'); return; }
 
         const fechaActualObj = fechaAguaLocal(mCurrD);
         const anio = fechaActualObj ? fechaActualObj.getFullYear() : null;
@@ -726,12 +832,15 @@
                 const datos = JSON.parse(e.target.result);
                 if (datos && typeof datos === 'object' && !Array.isArray(datos) && datos.schema === 'agua_cayran_unificado' && datos.estado_app) {
                     cargarEstadoLegacyAgua(datos.estado_app);
-                    const mes = String(datos.mes_cobro || datos.mes || '').trim().toUpperCase();
-                    alert(`¡JSON único de AGUA${mes ? ' (' + mes + ')' : ''} restaurado correctamente!`);
+                    showAlertModal('Has restaurado los datos de agua correctamente', 'success');
                 } else if (datos && typeof datos === 'object' && !Array.isArray(datos)) {
-                    cargarEstadoLegacyAgua(datos); alert('¡Datos antiguos restaurados correctamente!');
+                    cargarEstadoLegacyAgua(datos);
+                    showAlertModal('Has restaurado los datos de agua correctamente', 'success');
                 } else { throw new Error('Formato JSON no reconocido.'); }
-            } catch (error) { console.error(error); alert('Error al importar:\n' + (error && error.message ? error.message : error)); } finally { input.value = ''; }
+            } catch (error) { 
+                console.error(error); 
+                showAlertModal('Error al importar: ' + (error && error.message ? error.message : error), 'error'); 
+            } finally { input.value = ''; }
         };
         reader.readAsText(file);
     }
@@ -974,10 +1083,8 @@
                         </div>
                         
                         <div class="tenant-body">
-                            <div class="alert mt-2 py-4 px-3 text-center d-flex flex-column justify-content-center h-100" style="font-size: 0.95rem; margin-bottom: 25px; color: var(--text-muted); border: 1px dashed var(--card-border); border-radius: 8px; background-color: var(--bg-subtle);">
-                                <i class="bi bi-info-circle fs-3 mb-2" style="color: var(--text-muted);"></i>
-                                <span>El consumo de esta sección se calcula <strong>automáticamente</strong> restando los consumos individuales de los inquilinos con medidor al recibo principal.</span>
-                            </div>
+                            <!-- Espaciador flexible para empujar los botones hacia abajo y mantener la simetría visual -->
+                            <div class="flex-grow-1"></div>
 
                             <!-- Datos ocultos para exportación y cálculos -->
                             <div class="hidden-data">
