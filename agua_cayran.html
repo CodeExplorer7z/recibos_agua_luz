@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v7.html -->
+<!-- Nombre del archivo: agua_cayran_v8.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,57 +11,110 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
+    <script>
+        // Inicializar tema sin parpadeos
+        const savedTheme = localStorage.getItem('themeAgua') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+
     <style>
         :root { 
             --blue-dark: #0f172a; 
             --blue-light: #0ea5e9; 
             --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-subtle: #f1f5f9;
             --card-border: #e2e8f0;
             --text-main: #334155;
             --text-muted: #64748b;
+            --input-bg: #ffffff;
+            --input-text: #1e293b;
+        }
+
+        [data-theme="dark"] {
+            --blue-dark: #1e293b;
+            --blue-light: #38bdf8;
+            --bg-body: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-subtle: #334155;
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: #0f172a;
+            --input-text: #f8fafc;
         }
         
         body { 
             background-color: var(--bg-body); 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             overflow-x: hidden; 
+            padding-top: env(safe-area-inset-top);
             padding-bottom: max(20px, env(safe-area-inset-bottom)); 
             color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
         }
         
-        /* Navbar Fija y Moderna */
+        /* Navbar Fija Optimizada Edge-to-Edge */
         .nav-back-bar-container {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+            backdrop-filter: blur(12px) saturate(150%);
+            -webkit-backdrop-filter: blur(12px) saturate(150%);
             border-bottom: 1px solid var(--card-border);
-            padding: 12px 15px;
+            padding: max(8px, env(safe-area-inset-top)) clamp(12px, 2.6vw, 28px) 8px;
             margin-bottom: 20px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s, border-color 0.3s;
         }
-        .nav-back-bar { max-width: 1500px; margin: 0 auto; }
-        .btn-back { display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569 !important; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; }
-        .btn-back:hover { background: #e2e8f0; color: #0f172a !important; }
+        .nav-back-bar { 
+            max-width: 1500px; 
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-top-action {
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            font-size: 0.88rem; 
+            padding: 8px 14px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .btn-back { 
+            background: var(--bg-subtle); 
+            color: var(--text-main) !important; 
+            text-decoration: none; 
+            border: 1px solid var(--card-border);
+        }
+        .btn-back:hover { background: var(--card-border); filter: brightness(0.95); }
         
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
         
-        /* Tarjetas (Cards) mejoradas */
-        .main-card { border: none; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border-radius: 12px; background: white; overflow: hidden; }
-        .card-header-custom { background: var(--blue-dark); color: white; padding: 16px 20px; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        /* Tarjetas (Cards) */
+        .main-card { border: 1px solid var(--card-border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border-radius: 12px; background: var(--bg-surface); overflow: hidden; transition: background-color 0.3s; }
+        .card-header-custom { background: var(--blue-dark); color: white; padding: 16px 20px; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: background-color 0.3s; }
         
-        /* Ajustes de inputs generales (Más grandes para móvil) */
-        .input-editable { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; font-size: 15px !important; border-radius: 8px; color: #1e293b; padding: 10px 14px; transition: border-color 0.2s, box-shadow 0.2s; }
-        .input-editable:focus { border-color: #0ea5e9 !important; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.15) !important; outline: none; }
-        .input-total-main { background-color: #f0fdf4 !important; border: 1px solid #22c55e !important; font-weight: 800; color: #15803d !important; font-size: 1.4rem !important; border-radius: 8px; padding: 12px !important; }
+        /* Ajustes de inputs generales */
+        .input-editable { background-color: var(--input-bg) !important; border: 1px solid var(--card-border) !important; font-size: 15px !important; border-radius: 8px; color: var(--input-text) !important; padding: 10px 14px; transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s; }
+        .input-editable:focus { border-color: var(--blue-light) !important; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.15) !important; outline: none; }
+        .input-editable:disabled { opacity: 0.6; }
+        
+        .input-total-main { background-color: rgba(34, 197, 94, 0.1) !important; border: 1px solid #22c55e !important; font-weight: 800; color: #22c55e !important; font-size: 1.4rem !important; border-radius: 8px; padding: 12px !important; }
         
         .section-divider { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700; margin: 20px 0 10px 0; border-bottom: 1px solid var(--card-border); padding-bottom: 6px; display: flex; align-items: center; gap: 6px; }
         
         /* Estilos Inquilinos */
         .receipt-container { 
-            background: white; 
+            background: var(--bg-surface); 
             border-radius: 12px;
             border: 1px solid var(--card-border);
             box-shadow: 0 4px 15px rgba(0,0,0,0.03);
@@ -71,9 +124,10 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s, border-color 0.3s;
         }
         
-        .tenant-header { background: #f8fafc; padding: 16px 20px; border-bottom: 1px solid var(--card-border); }
+        .tenant-header { background: var(--bg-subtle); padding: 16px 20px; border-bottom: 1px solid var(--card-border); transition: background-color 0.3s; }
         .tenant-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         
         .tenant-client-label {
@@ -92,7 +146,7 @@
             font-size: 1.3rem; 
             padding: 0; 
             border-radius: 0; 
-            color: #0f172a; 
+            color: var(--text-main); 
             width: 100%; 
             box-shadow: none !important;
             text-transform: uppercase;
@@ -113,8 +167,8 @@
         .btn-action-mobile:active { transform: scale(0.97); }
         .btn-whatsapp-style { background-color: #22c55e !important; color: white !important; border: none !important; }
         .btn-whatsapp-style:hover { background-color: #16a34a !important; }
-        .btn-calc-style { background-color: #ffffff !important; color: #475569 !important; border: 1px solid #cbd5e1 !important; }
-        .btn-calc-style:hover { background-color: #f1f5f9 !important; }
+        .btn-calc-style { background-color: var(--bg-surface) !important; color: var(--text-main) !important; border: 1px solid var(--card-border) !important; }
+        .btn-calc-style:hover { background-color: var(--bg-subtle) !important; }
 
         .small-label { font-size: 0.85rem; font-weight: 600; display: block; color: var(--text-main); margin-bottom: 6px; }
         
@@ -124,7 +178,7 @@
 
         /* Botón Ciclo */
         .btn-ciclo {
-            background-color: #f1f5f9 !important;
+            background-color: var(--bg-subtle) !important;
             color: var(--blue-light) !important;
             border-radius: 6px;
             width: 32px;
@@ -134,31 +188,64 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
-            border: 1px solid #cbd5e1;
+            border: 1px solid var(--card-border);
         }
-        .btn-ciclo:hover { background-color: #e0f2fe !important; border-color: #7dd3fc; }
+        .btn-ciclo:hover { filter: brightness(0.9); }
         .btn-ciclo:active { transform: scale(0.9); }
         .btn-ciclo svg { width: 16px; height: 16px; }
 
+        /* === MEDIA QUERIES === */
         @media (max-width: 991px) { 
             .container-fluid { padding: 10px; } 
             .action-buttons-container { width: 100% !important; margin-top: 15px; flex-direction: column; }
             .btn-action-mobile { width: 100% !important; }
             #tenants_grid > div { margin-bottom: 20px; }
-            .nav-back-bar { flex-direction: column; gap: 15px; align-items: stretch !important; }
-            .nav-back-bar .d-flex { justify-content: space-between; }
-            .btn-back { justify-content: center; }
+        }
+
+        /* En pantallas móviles transformamos los botones superiores en iconos cuadrados */
+        @media (max-width: 640px) {
+            .hide-mobile { display: none !important; }
+            
+            .nav-back-bar-container {
+                padding: max(6px, env(safe-area-inset-top)) 10px 6px;
+            }
+            
+            .nav-back-bar { gap: 6px; }
+            .nav-back-bar .d-flex { gap: 6px !important; }
+
+            .btn-back, .btn-top-action {
+                width: 40px;
+                min-width: 40px;
+                height: 40px;
+                padding: 0 !important;
+                justify-content: center;
+                border-radius: 10px !important;
+            }
+
+            .btn-back i, .btn-top-action i {
+                font-size: 1.1rem;
+                margin: 0;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="nav-back-bar-container">
-    <div class="nav-back-bar d-flex justify-content-between align-items-center">
-        <a href="./index.html" class="btn-back"><i class="bi bi-arrow-left"></i> Menú Principal</a>
-        <div class="d-flex gap-2">
-            <button class="btn btn-success fw-bold text-white shadow-sm px-4" style="border-radius: 8px;" onclick="guardarEstadoApp()"><i class="bi bi-floppy"></i> Guardar JSON</button>
-            <button class="btn btn-secondary fw-bold text-white shadow-sm px-4" style="border-radius: 8px;" onclick="document.getElementById('file_import').click()"><i class="bi bi-upload"></i> Importar</button>
+    <div class="nav-back-bar">
+        <a href="./index.html" class="btn-top-action btn-back">
+            <i class="bi bi-arrow-left"></i> <span class="hide-mobile">Menú</span>
+        </a>
+        <div class="d-flex gap-2 align-items-center">
+            <button id="btn-theme-toggle" class="btn-top-action btn btn-outline-secondary shadow-sm" onclick="toggleTheme()" title="Cambiar Tema" style="border: 1px solid var(--card-border); color: var(--text-main);">
+                <!-- Se inyecta por JS -->
+            </button>
+            <button class="btn-top-action btn btn-success text-white shadow-sm" onclick="guardarEstadoApp()">
+                <i class="bi bi-floppy"></i> <span class="hide-mobile">Guardar JSON</span>
+            </button>
+            <button class="btn-top-action btn btn-secondary text-white shadow-sm" onclick="document.getElementById('file_import').click()">
+                <i class="bi bi-upload"></i> <span class="hide-mobile">Importar</span>
+            </button>
             <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
         </div>
     </div>
@@ -245,11 +332,11 @@
                         </div>
                         
                         <!-- Categoría 4: Configuración Inquilinos -->
-                        <div class="col-12 mt-4 p-4" style="background-color: #f1f5f9; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <label class="small-label text-primary d-flex align-items-center gap-2 mb-3" style="color: #0284c7 !important;">
+                        <div class="col-12 mt-4 p-4" style="background-color: var(--bg-subtle); border-radius: 10px; border: 1px solid var(--card-border);">
+                            <label class="small-label text-primary d-flex align-items-center gap-2 mb-3" style="color: var(--blue-light) !important;">
                                 <i class="bi bi-people-fill"></i> N° Inquilinos (Con Medidor)
                             </label>
-                            <select id="n_tenants_meter" class="form-select input-editable mb-3 fw-bold" style="border-color: #0ea5e9 !important; box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);" onchange="render()">
+                            <select id="n_tenants_meter" class="form-select input-editable mb-3 fw-bold" style="border-color: var(--blue-light) !important; box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);" onchange="render()">
                                 <option value="" selected>Seleccionar...</option>
                                 <option value="1">1 Inquilino</option>
                                 <option value="2">2 Inquilinos</option>
@@ -285,6 +372,28 @@
 </div>
 
 <script>
+    // =========================================================================
+    // MODO OSCURO (THEME TOGGLE)
+    // =========================================================================
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('themeAgua', newTheme);
+        actualizarIconoTema(newTheme);
+    }
+
+    function actualizarIconoTema(theme) {
+        const btn = document.getElementById('btn-theme-toggle');
+        if (theme === 'dark') {
+            btn.innerHTML = `<i class="bi bi-sun-fill"></i> <span class="hide-mobile">Claro</span>`;
+        } else {
+            btn.innerHTML = `<i class="bi bi-moon-stars-fill"></i> <span class="hide-mobile">Oscuro</span>`;
+        }
+    }
+    window.addEventListener('DOMContentLoaded', () => actualizarIconoTema(document.documentElement.getAttribute('data-theme')));
+
+
     document.addEventListener('wheel', function(event) {
         if (document.activeElement.type === 'number') {
             event.preventDefault();
@@ -298,14 +407,16 @@
             input.disabled = false;
             input.style.setProperty('background-color', '#fef9c3', 'important');
             input.style.setProperty('border-color', '#eab308', 'important');
+            input.style.setProperty('color', '#1e293b', 'important');
             if (fromUser) {
                 input.value = ''; 
                 input.focus();
             }
         } else {
             input.disabled = true;
-            input.style.setProperty('background-color', '#f1f5f9', 'important');
-            input.style.setProperty('border-color', '#cbd5e1', 'important');
+            input.style.setProperty('background-color', 'var(--input-bg)', 'important');
+            input.style.setProperty('border-color', 'var(--card-border)', 'important');
+            input.style.setProperty('color', 'var(--input-text)', 'important');
         }
         if (fromUser) calc();
     }
@@ -727,15 +838,15 @@
                                 <div class="col-6"><label class="small-label">Fecha Anterior</label><input type="date" id="i${i}_prev_d" class="form-control input-editable" oninput="calc()"></div>
                                 <div class="col-6"><label class="small-label">Fecha Actual</label><input type="date" id="i${i}_curr_d" class="form-control input-editable" oninput="calc()"></div>
                                 
-                                <div class="col-12 mt-3 pt-3" style="border-top: 1px dashed #cbd5e1;">
-                                    <label class="small-label text-primary" style="color: #0ea5e9 !important;">Modo de cálculo:</label>
+                                <div class="col-12 mt-3 pt-3" style="border-top: 1px dashed var(--card-border);">
+                                    <label class="small-label text-primary" style="color: var(--blue-light) !important;">Modo de cálculo:</label>
                                     <select id="i${i}_calc_mode" class="form-select input-editable fw-bold" onchange="toggleMode(${i}, true)">
                                         <option value="auto" selected>Asumir días del recibo</option>
                                         <option value="manual">Escribir días manualmente</option>
                                     </select>
                                 </div>
                                 <div class="col-12 mt-2">
-                                    <label class="small-label text-primary" style="color: #0ea5e9 !important;">Días a Facturar (Manual):</label>
+                                    <label class="small-label text-primary" style="color: var(--blue-light) !important;">Días a Facturar (Manual):</label>
                                     <input type="number" id="i${i}_manual_days" class="form-control input-editable" value="" disabled oninput="calc()">
                                 </div>
                             </div>
@@ -771,7 +882,7 @@
         if (hasNoMeter) {
             html += `
             <div class="col-xl-4 col-lg-6 col-md-6 col-12">
-                <div class="receipt-container" id="pdf_area_nometer" style="border: 2px solid #e2e8f0; border-top: 5px solid #64748b;">
+                <div class="receipt-container" id="pdf_area_nometer" style="border: 2px solid var(--card-border); border-top: 5px solid var(--text-muted);">
                     <div id="pdf_content_wrapper_nometer" class="d-flex flex-column h-100">
                         
                         <div id="pdf_header_nometer" class="pdf-only-section">
@@ -784,13 +895,13 @@
                         </div>
 
                         <div class="tenant-header" id="web_header_nometer">
-                            <div class="tenant-client-label text-secondary"><i class="bi bi-person-fill-exclamation"></i> SIN MEDIDOR</div>
+                            <div class="tenant-client-label"><i class="bi bi-person-fill-exclamation"></i> SIN MEDIDOR</div>
                             <input type="text" id="inometer_name" class="tenant-name-input" value="" placeholder="PROPIETARIO" oninput="calc()">
                         </div>
                         
                         <div class="tenant-body">
-                            <div class="alert mt-2 py-4 px-3 text-center d-flex flex-column justify-content-center h-100" style="font-size: 0.95rem; margin-bottom: 25px; color: #475569; border: 1px dashed #cbd5e1; border-radius: 8px; background-color: #f8fafc;">
-                                <i class="bi bi-info-circle fs-3 text-secondary mb-2"></i>
+                            <div class="alert mt-2 py-4 px-3 text-center d-flex flex-column justify-content-center h-100" style="font-size: 0.95rem; margin-bottom: 25px; color: var(--text-muted); border: 1px dashed var(--card-border); border-radius: 8px; background-color: var(--bg-subtle);">
+                                <i class="bi bi-info-circle fs-3 mb-2" style="color: var(--text-muted);"></i>
                                 <span>El consumo de esta sección se calcula <strong>automáticamente</strong> restando los consumos individuales de los inquilinos con medidor al recibo principal.</span>
                             </div>
 
