@@ -104,6 +104,9 @@
                         IMPORTAR SESIÓN
                     </button>
                 </div>
+                <div id="sync_status" class="sm:col-span-2 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-center">
+                    Sincronización automática: esperando datos de Agua y Luz.
+                </div>
             </div>
         </div>
 
@@ -315,9 +318,187 @@
         let mesImportadoAgua = '';
         let mesImportadoLuz = '';
 
+        const STORAGE_AGUA_SYNC = 'recibos_cayran_agua_sync_v1';
+        const STORAGE_LUZ_SYNC = 'recibos_cayran_luz_sync_v1';
+        const STORAGE_REDONDEOS_SESION = 'recibos_cayran_redondeos_sesion_v1';
+        let timerAutosaveRedondeos = null;
+        let restaurandoSesionLocal = false;
+
+        function restaurarSesionLocalRedondeos() {
+            try {
+                const raw = localStorage.getItem(STORAGE_REDONDEOS_SESION);
+                if (!raw) return false;
+                const datos = JSON.parse(raw);
+                if (!datos || datos.tipo !== 'CUENTA_FINAL_INQUILINOS_SESSION' || !datos.campos) return false;
+
+                restaurandoSesionLocal = true;
+                Object.entries(datos.campos).forEach(([id, valor]) => {
+                    const el = document.getElementById(id);
+                    if (!el || el.type === 'file') return;
+                    if (el.type === 'checkbox' || el.type === 'radio') el.checked = Boolean(valor);
+                    else el.value = valor ?? '';
+                });
+                ultimaFuenteProrrateo = datos.estado && ['kendra', 'sonia'].includes(datos.estado.ultimaFuenteProrrateo)
+                    ? datos.estado.ultimaFuenteProrrateo : null;
+                mesImportadoAgua = datos.estado ? String(datos.estado.mesImportadoAgua || '').trim().toUpperCase() : '';
+                mesImportadoLuz = datos.estado ? String(datos.estado.mesImportadoLuz || '').trim().toUpperCase() : '';
+                return true;
+            } catch (error) {
+                console.warn('No se pudo restaurar la sesión local de Redondeos:', error);
+                return false;
+            } finally {
+                restaurandoSesionLocal = false;
+            }
+        }
+
+        function guardarSesionLocalRedondeos() {
+            if (restaurandoSesionLocal) return;
+            try {
+                const datos = obtenerDatosSesion();
+                localStorage.setItem(STORAGE_REDONDEOS_SESION, JSON.stringify(datos));
+            } catch (error) {
+                console.warn('No se pudo guardar automáticamente Redondeos:', error);
+            }
+        }
+
+        function programarGuardarSesionLocal() {
+            clearTimeout(timerAutosaveRedondeos);
+            timerAutosaveRedondeos = setTimeout(guardarSesionLocalRedondeos, 250);
+        }
+
+        function aplicarAguaSincronizada(datos) {
+            if (!datos || String(datos.tipo || '').toLowerCase() !== 'agua') return 0;
+            const registros = obtenerRegistrosServicio(datos);
+            const mesImportado = extraerMesDesdeJson(datos);
+            if (!aplicarMesImportado('agua', mesImportado)) return 0;
+            let importados = 0;
+
+            registros.forEach(inq => {
+                if (!inq || typeof inq !== 'object') return;
+                const nombreLower = (inq.nombre || '').toLowerCase();
+                const monto = (parseFloat(inq.monto_pagar) || 0).toFixed(2);
+                const m3 = inq.consumo_m3 !== undefined ? inq.consumo_m3 : '';
+                const fi = inq.fecha_inicio || '';
+                const ff = inq.fecha_fin || '';
+
+                if (nombreLower.includes('mariluz')) {
+                    document.getElementById('agua_mariluz').value = monto;
+                    document.getElementById('m3_mariluz').value = m3;
+                    document.getElementById('fecha_inicio_mariluz').value = fi;
+                    document.getElementById('fecha_fin_mariluz').value = ff;
+                    importados++;
+                } else if (nombreLower.includes('kendra') && nombreLower.includes('sonia')) {
+                    document.getElementById('agua_compartida').value = monto;
+                    document.getElementById('m3_compartida').value = m3;
+                    document.getElementById('fecha_inicio_ks_agua').value = fi;
+                    document.getElementById('fecha_fin_ks_agua').value = ff;
+                    importados++;
+                } else if (nombreLower.includes('kendra')) {
+                    document.getElementById('agua_kendra').value = monto;
+                    document.getElementById('m3_kendra').value = m3;
+                    document.getElementById('fecha_inicio_kendra_agua').value = fi;
+                    document.getElementById('fecha_fin_kendra_agua').value = ff;
+                    importados++;
+                } else if (nombreLower.includes('sonia')) {
+                    document.getElementById('agua_sonia').value = monto;
+                    document.getElementById('m3_sonia').value = m3;
+                    document.getElementById('fecha_inicio_sonia_agua').value = fi;
+                    document.getElementById('fecha_fin_sonia_agua').value = ff;
+                    importados++;
+                }
+            });
+            return importados;
+        }
+
+        function aplicarLuzSincronizada(datos) {
+            if (!datos || String(datos.tipo || '').toLowerCase() !== 'luz') return 0;
+            const registros = obtenerRegistrosServicio(datos);
+            const mesImportado = extraerMesDesdeJson(datos);
+            if (!aplicarMesImportado('luz', mesImportado)) return 0;
+            let importados = 0;
+
+            registros.forEach(inq => {
+                if (!inq || typeof inq !== 'object') return;
+                const nombreLower = (inq.nombre || '').toLowerCase();
+                const monto = (parseFloat(inq.monto_pagar) || 0).toFixed(2);
+                const kwh = inq.kwh_real !== undefined ? inq.kwh_real : '';
+                const fi = inq.fecha_inicio || '';
+                const ff = inq.fecha_fin || '';
+
+                if (nombreLower.includes('mariluz')) {
+                    document.getElementById('luz_mariluz').value = monto;
+                    document.getElementById('kwh_mariluz').value = kwh;
+                    document.getElementById('fecha_inicio_mariluz_luz').value = fi;
+                    document.getElementById('fecha_fin_mariluz_luz').value = ff;
+                    importados++;
+                } else if (nombreLower.includes('kendra')) {
+                    document.getElementById('luz_kendra').value = monto;
+                    document.getElementById('kwh_kendra').value = kwh;
+                    document.getElementById('fecha_inicio_kendra_luz').value = fi;
+                    document.getElementById('fecha_fin_kendra_luz').value = ff;
+                    importados++;
+                } else if (nombreLower.includes('sonia')) {
+                    document.getElementById('luz_sonia').value = monto;
+                    document.getElementById('kwh_sonia').value = kwh;
+                    document.getElementById('fecha_inicio_sonia_luz').value = fi;
+                    document.getElementById('fecha_fin_sonia_luz').value = ff;
+                    importados++;
+                }
+            });
+            return importados;
+        }
+
+        function cargarDatosSincronizados() {
+            let agua = null;
+            let luz = null;
+            try { agua = JSON.parse(localStorage.getItem(STORAGE_AGUA_SYNC) || 'null'); } catch (_) {}
+            try { luz = JSON.parse(localStorage.getItem(STORAGE_LUZ_SYNC) || 'null'); } catch (_) {}
+
+            // Si existe información fresca de las calculadoras fuente, sus meses
+            // reemplazan a los que pudiera traer una sesión antigua de Redondeos.
+            if (agua) mesImportadoAgua = '';
+            if (luz) mesImportadoLuz = '';
+
+            const nAgua = agua ? aplicarAguaSincronizada(agua) : 0;
+            const nLuz = luz ? aplicarLuzSincronizada(luz) : 0;
+
+            const estado = document.getElementById('sync_status');
+            if (estado) {
+                if (nAgua > 0 && nLuz > 0) {
+                    estado.textContent = `✓ Sincronizado automáticamente: AGUA (${nAgua}) + LUZ (${nLuz}). Los botones JSON quedan como respaldo.`;
+                    estado.className = 'sm:col-span-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-center';
+                } else if (nAgua > 0 || nLuz > 0) {
+                    estado.textContent = `Sincronización parcial: ${nAgua > 0 ? 'AGUA disponible' : 'falta AGUA'} · ${nLuz > 0 ? 'LUZ disponible' : 'falta LUZ'}.`;
+                    estado.className = 'sm:col-span-2 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-center';
+                } else {
+                    estado.textContent = 'Sin datos sincronizados todavía. Completa Agua y Luz; también puedes usar los JSON de respaldo.';
+                    estado.className = 'sm:col-span-2 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-center';
+                }
+            }
+            return { agua: nAgua, luz: nLuz };
+        }
+
+        function instalarAutosaveRedondeos() {
+            document.addEventListener('input', programarGuardarSesionLocal, true);
+            document.addEventListener('change', programarGuardarSesionLocal, true);
+            window.addEventListener('pagehide', guardarSesionLocalRedondeos);
+            window.addEventListener('beforeunload', guardarSesionLocalRedondeos);
+            window.addEventListener('storage', (e) => {
+                if (e.key === STORAGE_AGUA_SYNC || e.key === STORAGE_LUZ_SYNC) {
+                    cargarDatosSincronizados();
+                    procesarCalculosGlobales();
+                    guardarSesionLocalRedondeos();
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('input[type=number]').forEach(input => { input.addEventListener('wheel', e => e.preventDefault(), { passive: false }); });
-            procesarCalculosGlobales(); 
+            restaurarSesionLocalRedondeos();
+            cargarDatosSincronizados();
+            procesarCalculosGlobales();
+            instalarAutosaveRedondeos();
+            guardarSesionLocalRedondeos();
         });
 
         function extraerMesDesdeJson(datos) {
