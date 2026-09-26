@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: redondeos_montos_v5.html -->
+<!-- Nombre del archivo: redondeos_montos_v6.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -511,7 +511,7 @@
         let ultimoTotalCompartidoRedondeado = null;
         let mesImportadoAgua = '';
         let mesImportadoLuz = '';
-        let inquilinosVisibles = 0; // Se ajusta dinámicamente
+        let inquilinosVisibles = 0;
 
         const STORAGE_AGUA_SYNC = 'recibos_cayran_agua_sync_v1';
         const STORAGE_LUZ_SYNC = 'recibos_cayran_luz_sync_v1';
@@ -665,15 +665,23 @@
             }
         }
 
-        function determinarSlot(nombreOriginal) {
+        function determinarSlot(nombreOriginal, tipoServicio) {
             const nombreLower = (nombreOriginal || '').toLowerCase().trim();
             if (!nombreLower) return null;
 
-            if (nombreLower.includes('mariluz')) return 1;
-            if ((nombreLower.includes('kendra') && nombreLower.includes('sonia')) || nombreLower.includes(' y ') || nombreLower.includes('+')) return 'comp';
-            if (nombreLower.includes('kendra')) return 2;
-            if (nombreLower.includes('sonia')) return 3;
+            // 1. Detección de inquilinos compartidos (Ej: MANUEL+LOPEZ)
+            if (tipoServicio === 'agua' && (nombreLower.includes('+') || nombreLower.includes(' y '))) {
+                const separador = nombreLower.includes('+') ? '+' : ' y ';
+                const partes = nombreOriginal.split(new RegExp(`\\+| y `, 'i')).map(n => n.trim());
+                
+                // Forzar la asignación de los implicados a los slots 2 y 3 para prepararlos para luz
+                if (partes[0]) document.getElementById('label_nombre_2').innerText = partes[0].toUpperCase();
+                if (partes[1]) document.getElementById('label_nombre_3').innerText = partes[1].toUpperCase();
+                
+                return 'comp';
+            }
 
+            // 2. Buscar si el nombre ya existe en algún slot asignado (1 al 6)
             for (let i = 1; i <= 6; i++) {
                 const labelEl = document.getElementById(`label_nombre_${i}`);
                 if (labelEl && labelEl.innerText.toLowerCase().trim() === nombreLower) {
@@ -681,15 +689,18 @@
                 }
             }
 
-            const ordenPreferencia = [4, 5, 6, 1]; 
-            for (let i of ordenPreferencia) {
-                const labelEl = document.getElementById(`label_nombre_${i}`);
-                if (labelEl && labelEl.innerText.trim().toUpperCase() === `INQUILINO ${i}`) {
-                    return i;
-                }
+            // Si es Luz y coincide con uno de los nombres del bloque compartido (para que caigan en 2 o 3)
+            const compLabel = document.getElementById('label_nombre_comp').innerText.toLowerCase();
+            if (compLabel.includes(nombreLower) && compLabel.includes('compartida')) {
+                const partes = compLabel.replace('(agua compartida)','').split('+').map(n=>n.trim());
+                if (partes[0] === nombreLower) return 2;
+                if (partes[1] === nombreLower) return 3;
             }
-            
-            for (let i = 1; i <= 6; i++) {
+
+            // 3. Si no hay coincidencia, asignar al primer slot vacío ("INQUILINO X")
+            // Orden: 1, 4, 5, 6 (Reservamos 2 y 3 para posibles compartidos por defecto)
+            const ordenPreferencia = [1, 4, 5, 6, 2, 3]; 
+            for (let i of ordenPreferencia) {
                 const labelEl = document.getElementById(`label_nombre_${i}`);
                 if (labelEl && labelEl.innerText.trim().toUpperCase() === `INQUILINO ${i}`) {
                     return i;
@@ -712,7 +723,7 @@
                 const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                 const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
-                let slot = determinarSlot(inq.nombre);
+                let slot = determinarSlot(inq.nombre, 'agua');
 
                 if (slot) {
                     if (slot === 'comp') {
@@ -748,7 +759,7 @@
                 const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                 const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
-                let slot = determinarSlot(inq.nombre);
+                let slot = determinarSlot(inq.nombre, 'luz');
 
                 if (slot && slot !== 'comp') {
                     document.getElementById(`luz_${slot}`).value = monto;
@@ -767,10 +778,14 @@
             let agua = null; let luz = null;
             try { agua = JSON.parse(localStorage.getItem(STORAGE_AGUA_SYNC) || 'null'); } catch (_) {}
             try { luz = JSON.parse(localStorage.getItem(STORAGE_LUZ_SYNC) || 'null'); } catch (_) {}
+            
             if (agua) mesImportadoAgua = '';
             if (luz) mesImportadoLuz = '';
+            
+            // Prioridad: Agua corre primero para preparar los slots 2 y 3 si hay agua compartida
             const nAgua = agua ? aplicarAguaSincronizada(agua) : 0;
             const nLuz = luz ? aplicarLuzSincronizada(luz) : 0;
+            
             return { agua: nAgua, luz: nLuz };
         }
 
@@ -860,7 +875,7 @@
                         const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                         const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
-                        let slot = determinarSlot(inq.nombre);
+                        let slot = determinarSlot(inq.nombre, 'agua');
 
                         if (slot) {
                             if (slot === 'comp') {
@@ -921,7 +936,7 @@
                         const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                         const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
-                        let slot = determinarSlot(inq.nombre);
+                        let slot = determinarSlot(inq.nombre, 'luz');
 
                         if (slot && slot !== 'comp') {
                             document.getElementById(`luz_${slot}`).value = monto;
