@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: redondeos_montos_v1.html -->
+<!-- Nombre del archivo: redondeos_montos_v2.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -120,7 +120,7 @@
                 </h2>
                 
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm">MARILUZ</h3>
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_1">MARILUZ</h3>
                     <div class="grid grid-cols-2 gap-4 mb-3">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_mariluz" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_mariluz" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -132,7 +132,7 @@
                 </div>
 
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA</h3>
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_2">KENDRA</h3>
                     <div class="grid grid-cols-2 gap-4 mb-2">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -145,7 +145,7 @@
                 </div>
 
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm">SONIA</h3>
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_3">SONIA</h3>
                     <div class="grid grid-cols-2 gap-4 mb-2">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -158,7 +158,7 @@
                 </div>
 
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm">KENDRA + SONIA (Agua Compartida)</h3>
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_compartida">KENDRA + SONIA (Agua Compartida)</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label><input type="number" id="agua_compartida" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_compartida" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -183,31 +183,31 @@
 
                     <div class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
                         <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2">MARILUZ AGUA</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_1">MARILUZ AGUA</label>
                             <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_mariluz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_mariluz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                         </div>
                         <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2">MARILUZ LUZ</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_1_luz">MARILUZ LUZ</label>
                             <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_mariluz_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_mariluz_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                         </div>
                         <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2">KENDRA AGUA (Individual)</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_2">KENDRA AGUA (Individual)</label>
                             <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_kendra_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_kendra_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                         </div>
                         <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2">KENDRA LUZ</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_2_luz">KENDRA LUZ</label>
                             <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_kendra_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_kendra_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                         </div>
                         <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2">SONIA AGUA (Individual)</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3">SONIA AGUA (Individual)</label>
                             <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_sonia_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_sonia_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                         </div>
                         <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2">SONIA LUZ</label>
+                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3_luz">SONIA LUZ</label>
                             <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_sonia_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_sonia_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                         </div>
                         <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-blue-600 mb-2">KENDRA+SONIA AGUA (Compartida)</label>
+                            <label class="block text-xs font-bold text-blue-600 mb-2" id="label_fechas_comp">KENDRA+SONIA AGUA (Compartida)</label>
                             <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_ks_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"><input type="date" id="fecha_fin_ks_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"></div>
                         </div>
                     </div>
@@ -218,7 +218,7 @@
                     <h2 class="text-md font-black text-blue-800 uppercase tracking-wide">
                         Distribución de Agua Compartida
                     </h2>
-                    <p class="text-xs text-blue-600 mb-2">Ingresa el valor histórico/de referencia para Kendra o Sonia. El valor de la otra se calculará automáticamente restándolo del Total Compartido Redondeado. Mientras este modo esté activo, el agua individual de ambas queda bloqueada y fuera de las boletas.</p>
+                    <p class="text-xs text-blue-600 mb-2">Ingresa el valor histórico/de referencia para el primer integrante. El valor del otro se calculará automáticamente restándolo del Total Compartido Redondeado. Mientras este modo esté activo, el agua individual de ambos queda bloqueada y fuera de las boletas.</p>
                     
                     <div class="bg-white p-3 rounded-lg border border-blue-100 mb-3 text-center">
                         <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Ya Redondeado)</span>
@@ -227,11 +227,11 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Valor compartido Kendra (S/)</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_kendra">Valor compartido Kendra (S/)</label>
                             <input type="number" id="prorrateo_kendra" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('kendra')">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Valor compartido Sonia (S/)</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_sonia">Valor compartido Sonia (S/)</label>
                             <input type="number" id="prorrateo_sonia" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('sonia')">
                         </div>
                     </div>
@@ -246,12 +246,12 @@
             <h2 class="text-2xl font-black text-gray-800 text-center mb-6 uppercase tracking-wider">Boletas Individuales</h2>
             
             <div class="boletas-container">
-                <!-- Boleta Mariluz -->
+                <!-- Boleta Slot 1 -->
                 <div class="boleta-wrapper" id="wrapper-mariluz">
                     <div class="boleta-card" id="boleta-mariluz">
                         <div class="boleta-header">
                             <span>MES: <span class="txt-mes"></span></span>
-                            <h3>MARILUZ</h3>
+                            <h3 id="boleta_nombre_1">MARILUZ</h3>
                         </div>
                         <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_mariluz"></div></div>
                         <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_mariluz"></div></div>
@@ -262,15 +262,15 @@
                         </div>
                         <div class="boleta-detalles" id="detalles_mariluz"></div>
                     </div>
-                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-mariluz', 'Boleta_Mariluz')">Descargar Boleta</button>
+                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-mariluz', 1)">Descargar Boleta</button>
                 </div>
 
-                <!-- Boleta Kendra -->
+                <!-- Boleta Slot 2 -->
                 <div class="boleta-wrapper" id="wrapper-kendra">
                     <div class="boleta-card" id="boleta-kendra">
                         <div class="boleta-header">
                             <span>MES: <span class="txt-mes"></span></span>
-                            <h3>KENDRA</h3>
+                            <h3 id="boleta_nombre_2">KENDRA</h3>
                         </div>
                         <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_kendra"></div></div>
                         <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_kendra"></div></div>
@@ -281,15 +281,15 @@
                         </div>
                         <div class="boleta-detalles" id="detalles_kendra"></div>
                     </div>
-                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-kendra', 'Boleta_Kendra')">Descargar Boleta</button>
+                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-kendra', 2)">Descargar Boleta</button>
                 </div>
 
-                <!-- Boleta Sonia -->
+                <!-- Boleta Slot 3 -->
                 <div class="boleta-wrapper" id="wrapper-sonia">
                     <div class="boleta-card" id="boleta-sonia">
                         <div class="boleta-header">
                             <span>MES: <span class="txt-mes"></span></span>
-                            <h3>SONIA</h3>
+                            <h3 id="boleta_nombre_3">SONIA</h3>
                         </div>
                         <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_sonia"></div></div>
                         <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_sonia"></div></div>
@@ -300,7 +300,7 @@
                         </div>
                         <div class="boleta-detalles" id="detalles_sonia"></div>
                     </div>
-                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-sonia', 'Boleta_Sonia')">Descargar Boleta</button>
+                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-sonia', 3)">Descargar Boleta</button>
                 </div>
             </div>
         </div>
@@ -324,6 +324,43 @@
         let timerAutosaveRedondeos = null;
         let restaurandoSesionLocal = false;
 
+        function actualizarNombresGlobales(slot, nombre) {
+            if (!nombre) return;
+            const nomUpper = nombre.toUpperCase();
+            if (slot === 1) {
+                document.getElementById('label_nombre_1').innerText = nomUpper;
+                document.getElementById('label_fechas_1').innerText = nomUpper + " AGUA";
+                document.getElementById('label_fechas_1_luz').innerText = nomUpper + " LUZ";
+                document.getElementById('boleta_nombre_1').innerText = nomUpper;
+            } else if (slot === 2) {
+                document.getElementById('label_nombre_2').innerText = nomUpper;
+                document.getElementById('label_fechas_2').innerText = nomUpper + " AGUA (Individual)";
+                document.getElementById('label_fechas_2_luz').innerText = nomUpper + " LUZ";
+                document.getElementById('boleta_nombre_2').innerText = nomUpper;
+                document.getElementById('lbl_prorrateo_kendra').innerText = `Valor compartido ${nomUpper} (S/)`;
+                
+                const avisoK = document.getElementById('aviso_agua_kendra');
+                if (avisoK) avisoK.innerText = `BLOQUEADO: se está usando el reparto de ${nomUpper} + ${document.getElementById('label_nombre_3').innerText}.`;
+                const avisoS = document.getElementById('aviso_agua_sonia');
+                if (avisoS) avisoS.innerText = `BLOQUEADO: se está usando el reparto de ${nomUpper} + ${document.getElementById('label_nombre_3').innerText}.`;
+            } else if (slot === 3) {
+                document.getElementById('label_nombre_3').innerText = nomUpper;
+                document.getElementById('label_fechas_3').innerText = nomUpper + " AGUA (Individual)";
+                document.getElementById('label_fechas_3_luz').innerText = nomUpper + " LUZ";
+                document.getElementById('boleta_nombre_3').innerText = nomUpper;
+                document.getElementById('lbl_prorrateo_sonia').innerText = `Valor compartido ${nomUpper} (S/)`;
+                
+                const avisoK = document.getElementById('aviso_agua_kendra');
+                if (avisoK) avisoK.innerText = `BLOQUEADO: se está usando el reparto de ${document.getElementById('label_nombre_2').innerText} + ${nomUpper}.`;
+                const avisoS = document.getElementById('aviso_agua_sonia');
+                if (avisoS) avisoS.innerText = `BLOQUEADO: se está usando el reparto de ${document.getElementById('label_nombre_2').innerText} + ${nomUpper}.`;
+            } else if (slot === 'comp') {
+                const baseName = nomUpper.replace('(AGUA COMPARTIDA)', '').trim();
+                document.getElementById('label_nombre_compartida').innerText = baseName + ' (Agua Compartida)';
+                document.getElementById('label_fechas_comp').innerText = baseName + ' AGUA (Compartida)';
+            }
+        }
+
         function restaurarSesionLocalRedondeos() {
             try {
                 const raw = localStorage.getItem(STORAGE_REDONDEOS_SESION);
@@ -338,6 +375,14 @@
                     if (el.type === 'checkbox' || el.type === 'radio') el.checked = Boolean(valor);
                     else el.value = valor ?? '';
                 });
+
+                if (datos.estado && datos.estado.nombres) {
+                    actualizarNombresGlobales(1, datos.estado.nombres.n1);
+                    actualizarNombresGlobales(2, datos.estado.nombres.n2);
+                    actualizarNombresGlobales(3, datos.estado.nombres.n3);
+                    actualizarNombresGlobales('comp', datos.estado.nombres.nComp.replace(' (AGUA COMPARTIDA)', ''));
+                }
+
                 ultimaFuenteProrrateo = datos.estado && ['kendra', 'sonia'].includes(datos.estado.ultimaFuenteProrrateo)
                     ? datos.estado.ultimaFuenteProrrateo : null;
                 mesImportadoAgua = datos.estado ? String(datos.estado.mesImportadoAgua || '').trim().toUpperCase() : '';
@@ -381,29 +426,33 @@
                 const fi = inq.fecha_inicio || '';
                 const ff = inq.fecha_fin || '';
 
-                if (nombreLower.includes('mariluz')) {
+                if (String(inq.id_interno) === '1' || nombreLower.includes('mariluz')) {
                     document.getElementById('agua_mariluz').value = monto;
                     document.getElementById('m3_mariluz').value = m3;
                     document.getElementById('fecha_inicio_mariluz').value = fi;
                     document.getElementById('fecha_fin_mariluz').value = ff;
+                    actualizarNombresGlobales(1, inq.nombre);
                     importados++;
-                } else if (nombreLower.includes('kendra') && nombreLower.includes('sonia')) {
+                } else if ((String(inq.id_interno) === '2' && (nombreLower.includes(' y ') || nombreLower.includes('+'))) || (nombreLower.includes('kendra') && nombreLower.includes('sonia'))) {
                     document.getElementById('agua_compartida').value = monto;
                     document.getElementById('m3_compartida').value = m3;
                     document.getElementById('fecha_inicio_ks_agua').value = fi;
                     document.getElementById('fecha_fin_ks_agua').value = ff;
+                    actualizarNombresGlobales('comp', inq.nombre);
                     importados++;
-                } else if (nombreLower.includes('kendra')) {
+                } else if (String(inq.id_interno) === '2' || nombreLower.includes('kendra')) {
                     document.getElementById('agua_kendra').value = monto;
                     document.getElementById('m3_kendra').value = m3;
                     document.getElementById('fecha_inicio_kendra_agua').value = fi;
                     document.getElementById('fecha_fin_kendra_agua').value = ff;
+                    actualizarNombresGlobales(2, inq.nombre);
                     importados++;
-                } else if (nombreLower.includes('sonia')) {
+                } else if (String(inq.id_interno) === '3' || nombreLower.includes('sonia')) {
                     document.getElementById('agua_sonia').value = monto;
                     document.getElementById('m3_sonia').value = m3;
                     document.getElementById('fecha_inicio_sonia_agua').value = fi;
                     document.getElementById('fecha_fin_sonia_agua').value = ff;
+                    actualizarNombresGlobales(3, inq.nombre);
                     importados++;
                 }
             });
@@ -425,23 +474,26 @@
                 const fi = inq.fecha_inicio || '';
                 const ff = inq.fecha_fin || '';
 
-                if (nombreLower.includes('mariluz')) {
+                if (String(inq.id_interno) === '2' || nombreLower.includes('mariluz')) {
                     document.getElementById('luz_mariluz').value = monto;
                     document.getElementById('kwh_mariluz').value = kwh;
                     document.getElementById('fecha_inicio_mariluz_luz').value = fi;
                     document.getElementById('fecha_fin_mariluz_luz').value = ff;
+                    actualizarNombresGlobales(1, inq.nombre);
                     importados++;
-                } else if (nombreLower.includes('kendra')) {
+                } else if (String(inq.id_interno) === '3' || nombreLower.includes('kendra')) {
                     document.getElementById('luz_kendra').value = monto;
                     document.getElementById('kwh_kendra').value = kwh;
                     document.getElementById('fecha_inicio_kendra_luz').value = fi;
                     document.getElementById('fecha_fin_kendra_luz').value = ff;
+                    actualizarNombresGlobales(2, inq.nombre);
                     importados++;
-                } else if (nombreLower.includes('sonia')) {
+                } else if (String(inq.id_interno) === '4' || nombreLower.includes('sonia')) {
                     document.getElementById('luz_sonia').value = monto;
                     document.getElementById('kwh_sonia').value = kwh;
                     document.getElementById('fecha_inicio_sonia_luz').value = fi;
                     document.getElementById('fecha_fin_sonia_luz').value = ff;
+                    actualizarNombresGlobales(3, inq.nombre);
                     importados++;
                 }
             });
@@ -454,8 +506,6 @@
             try { agua = JSON.parse(localStorage.getItem(STORAGE_AGUA_SYNC) || 'null'); } catch (_) {}
             try { luz = JSON.parse(localStorage.getItem(STORAGE_LUZ_SYNC) || 'null'); } catch (_) {}
 
-            // Si existe información fresca de las calculadoras fuente, sus meses
-            // reemplazan a los que pudiera traer una sesión antigua de Redondeos.
             if (agua) mesImportadoAgua = '';
             if (luz) mesImportadoLuz = '';
 
@@ -532,7 +582,6 @@
             const otroServicio = esAgua ? 'LUZ' : 'AGUA';
             const servicioActual = esAgua ? 'AGUA' : 'LUZ';
 
-            // Si ya se importó el otro servicio, ambos deben pertenecer al mismo mes.
             if (otroMes && otroMes !== mesNormalizado) {
                 alert(
                     `No se importaron los datos de ${servicioActual}.\n\n` +
@@ -573,8 +622,6 @@
                     const mesImportado = extraerMesDesdeJson(datos);
                     if (!aplicarMesImportado('agua', mesImportado)) return;
 
-                    // REGLA: KENDRA sola es individual. Solo se considera agua
-                    // compartida cuando el nombre contiene a KENDRA y SONIA.
                     let importados = 0;
 
                     registros.forEach(inq => {
@@ -587,29 +634,33 @@
                         const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                         const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
-                        if (nombreLower.includes('mariluz')) {
+                        if (String(inq.id_interno) === '1' || nombreLower.includes('mariluz')) {
                             document.getElementById('agua_mariluz').value = monto;
                             document.getElementById('m3_mariluz').value = m3;
                             document.getElementById('fecha_inicio_mariluz').value = fi;
                             document.getElementById('fecha_fin_mariluz').value = ff;
+                            actualizarNombresGlobales(1, inq.nombre);
                             importados++;
-                        } else if (nombreLower.includes('kendra') && nombreLower.includes('sonia')) {
+                        } else if ((String(inq.id_interno) === '2' && (nombreLower.includes(' y ') || nombreLower.includes('+'))) || (nombreLower.includes('kendra') && nombreLower.includes('sonia'))) {
                             document.getElementById('agua_compartida').value = monto;
                             document.getElementById('m3_compartida').value = m3;
                             document.getElementById('fecha_inicio_ks_agua').value = fi;
                             document.getElementById('fecha_fin_ks_agua').value = ff;
+                            actualizarNombresGlobales('comp', inq.nombre);
                             importados++;
-                        } else if (nombreLower.includes('kendra')) {
+                        } else if (String(inq.id_interno) === '2' || nombreLower.includes('kendra')) {
                             document.getElementById('agua_kendra').value = monto;
                             document.getElementById('m3_kendra').value = m3;
                             document.getElementById('fecha_inicio_kendra_agua').value = fi;
                             document.getElementById('fecha_fin_kendra_agua').value = ff;
+                            actualizarNombresGlobales(2, inq.nombre);
                             importados++;
-                        } else if (nombreLower.includes('sonia')) {
+                        } else if (String(inq.id_interno) === '3' || nombreLower.includes('sonia')) {
                             document.getElementById('agua_sonia').value = monto;
                             document.getElementById('m3_sonia').value = m3;
                             document.getElementById('fecha_inicio_sonia_agua').value = fi;
                             document.getElementById('fecha_fin_sonia_agua').value = ff;
+                            actualizarNombresGlobales(3, inq.nombre);
                             importados++;
                         }
                     });
@@ -659,23 +710,26 @@
                         const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                         const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
-                        if (nombreLower.includes('mariluz')) {
+                        if (String(inq.id_interno) === '2' || nombreLower.includes('mariluz')) {
                             document.getElementById('luz_mariluz').value = monto;
                             document.getElementById('kwh_mariluz').value = kwh;
                             document.getElementById('fecha_inicio_mariluz_luz').value = fi;
                             document.getElementById('fecha_fin_mariluz_luz').value = ff;
+                            actualizarNombresGlobales(1, inq.nombre);
                             importados++;
-                        } else if (nombreLower.includes('kendra')) {
+                        } else if (String(inq.id_interno) === '3' || nombreLower.includes('kendra')) {
                             document.getElementById('luz_kendra').value = monto;
                             document.getElementById('kwh_kendra').value = kwh;
                             document.getElementById('fecha_inicio_kendra_luz').value = fi;
                             document.getElementById('fecha_fin_kendra_luz').value = ff;
+                            actualizarNombresGlobales(2, inq.nombre);
                             importados++;
-                        } else if (nombreLower.includes('sonia')) {
+                        } else if (String(inq.id_interno) === '4' || nombreLower.includes('sonia')) {
                             document.getElementById('luz_sonia').value = monto;
                             document.getElementById('kwh_sonia').value = kwh;
                             document.getElementById('fecha_inicio_sonia_luz').value = fi;
                             document.getElementById('fecha_fin_sonia_luz').value = ff;
+                            actualizarNombresGlobales(3, inq.nombre);
                             importados++;
                         }
                     });
@@ -750,16 +804,12 @@
             let luzKendra = parseFloat(document.getElementById('luz_kendra').value) || 0;
             let luzSonia = parseFloat(document.getElementById('luz_sonia').value) || 0;
 
-            // MODOS EXCLUYENTES:
-            // Si existe agua compartida KENDRA+SONIA, los importes individuales de agua
-            // de Kendra y Sonia se ignoran por completo, aunque contengan valores antiguos.
             comparteAgua = (aguaKS > 0);
             actualizarModoAguaCompartida(comparteAgua);
 
             let aguaKendra = comparteAgua ? 0 : (parseFloat(document.getElementById('agua_kendra').value) || 0);
             let aguaSonia = comparteAgua ? 0 : (parseFloat(document.getElementById('agua_sonia').value) || 0);
 
-            // Reiniciar valores redondeados para evitar que queden restos de un cálculo anterior.
             datosRedondeados = {
                 mariluz: { agua: 0, luz: 0 },
                 ks_agua: { agua: 0 },
@@ -767,11 +817,16 @@
                 sonia: { agua: 0, luz: 0 }
             };
 
+            let nom1 = document.getElementById('label_nombre_1').innerText;
+            let nom2 = document.getElementById('label_nombre_2').innerText;
+            let nom3 = document.getElementById('label_nombre_3').innerText;
+            let nomComp = document.getElementById('label_nombre_compartida').innerText;
+
             let inquilinos = [
-                { id: 'mariluz', nombre: "Mariluz", agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz, m3: document.getElementById('m3_mariluz').value, kwh: document.getElementById('kwh_mariluz').value },
-                { id: 'ks_agua', nombre: "Kendra + Sonia", agua: aguaKS, luz: null, exacto: aguaKS, m3: document.getElementById('m3_compartida').value, kwh: '' },
-                { id: 'kendra', nombre: "Kendra", agua: aguaKendra, luz: luzKendra, exacto: aguaKendra + luzKendra, m3: comparteAgua ? '' : document.getElementById('m3_kendra').value, kwh: document.getElementById('kwh_kendra').value },
-                { id: 'sonia', nombre: "Sonia", agua: aguaSonia, luz: luzSonia, exacto: aguaSonia + luzSonia, m3: comparteAgua ? '' : document.getElementById('m3_sonia').value, kwh: document.getElementById('kwh_sonia').value }
+                { id: 'mariluz', nombre: nom1, agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz, m3: document.getElementById('m3_mariluz').value, kwh: document.getElementById('kwh_mariluz').value },
+                { id: 'ks_agua', nombre: nomComp, agua: aguaKS, luz: null, exacto: aguaKS, m3: document.getElementById('m3_compartida').value, kwh: '' },
+                { id: 'kendra', nombre: nom2, agua: aguaKendra, luz: luzKendra, exacto: aguaKendra + luzKendra, m3: comparteAgua ? '' : document.getElementById('m3_kendra').value, kwh: document.getElementById('kwh_kendra').value },
+                { id: 'sonia', nombre: nom3, agua: aguaSonia, luz: luzSonia, exacto: aguaSonia + luzSonia, m3: comparteAgua ? '' : document.getElementById('m3_sonia').value, kwh: document.getElementById('kwh_sonia').value }
             ];
 
             let inquilinosFiltrados = inquilinos.filter(inq => inq.exacto > 0);
@@ -789,10 +844,6 @@
                 const totalCompartido = datosRedondeados.ks_agua.agua;
                 document.getElementById('prorrateo_total_text').innerText = `S/ ${totalCompartido}`;
 
-                // Si cambia el total compartido (por ejemplo al importar un nuevo JSON),
-                // conserva el valor histórico que el usuario haya elegido como referencia
-                // y recalcula el complemento. Si aún no se ha elegido una referencia,
-                // deja ambos campos vacíos para evitar asignaciones automáticas incorrectas.
                 if (ultimoTotalCompartidoRedondeado !== totalCompartido) {
                     if (ultimaFuenteProrrateo) {
                         calcularProrrateo(ultimaFuenteProrrateo, true);
@@ -863,7 +914,6 @@
         }
 
         function generarFilaDetalle(servicio, ini, fin, consumo, unidad, ocultarM3 = false) {
-            // Si este servicio todavía no tiene datos, no mostrar una fila artificial con ceros.
             const tieneDatos = Boolean(ini || fin || (consumo !== undefined && String(consumo).trim() !== ''));
             if (!tieneDatos) return '';
 
@@ -888,12 +938,11 @@
             let mes = valor('mes_cobro').trim().toUpperCase();
             Array.from(document.getElementsByClassName('txt-mes')).forEach(el => el.innerText = mes);
 
-            // MARILUZ: cada servicio queda vacío hasta que exista un dato real para ese servicio.
+            // SLOT 1
             let aguaM = datosRedondeados.mariluz.agua; let luzM = datosRedondeados.mariluz.luz;
             const hayAguaM = tieneValor('agua_mariluz') || tieneValor('m3_mariluz') || tieneValor('fecha_inicio_mariluz') || tieneValor('fecha_fin_mariluz');
             const hayLuzM = tieneValor('luz_mariluz') || tieneValor('kwh_mariluz') || tieneValor('fecha_inicio_mariluz_luz') || tieneValor('fecha_fin_mariluz_luz');
             
-            // Ocultar wrapper si no hay inputs de Mariluz
             document.getElementById('wrapper-mariluz').style.display = (hayAguaM || hayLuzM) ? 'flex' : 'none';
 
             ponerImporte('out_agua_mariluz', hayAguaM, aguaM);
@@ -903,7 +952,7 @@
                 (hayAguaM ? generarFilaDetalle('AGUA', valor('fecha_inicio_mariluz'), valor('fecha_fin_mariluz'), valor('m3_mariluz'), 'M3') : '') + 
                 (hayLuzM ? generarFilaDetalle('LUZ', valor('fecha_inicio_mariluz_luz'), valor('fecha_fin_mariluz_luz'), valor('kwh_mariluz'), 'KWH') : '');
 
-            // KENDRA
+            // SLOT 2
             let aguaK = comparteAgua ? (parseInt(valor('prorrateo_kendra')) || 0) : datosRedondeados.kendra.agua;
             let luzK = datosRedondeados.kendra.luz;
             let fi_k_agua = comparteAgua ? valor('fecha_inicio_ks_agua') : valor('fecha_inicio_kendra_agua');
@@ -913,7 +962,6 @@
                 : (tieneValor('agua_kendra') || tieneValor('m3_kendra') || tieneValor('fecha_inicio_kendra_agua') || tieneValor('fecha_fin_kendra_agua'));
             const hayLuzK = tieneValor('luz_kendra') || tieneValor('kwh_kendra') || tieneValor('fecha_inicio_kendra_luz') || tieneValor('fecha_fin_kendra_luz');
             
-            // Ocultar wrapper si no hay inputs de Kendra
             document.getElementById('wrapper-kendra').style.display = (hayAguaK || hayLuzK) ? 'flex' : 'none';
 
             ponerImporte('out_agua_kendra', hayAguaK, comparteAgua && !tieneValor('prorrateo_kendra') ? '' : aguaK);
@@ -924,7 +972,7 @@
                 (hayAguaK ? generarFilaDetalle('AGUA', fi_k_agua, ff_k_agua, comparteAgua ? '' : valor('m3_kendra'), 'M3', comparteAgua) : '') + 
                 (hayLuzK ? generarFilaDetalle('LUZ', valor('fecha_inicio_kendra_luz'), valor('fecha_fin_kendra_luz'), valor('kwh_kendra'), 'KWH') : '');
 
-            // SONIA
+            // SLOT 3
             let aguaS = comparteAgua ? (parseInt(valor('prorrateo_sonia')) || 0) : datosRedondeados.sonia.agua;
             let luzS = datosRedondeados.sonia.luz;
             let fi_s_agua = comparteAgua ? valor('fecha_inicio_ks_agua') : valor('fecha_inicio_sonia_agua');
@@ -934,7 +982,6 @@
                 : (tieneValor('agua_sonia') || tieneValor('m3_sonia') || tieneValor('fecha_inicio_sonia_agua') || tieneValor('fecha_fin_sonia_agua'));
             const hayLuzS = tieneValor('luz_sonia') || tieneValor('kwh_sonia') || tieneValor('fecha_inicio_sonia_luz') || tieneValor('fecha_fin_sonia_luz');
             
-            // Ocultar wrapper si no hay inputs de Sonia
             document.getElementById('wrapper-sonia').style.display = (hayAguaS || hayLuzS) ? 'flex' : 'none';
 
             ponerImporte('out_agua_sonia', hayAguaS, comparteAgua && !tieneValor('prorrateo_sonia') ? '' : aguaS);
@@ -957,7 +1004,6 @@
                 const elemento = document.getElementById(elementId);
                 if (!elemento) throw new Error('No se encontró la plantilla temporal de la boleta.');
 
-                // Mismo método probado en luz_cayran: HTML -> html2canvas -> PNG.
                 const canvas = await html2canvas(elemento, {
                     scale: 2,
                     useCORS: true,
@@ -969,7 +1015,6 @@
 
                 const base64Uri = canvas.toDataURL('image/png');
 
-                // Compatibilidad con una app empaquetada mediante Capacitor, igual que luz_cayran.
                 if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
                     try {
                         const { Filesystem, Share } = window.Capacitor.Plugins;
@@ -995,7 +1040,6 @@
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 if (!blob) throw new Error('No se pudo convertir la boleta en una imagen PNG.');
 
-                // En móviles compatibles abre el menú Compartir (WhatsApp, correo, etc.).
                 let compartidoNativo = false;
                 if (navigator.share) {
                     const archivo = new File([blob], nombreArchivo, { type: 'image/png' });
@@ -1011,7 +1055,6 @@
                             compartidoNativo = true;
                         } catch (errShare) {
                             console.log('Compartir cancelado o no disponible:', errShare);
-                            // Si el usuario cerró voluntariamente el menú, no iniciar otra descarga.
                             if (errShare && (errShare.name === 'AbortError' || String(errShare.message || '').toLowerCase().includes('canceled') || String(errShare.message || '').toLowerCase().includes('cancelled'))) {
                                 compartidoNativo = true;
                             }
@@ -1019,7 +1062,6 @@
                     }
                 }
 
-                // En PC/navegadores sin compartir archivos: descarga directa.
                 if (!compartidoNativo) {
                     const enlace = document.createElement('a');
                     enlace.href = base64Uri;
@@ -1037,7 +1079,7 @@
             }
         }
 
-        async function descargarBoleta(boton, idElemento, nombreBase) {
+        async function descargarBoleta(boton, idElemento, slotId) {
             const original = document.getElementById(idElemento);
             const tempCont = document.getElementById('boleta-template-container');
 
@@ -1048,6 +1090,11 @@
 
             procesarCalculosGlobales();
 
+            let nombreBase = 'Boleta';
+            if (slotId === 1) nombreBase = 'Boleta_' + document.getElementById('label_nombre_1').innerText.trim().replace(/\s+/g, '_');
+            if (slotId === 2) nombreBase = 'Boleta_' + document.getElementById('label_nombre_2').innerText.trim().replace(/\s+/g, '_');
+            if (slotId === 3) nombreBase = 'Boleta_' + document.getElementById('label_nombre_3').innerText.trim().replace(/\s+/g, '_');
+
             const textoOriginal = boton ? boton.textContent : 'Descargar Boleta';
             if (boton) {
                 boton.disabled = true;
@@ -1055,16 +1102,13 @@
             }
 
             try {
-                // Igual que luz_cayran: se prepara una plantilla independiente fuera de pantalla.
                 tempCont.innerHTML = '';
                 const clon = original.cloneNode(true);
                 clon.id = 'boleta-captura';
 
-                // Evitar IDs duplicados dentro de la copia; la captura ya contiene los textos calculados.
                 clon.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
                 tempCont.appendChild(clon);
 
-                // Dar al navegador un ciclo de render para calcular correctamente tamaño y fuentes.
                 await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
                 const mesVisible = (document.getElementById('mes_cobro').value.trim() || 'MES').toUpperCase();
@@ -1107,13 +1151,18 @@
                 estado: {
                     ultimaFuenteProrrateo: ultimaFuenteProrrateo || null,
                     mesImportadoAgua: mesImportadoAgua || '',
-                    mesImportadoLuz: mesImportadoLuz || ''
+                    mesImportadoLuz: mesImportadoLuz || '',
+                    nombres: {
+                        n1: document.getElementById('label_nombre_1').innerText,
+                        n2: document.getElementById('label_nombre_2').innerText,
+                        n3: document.getElementById('label_nombre_3').innerText,
+                        nComp: document.getElementById('label_nombre_compartida').innerText
+                    }
                 }
             };
         }
 
         function textoABase64Utf8(texto) {
-            // Compatible también con WebView Android antiguas que no implementan TextEncoder.
             return btoa(unescape(encodeURIComponent(texto)));
         }
 
@@ -1137,11 +1186,6 @@
                 const nombreArchivo = `CUENTA FINAL INQUILINOS-${mesArchivo}.json`;
                 const jsonTexto = JSON.stringify(datosSesion, null, 2);
 
-                // ==============================================================
-                // MÉTODO 1 - APP ANDROID / CAPACITOR:
-                // Guardar físicamente en DOCUMENTS. No depende del atributo
-                // HTML "download" ni de que Android acepte application/json.
-                // ==============================================================
                 const plugins = window.Capacitor && window.Capacitor.Plugins
                     ? window.Capacitor.Plugins
                     : null;
@@ -1151,7 +1195,6 @@
                         const Filesystem = plugins.Filesystem;
                         const base64Data = textoABase64Utf8(jsonTexto);
 
-                        // Primero intentamos DOCUMENTS (archivo persistente).
                         const guardado = await Filesystem.writeFile({
                             path: nombreArchivo,
                             data: base64Data,
@@ -1159,9 +1202,6 @@
                             recursive: true
                         });
 
-                        // Si existe Share, abrimos el selector de Android usando
-                        // el URI del archivo ya guardado. Aunque el usuario cancele,
-                        // el respaldo permanece escrito en DOCUMENTS.
                         if (plugins.Share) {
                             try {
                                 await plugins.Share.share({
@@ -1181,8 +1221,6 @@
                     } catch (errorDocuments) {
                         console.warn('No se pudo escribir en DOCUMENTS:', errorDocuments);
 
-                        // Segundo intento nativo: CACHE + Share, por si la WebView
-                        // no tiene permiso para DOCUMENTS pero sí para su caché.
                         try {
                             const Filesystem = plugins.Filesystem;
                             const base64Data = textoABase64Utf8(jsonTexto);
@@ -1208,11 +1246,6 @@
                     }
                 }
 
-                // ==============================================================
-                // MÉTODO 2 - WEB SHARE API:
-                // Archivo .json etiquetado como text/plain. Android/WebView suele
-                // aceptar este MIME aunque rechace application/json.
-                // ==============================================================
                 if (navigator.share && typeof File !== 'undefined') {
                     const archivoCompatible = new File(
                         [jsonTexto],
@@ -1221,8 +1254,6 @@
                     );
 
                     try {
-                        // No bloqueamos el intento por navigator.canShare(), porque
-                        // algunas WebView devuelven false aunque share(files) funcione.
                         await navigator.share({
                             files: [archivoCompatible],
                             title: nombreArchivo,
@@ -1237,8 +1268,6 @@
                         console.warn('Android no aceptó compartir el archivo:', errorArchivoShare);
                     }
 
-                    // Último intento usando el panel Android como texto. Esto no
-                    // depende de soporte para compartir archivos en la WebView.
                     try {
                         await navigator.share({
                             title: nombreArchivo,
@@ -1255,10 +1284,6 @@
                     }
                 }
 
-                // ==============================================================
-                // MÉTODO 3 - PC / NAVEGADOR NORMAL:
-                // Blob URL convencional.
-                // ==============================================================
                 const blob = new Blob([jsonTexto], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const enlace = document.createElement('a');
@@ -1273,8 +1298,6 @@
             } catch (error) {
                 console.error('Error al guardar sesión:', error);
 
-                // Fallback final: copiar el respaldo. Así nunca se pierde la sesión
-                // aunque la WebView no exponga ninguna API de archivos.
                 try {
                     const datosSesion = obtenerDatosSesion();
                     const jsonTexto = JSON.stringify(datosSesion, null, 2);
@@ -1307,14 +1330,19 @@
                         throw new Error('El archivo no corresponde a una sesión válida de esta calculadora.');
                     }
 
-                    // Restaurar primero todos los campos, incluso los que puedan quedar deshabilitados
-                    // posteriormente por el modo de agua compartida.
                     Object.entries(datos.campos).forEach(([id, valor]) => {
                         const el = document.getElementById(id);
                         if (!el || el.type === 'file') return;
                         if (el.type === 'checkbox' || el.type === 'radio') el.checked = Boolean(valor);
                         else el.value = valor ?? '';
                     });
+
+                    if (datos.estado && datos.estado.nombres) {
+                        actualizarNombresGlobales(1, datos.estado.nombres.n1);
+                        actualizarNombresGlobales(2, datos.estado.nombres.n2);
+                        actualizarNombresGlobales(3, datos.estado.nombres.n3);
+                        actualizarNombresGlobales('comp', datos.estado.nombres.nComp.replace(' (AGUA COMPARTIDA)', ''));
+                    }
 
                     ultimaFuenteProrrateo = datos.estado && ['kendra', 'sonia'].includes(datos.estado.ultimaFuenteProrrateo)
                         ? datos.estado.ultimaFuenteProrrateo
@@ -1325,8 +1353,6 @@
 
                     procesarCalculosGlobales();
 
-                    // procesarCalculosGlobales puede recalcular el prorrateo. Si el respaldo traía
-                    // ambos valores, los restauramos exactamente y actualizamos las boletas.
                     if (comparteAgua) {
                         const kGuardado = datos.campos.prorrateo_kendra;
                         const sGuardado = datos.campos.prorrateo_sonia;
@@ -1349,7 +1375,6 @@
             };
             reader.readAsText(file);
         }
-
 
         function formatearFecha(fechaStr) { if (!fechaStr) return ''; const p = fechaStr.split('-'); if(p.length !== 3) return fechaStr; return `${parseInt(p[2], 10)}/${parseInt(p[1], 10)}/${p[0]}`; }
     </script>
