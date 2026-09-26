@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title></title>
+    <title>Cálculos de Recibo Luz y Agua</title>
     
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
@@ -33,7 +33,13 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
-            padding: max(2rem, env(safe-area-inset-top)) 1rem max(2rem, env(safe-area-inset-bottom)) 1rem;
+            /* AQUÍ ESTÁ LA CLAVE: 
+               Usamos env() sumado a un padding cómodo para que nunca quede pegado a la cámara ni a la barra de gestos inferior */
+            padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem);
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem);
+            padding-left: calc(env(safe-area-inset-left, 0px) + 1rem);
+            padding-right: calc(env(safe-area-inset-right, 0px) + 1rem);
+            min-height: 100vh;
         }
 
         .container {
@@ -112,7 +118,6 @@
             transform: scale(0.98);
         }
 
-        /* Nueva clase para el botón rojo */
         .btn-rojo {
             background-color: #ef4444; 
         }
@@ -125,7 +130,6 @@
         .card-agua { border-top: 4px solid #3b82f6; }
         .card-luz-especial { border-top: 4px solid #f97316; }
         .card-control-luz { border-top: 4px solid #14b8a6; }
-        /* Nueva clase para la tarjeta de redondeo */
         .card-redondeo { border-top: 4px solid #8b5cf6; }
 
         footer {
@@ -141,7 +145,6 @@
     <div class="container">
         <header>
             <h1>CALCULOS DE RECIBO LUZ Y AGUA</h1>
-            
         </header>
 
         <main class="grid">
@@ -175,11 +178,9 @@
                     <h2>CALCULO RECIBO - LUZ EDGAR</h2>
                     <p></p>
                 </div>
-                <!-- Aquí se agregó la clase btn-rojo -->
                 <a href="./luz_edgar.html" class="btn btn-rojo">Abrir Aplicación</a>
             </div>
 
-            <!-- Nueva tarjeta agregada para los redondeos -->
             <div class="card card-redondeo">
                 <div class="card-content">
                     <h2>REDONDEOS DE MONTOS</h2>
