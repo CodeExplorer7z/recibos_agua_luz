@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: redondeos_montos_v9.html -->
+<!-- Nombre del archivo: redondeos_montos_v10.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1106,6 +1106,73 @@
                 } catch (err) {
                     showAlertModal('Error al procesar JSON de Luz:\n' + err.message, "error");
                 } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ==========================================
+        // NUEVA FUNCIÓN: IMPORTAR SESIÓN
+        // ==========================================
+        function importarSesion(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const datos = JSON.parse(e.target.result);
+                    if (datos.tipo !== 'CUENTA_FINAL_INQUILINOS_SESSION') {
+                        throw new Error('El archivo seleccionado no es un archivo de sesión válido.');
+                    }
+
+                    // 1. Restaurar campos de inputs
+                    if (datos.campos) {
+                        for (const [id, valor] of Object.entries(datos.campos)) {
+                            const el = document.getElementById(id);
+                            if (el) {
+                                if (el.type === 'checkbox' || el.type === 'radio') {
+                                    el.checked = valor === true;
+                                } else {
+                                    el.value = valor;
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Restaurar estado (nombres y variables globales)
+                    if (datos.estado) {
+                        ultimaFuenteProrrateo_12 = datos.estado.ultimaFuenteProrrateo_12 || null;
+                        ultimaFuenteProrrateo_34 = datos.estado.ultimaFuenteProrrateo_34 || null;
+                        ultimaFuenteProrrateo_56 = datos.estado.ultimaFuenteProrrateo_56 || null;
+                        mesImportadoAgua = datos.estado.mesImportadoAgua || '';
+                        mesImportadoLuz = datos.estado.mesImportadoLuz || '';
+
+                        if (datos.estado.nombres) {
+                            if (datos.estado.nombres.n1) actualizarNombresGlobales(1, datos.estado.nombres.n1);
+                            if (datos.estado.nombres.n2) actualizarNombresGlobales(2, datos.estado.nombres.n2);
+                            if (datos.estado.nombres.n3) actualizarNombresGlobales(3, datos.estado.nombres.n3);
+                            if (datos.estado.nombres.n4) actualizarNombresGlobales(4, datos.estado.nombres.n4);
+                            if (datos.estado.nombres.n5) actualizarNombresGlobales(5, datos.estado.nombres.n5);
+                            if (datos.estado.nombres.n6) actualizarNombresGlobales(6, datos.estado.nombres.n6);
+                            if (datos.estado.nombres.n7) actualizarNombresGlobales(7, datos.estado.nombres.n7);
+                            if (datos.estado.nombres.nComp12) actualizarNombresGlobales('comp_12', datos.estado.nombres.nComp12);
+                            if (datos.estado.nombres.nComp34) actualizarNombresGlobales('comp_34', datos.estado.nombres.nComp34);
+                            if (datos.estado.nombres.nComp56) actualizarNombresGlobales('comp_56', datos.estado.nombres.nComp56);
+                        }
+                    }
+
+                    // 3. Procesar cálculos y visualizar interfaz
+                    procesarCalculosGlobales();
+                    evaluarVisibilidadGeneral();
+                    showAlertModal('Sesión importada correctamente', "success");
+
+                } catch (err) {
+                    console.error('Error al importar sesión:', err);
+                    showAlertModal('Error al procesar JSON de Sesión:\n' + err.message, "error");
+                } finally {
+                    // Limpiar el input para permitir volver a cargar el mismo archivo si es necesario
                     event.target.value = '';
                 }
             };
