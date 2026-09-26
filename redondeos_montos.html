@@ -1,12 +1,13 @@
-<!-- Nombre del archivo: redondeos_montos_v2.html -->
+<!-- Nombre del archivo: redondeos_montos_v4.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Recibos y Boletas</title>
+    <title>CUENTAS A PAGAR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -38,7 +39,6 @@
             .col-dias { padding: 0 1px; }
         }
 
-        /* Contenedor temporal para generar/compartir las boletas como imagen. */
         #boleta-template-container {
             position: absolute;
             left: -9999px;
@@ -55,263 +55,457 @@
             margin: 0 !important;
             box-shadow: none !important;
         }
+
+        /* Modales Personalizados */
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .custom-modal-overlay.active { opacity: 1; visibility: visible; }
+        .custom-modal-box {
+            background: #ffffff; border-radius: 16px;
+            padding: 28px 24px; width: 90%; max-width: 360px;
+            text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+            transform: scale(0.95) translateY(10px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid #e5e7eb;
+        }
+        .custom-modal-overlay.active .custom-modal-box { transform: scale(1) translateY(0); }
+        .custom-modal-icon { font-size: 3.5rem; margin-bottom: 15px; line-height: 1; }
+        .icon-warning { color: #fb7185; }
+        .icon-success { color: #10b981; }
+        .custom-modal-title { font-size: 1.15rem; font-weight: 700; color: #1f2937; margin-bottom: 24px; line-height: 1.4; }
+        .custom-modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; flex: 1; transition: all 0.2s; font-size: 1rem; }
+        .btn-modal-cancel { background: #f3f4f6; color: #1f2937; border: 1px solid #e5e7eb; }
+        .btn-modal-confirm { background: #fb7185; color: white; }
+        .btn-modal-ok { background: #10b981; color: white; width: 100%; flex: none; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8" oninput="procesarCalculosGlobales()">
+<body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8 min-h-screen flex flex-col" oninput="procesarCalculosGlobales()">
 
-    <div class="max-w-5xl mx-auto space-y-6">
-        
-        <!-- BARRA DE NAVEGACIÓN (BOTÓN MENÚ PRINCIPAL) -->
-        <div class="w-full flex justify-start">
-            <a href="./index.html" class="inline-flex items-center gap-1.5 bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold py-2 px-3.5 rounded-md no-underline transition-colors shadow-sm">
-                &#8592; Menú Principal
-            </a>
-        </div>
-
-        <!-- CABECERA -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-800">Calculadora de Cuentas & Boletas</h1>
-                </div>
-                <p class="text-gray-500 text-sm sm:ml-11">Ingresa los datos para generar el reporte general y boletas individuales.</p>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full sm:w-auto">
-                <div>
-                    <input type="file" id="input_json_agua" accept=".json,application/json" class="hidden" onchange="importarJsonAgua(event)">
-                    <button type="button" onclick="document.getElementById('input_json_agua').click()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
-                        IMPORTAR JSON AGUA
-                    </button>
-                </div>
-                <div>
-                    <input type="file" id="input_json_luz" accept=".json,application/json" class="hidden" onchange="importarJsonLuz(event)">
-                    <button type="button" onclick="document.getElementById('input_json_luz').click()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
-                        IMPORTAR JSON LUZ
-                    </button>
-                </div>
-                <div>
-                    <button type="button" onclick="guardarSesion(this)" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
-                        GUARDAR SESIÓN
-                    </button>
-                </div>
-                <div>
-                    <input type="file" id="input_sesion" accept=".json,application/json,text/plain" class="hidden" onchange="importarSesion(event)">
-                    <button type="button" onclick="document.getElementById('input_sesion').click()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center justify-center gap-2">
-                        IMPORTAR SESIÓN
-                    </button>
-                </div>
-                <div id="sync_status" class="sm:col-span-2 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-center">
-                    Sincronización automática: esperando datos de Agua y Luz.
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <!-- SECCIÓN 1: MONTOS Y CONSUMOS -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-5">
-                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm">1</span> 
-                    Importes y Consumos
-                </h2>
-                
-                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_1">MARILUZ</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-3">
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_mariluz" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_mariluz" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_mariluz" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_mariluz" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                    </div>
-                </div>
-
-                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_2">KENDRA</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-2">
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                    </div>
-                    <p id="aviso_agua_kendra" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto de KENDRA + SONIA.</p>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_kendra" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                    </div>
-                </div>
-
-                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_3">SONIA</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-2">
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                    </div>
-                    <p id="aviso_agua_sonia" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto de KENDRA + SONIA.</p>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_sonia" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                    </div>
-                </div>
-
-                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_compartida">KENDRA + SONIA (Agua Compartida)</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label><input type="number" id="agua_compartida" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                        <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_compartida" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                    </div>
-                </div>
-                
-            </div>
-
-            <!-- SECCIÓN 2: FECHAS Y PRORRATEO -->
-            <div class="flex flex-col gap-6">
-                
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-5">
-                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm">2</span> 
-                        Periodos de Lectura
-                    </h2>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold text-blue-600 mb-2">MES DE COBRO (Aparecerá en boletas)</label>
-                        <input type="text" id="mes_cobro" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none uppercase font-bold text-gray-700" placeholder="Ej. SETIEMBRE">
-                    </div>
-
-                    <div class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
-                        <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_1">MARILUZ AGUA</label>
-                            <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_mariluz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_mariluz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
-                        </div>
-                        <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_1_luz">MARILUZ LUZ</label>
-                            <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_mariluz_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_mariluz_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
-                        </div>
-                        <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_2">KENDRA AGUA (Individual)</label>
-                            <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_kendra_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_kendra_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
-                        </div>
-                        <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_2_luz">KENDRA LUZ</label>
-                            <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_kendra_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_kendra_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
-                        </div>
-                        <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3">SONIA AGUA (Individual)</label>
-                            <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_sonia_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_sonia_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
-                        </div>
-                        <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3_luz">SONIA LUZ</label>
-                            <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_sonia_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_sonia_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
-                        </div>
-                        <div class="p-3 border border-gray-100 rounded-lg bg-gray-50">
-                            <label class="block text-xs font-bold text-blue-600 mb-2" id="label_fechas_comp">KENDRA+SONIA AGUA (Compartida)</label>
-                            <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_ks_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"><input type="date" id="fecha_fin_ks_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BLOQUE DE PRORRATEO (Se muestra solo si hay Agua Compartida) -->
-                <div id="bloque_prorrateo" class="bg-blue-50 p-6 rounded-2xl shadow-sm border border-blue-200 space-y-4" style="display: none;">
-                    <h2 class="text-md font-black text-blue-800 uppercase tracking-wide">
-                        Distribución de Agua Compartida
-                    </h2>
-                    <p class="text-xs text-blue-600 mb-2">Ingresa el valor histórico/de referencia para el primer integrante. El valor del otro se calculará automáticamente restándolo del Total Compartido Redondeado. Mientras este modo esté activo, el agua individual de ambos queda bloqueada y fuera de las boletas.</p>
-                    
-                    <div class="bg-white p-3 rounded-lg border border-blue-100 mb-3 text-center">
-                        <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Ya Redondeado)</span>
-                        <span class="text-2xl font-black text-blue-600" id="prorrateo_total_text"></span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_kendra">Valor compartido Kendra (S/)</label>
-                            <input type="number" id="prorrateo_kendra" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('kendra')">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_sonia">Valor compartido Sonia (S/)</label>
-                            <input type="number" id="prorrateo_sonia" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('sonia')">
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- SECCIÓN 3: BOLETAS INDIVIDUALES (VISIBLES) -->
-        <div class="mt-8 pt-8 border-t-2 border-dashed border-gray-300">
-            <h2 class="text-2xl font-black text-gray-800 text-center mb-6 uppercase tracking-wider">Boletas Individuales</h2>
-            
-            <div class="boletas-container">
-                <!-- Boleta Slot 1 -->
-                <div class="boleta-wrapper" id="wrapper-mariluz">
-                    <div class="boleta-card" id="boleta-mariluz">
-                        <div class="boleta-header">
-                            <span>MES: <span class="txt-mes"></span></span>
-                            <h3 id="boleta_nombre_1">MARILUZ</h3>
-                        </div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_mariluz"></div></div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_mariluz"></div></div>
-                        <div class="divider"></div>
-                        <div class="boleta-total">
-                            <span>TOTAL A PAGAR</span>
-                            <h2 id="out_total_mariluz"></h2>
-                        </div>
-                        <div class="boleta-detalles" id="detalles_mariluz"></div>
-                    </div>
-                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-mariluz', 1)">Descargar Boleta</button>
-                </div>
-
-                <!-- Boleta Slot 2 -->
-                <div class="boleta-wrapper" id="wrapper-kendra">
-                    <div class="boleta-card" id="boleta-kendra">
-                        <div class="boleta-header">
-                            <span>MES: <span class="txt-mes"></span></span>
-                            <h3 id="boleta_nombre_2">KENDRA</h3>
-                        </div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_kendra"></div></div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_kendra"></div></div>
-                        <div class="divider"></div>
-                        <div class="boleta-total">
-                            <span>TOTAL A PAGAR</span>
-                            <h2 id="out_total_kendra"></h2>
-                        </div>
-                        <div class="boleta-detalles" id="detalles_kendra"></div>
-                    </div>
-                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-kendra', 2)">Descargar Boleta</button>
-                </div>
-
-                <!-- Boleta Slot 3 -->
-                <div class="boleta-wrapper" id="wrapper-sonia">
-                    <div class="boleta-card" id="boleta-sonia">
-                        <div class="boleta-header">
-                            <span>MES: <span class="txt-mes"></span></span>
-                            <h3 id="boleta_nombre_3">SONIA</h3>
-                        </div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_sonia"></div></div>
-                        <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_sonia"></div></div>
-                        <div class="divider"></div>
-                        <div class="boleta-total">
-                            <span>TOTAL A PAGAR</span>
-                            <h2 id="out_total_sonia"></h2>
-                        </div>
-                        <div class="boleta-detalles" id="detalles_sonia"></div>
-                    </div>
-                    <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-sonia', 3)">Descargar Boleta</button>
-                </div>
-            </div>
-        </div>
-
+    <!-- Toast Notification (Flotante) -->
+    <div id="toastNotification" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm transition-all duration-300 opacity-0 invisible z-[9999]">
+        Datos sincronizados
     </div>
 
-    <!-- Plantilla temporal fuera de pantalla, igual al patrón usado por luz_cayran -->
+    <!-- Modales Globales -->
+    <div class="custom-modal-overlay" id="globalConfirmModal">
+        <div class="custom-modal-box">
+            <div class="custom-modal-icon icon-warning"><i class="bi bi-exclamation-circle-fill"></i></div>
+            <div class="custom-modal-title" id="globalConfirmMsg">¿Desea borrar los datos?</div>
+            <div class="custom-modal-actions">
+                <button class="btn-modal btn-modal-cancel" onclick="closeGlobalConfirm()">No</button>
+                <button class="btn-modal btn-modal-confirm" id="globalConfirmBtn">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="custom-modal-overlay" id="globalAlertModal">
+        <div class="custom-modal-box">
+            <div class="custom-modal-icon icon-success" id="globalAlertIcon"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="custom-modal-title" id="globalAlertMsg">Mensaje</div>
+            <div class="custom-modal-actions">
+                <button class="btn-modal btn-modal-ok" onclick="closeGlobalAlert()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra Superior -->
+    <div class="w-full flex justify-start fixed top-4 left-4 z-50">
+        <a href="./index.html" class="inline-flex items-center gap-1.5 bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold py-2 px-3.5 rounded-md no-underline transition-colors shadow-sm">
+            &#8592; Menú Principal
+        </a>
+    </div>
+
+    <!-- CONTENEDOR CENTRAL DE LA APLICACIÓN -->
+    <div class="flex-grow flex flex-col items-center justify-center w-full mt-10">
+
+        <!-- PANEL DE CONTROLES (BOTONES) -->
+        <div id="controls_card" class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 w-full max-w-sm m-auto transition-all duration-500">
+            <div class="flex items-center gap-3 mb-4 justify-center sm:justify-start">
+                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg hidden sm:block">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h1 class="text-2xl font-black text-gray-800 uppercase tracking-tight text-center w-full sm:w-auto sm:text-left">Cuentas a Pagar</h1>
+            </div>
+            <p class="text-gray-500 text-sm mb-6 text-center sm:text-left">Ingresa los datos para generar el reporte general y boletas individuales.</p>
+            
+            <div class="flex flex-col gap-3">
+                <input type="file" id="input_json_agua" accept=".json,application/json" class="hidden" onchange="importarJsonAgua(event)">
+                <button type="button" onclick="document.getElementById('input_json_agua').click()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors text-sm text-center uppercase tracking-wide">
+                    IMPORTAR JSON AGUA
+                </button>
+                
+                <input type="file" id="input_json_luz" accept=".json,application/json" class="hidden" onchange="importarJsonLuz(event)">
+                <button type="button" onclick="document.getElementById('input_json_luz').click()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors text-sm text-center uppercase tracking-wide">
+                    IMPORTAR JSON LUZ
+                </button>
+                
+                <button type="button" onclick="guardarSesion(this)" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors text-sm text-center uppercase tracking-wide">
+                    GUARDAR SESIÓN
+                </button>
+                
+                <input type="file" id="input_sesion" accept=".json,application/json,text/plain" class="hidden" onchange="importarSesion(event)">
+                <button type="button" onclick="document.getElementById('input_sesion').click()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors text-sm text-center uppercase tracking-wide">
+                    IMPORTAR SESIÓN
+                </button>
+
+                <button type="button" onclick="sincronizarManual()" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors text-sm text-center uppercase tracking-wide">
+                    SINCRONIZAR
+                </button>
+
+                <button type="button" onclick="borrarTodosLosDatos()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors text-sm text-center uppercase tracking-wide">
+                    BORRAR DATOS
+                </button>
+            </div>
+        </div>
+
+        <!-- ÁREA DE CONTENIDO PRINCIPAL (Oculta por defecto) -->
+        <div id="main_content_area" class="w-full max-w-5xl hidden mt-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- SECCIÓN 1: MONTOS Y CONSUMOS -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-5">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm">1</span> 
+                        Importes y Consumos
+                    </h2>
+                    
+                    <!-- Inquilino 1 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_1">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_1">INQUILINO 1</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_1" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_1" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_1" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_1" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+
+                    <!-- Inquilino 2 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_2">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_2">INQUILINO 2</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-2">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_2" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_2" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                        <p id="aviso_agua_2" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto de compartidos.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_2" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_2" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+
+                    <!-- Inquilino 3 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_3">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_3">INQUILINO 3</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-2">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_3" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_3" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                        <p id="aviso_agua_3" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto de compartidos.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_3" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_3" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+
+                    <!-- Agua Compartida (Slot 2 + Slot 3) -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_comp">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_comp">INQUILINO 2 + INQUILINO 3 (Agua Compartida)</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label><input type="number" id="agua_comp" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_comp" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+
+                    <!-- Inquilino 4 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_4">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_4">INQUILINO 4</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_4" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_4" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_4" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_4" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+
+                    <!-- Inquilino 5 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_5">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_5">INQUILINO 5</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_5" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_5" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_5" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_5" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+
+                    <!-- Inquilino 6 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_6">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_6">INQUILINO 6</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_6" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_6" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_6" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_6" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: FECHAS Y PRORRATEO -->
+                <div class="flex flex-col gap-6">
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-5">
+                        <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm">2</span> 
+                            Periodos de Lectura
+                        </h2>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-blue-600 mb-2">MES DE COBRO (Aparecerá en boletas)</label>
+                            <input type="text" id="mes_cobro" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none uppercase font-bold text-gray-700" placeholder="Ej. SETIEMBRE">
+                        </div>
+
+                        <div class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
+                            <!-- Fechas 1 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_1_agua">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_1_agua">INQUILINO 1 AGUA</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_1_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_1_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_1_luz">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_1_luz">INQUILINO 1 LUZ</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_1_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_1_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+                            
+                            <!-- Fechas 2 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_2_agua">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_2_agua">INQUILINO 2 AGUA (Individual)</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_2_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_2_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_2_luz">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_2_luz">INQUILINO 2 LUZ</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_2_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_2_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+
+                            <!-- Fechas 3 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_3_agua">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3_agua">INQUILINO 3 AGUA (Individual)</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_3_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_3_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_3_luz">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3_luz">INQUILINO 3 LUZ</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_3_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_3_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+
+                            <!-- Fechas Comp -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_comp">
+                                <label class="block text-xs font-bold text-blue-600 mb-2" id="label_fechas_comp_agua">INQUILINO 2 + INQUILINO 3 AGUA (Compartida)</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_comp_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"><input type="date" id="fecha_fin_comp_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"></div>
+                            </div>
+
+                            <!-- Fechas 4 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_4_agua">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_4_agua">INQUILINO 4 AGUA</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_4_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_4_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_4_luz">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_4_luz">INQUILINO 4 LUZ</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_4_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_4_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+
+                            <!-- Fechas 5 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_5_agua">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_5_agua">INQUILINO 5 AGUA</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_5_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_5_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_5_luz">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_5_luz">INQUILINO 5 LUZ</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_5_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_5_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+
+                            <!-- Fechas 6 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_6_agua">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_6_agua">INQUILINO 6 AGUA</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_6_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_6_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_6_luz">
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_6_luz">INQUILINO 6 LUZ</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_6_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_6_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOQUE DE PRORRATEO (Se muestra solo si hay Agua Compartida) -->
+                    <div id="bloque_prorrateo" class="bg-blue-50 p-6 rounded-2xl shadow-sm border border-blue-200 space-y-4" style="display: none;">
+                        <h2 class="text-md font-black text-blue-800 uppercase tracking-wide">
+                            Distribución de Agua Compartida
+                        </h2>
+                        <p class="text-xs text-blue-600 mb-2">Ingresa el valor histórico/de referencia para el primer integrante. El valor del otro se calculará automáticamente restándolo del Total Compartido Redondeado. Mientras este modo esté activo, el agua individual de ambos queda bloqueada y fuera de las boletas.</p>
+                        
+                        <div class="bg-white p-3 rounded-lg border border-blue-100 mb-3 text-center">
+                            <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Ya Redondeado)</span>
+                            <span class="text-2xl font-black text-blue-600" id="prorrateo_total_text"></span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_2">Valor compartido Inq 2 (S/)</label>
+                                <input type="number" id="prorrateo_2" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('2')">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_3">Valor compartido Inq 3 (S/)</label>
+                                <input type="number" id="prorrateo_3" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('3')">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- SECCIÓN 3: BOLETAS INDIVIDUALES (VISIBLES) -->
+            <div class="mt-8 pt-8 border-t-2 border-dashed border-gray-300">
+                <h2 class="text-2xl font-black text-gray-800 text-center mb-6 uppercase tracking-wider">Boletas Individuales</h2>
+                
+                <div class="boletas-container">
+                    <!-- Boleta Slot 1 -->
+                    <div class="boleta-wrapper hidden" id="wrapper-1">
+                        <div class="boleta-card" id="boleta-1">
+                            <div class="boleta-header">
+                                <span>MES: <span class="txt-mes"></span></span>
+                                <h3 id="boleta_nombre_1">INQUILINO 1</h3>
+                            </div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_1"></div></div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_1"></div></div>
+                            <div class="divider"></div>
+                            <div class="boleta-total">
+                                <span>TOTAL A PAGAR</span>
+                                <h2 id="out_total_1"></h2>
+                            </div>
+                            <div class="boleta-detalles" id="detalles_1"></div>
+                        </div>
+                        <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-1', 1)">Descargar Boleta</button>
+                    </div>
+
+                    <!-- Boleta Slot 2 -->
+                    <div class="boleta-wrapper hidden" id="wrapper-2">
+                        <div class="boleta-card" id="boleta-2">
+                            <div class="boleta-header">
+                                <span>MES: <span class="txt-mes"></span></span>
+                                <h3 id="boleta_nombre_2">INQUILINO 2</h3>
+                            </div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_2"></div></div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_2"></div></div>
+                            <div class="divider"></div>
+                            <div class="boleta-total">
+                                <span>TOTAL A PAGAR</span>
+                                <h2 id="out_total_2"></h2>
+                            </div>
+                            <div class="boleta-detalles" id="detalles_2"></div>
+                        </div>
+                        <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-2', 2)">Descargar Boleta</button>
+                    </div>
+
+                    <!-- Boleta Slot 3 -->
+                    <div class="boleta-wrapper hidden" id="wrapper-3">
+                        <div class="boleta-card" id="boleta-3">
+                            <div class="boleta-header">
+                                <span>MES: <span class="txt-mes"></span></span>
+                                <h3 id="boleta_nombre_3">INQUILINO 3</h3>
+                            </div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_3"></div></div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_3"></div></div>
+                            <div class="divider"></div>
+                            <div class="boleta-total">
+                                <span>TOTAL A PAGAR</span>
+                                <h2 id="out_total_3"></h2>
+                            </div>
+                            <div class="boleta-detalles" id="detalles_3"></div>
+                        </div>
+                        <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-3', 3)">Descargar Boleta</button>
+                    </div>
+
+                    <!-- Boleta Slot 4 -->
+                    <div class="boleta-wrapper hidden" id="wrapper-4">
+                        <div class="boleta-card" id="boleta-4">
+                            <div class="boleta-header">
+                                <span>MES: <span class="txt-mes"></span></span>
+                                <h3 id="boleta_nombre_4">INQUILINO 4</h3>
+                            </div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_4"></div></div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_4"></div></div>
+                            <div class="divider"></div>
+                            <div class="boleta-total">
+                                <span>TOTAL A PAGAR</span>
+                                <h2 id="out_total_4"></h2>
+                            </div>
+                            <div class="boleta-detalles" id="detalles_4"></div>
+                        </div>
+                        <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-4', 4)">Descargar Boleta</button>
+                    </div>
+
+                    <!-- Boleta Slot 5 -->
+                    <div class="boleta-wrapper hidden" id="wrapper-5">
+                        <div class="boleta-card" id="boleta-5">
+                            <div class="boleta-header">
+                                <span>MES: <span class="txt-mes"></span></span>
+                                <h3 id="boleta_nombre_5">INQUILINO 5</h3>
+                            </div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_5"></div></div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_5"></div></div>
+                            <div class="divider"></div>
+                            <div class="boleta-total">
+                                <span>TOTAL A PAGAR</span>
+                                <h2 id="out_total_5"></h2>
+                            </div>
+                            <div class="boleta-detalles" id="detalles_5"></div>
+                        </div>
+                        <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-5', 5)">Descargar Boleta</button>
+                    </div>
+
+                    <!-- Boleta Slot 6 -->
+                    <div class="boleta-wrapper hidden" id="wrapper-6">
+                        <div class="boleta-card" id="boleta-6">
+                            <div class="boleta-header">
+                                <span>MES: <span class="txt-mes"></span></span>
+                                <h3 id="boleta_nombre_6">INQUILINO 6</h3>
+                            </div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">💧</span> AGUA</div><div id="out_agua_6"></div></div>
+                            <div class="boleta-row"><div class="icon-text"><span class="icon">⚡</span> LUZ</div><div id="out_luz_6"></div></div>
+                            <div class="divider"></div>
+                            <div class="boleta-total">
+                                <span>TOTAL A PAGAR</span>
+                                <h2 id="out_total_6"></h2>
+                            </div>
+                            <div class="boleta-detalles" id="detalles_6"></div>
+                        </div>
+                        <button type="button" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-wait text-white font-bold py-2 rounded shadow-sm" onclick="descargarBoleta(this, 'boleta-6', 6)">Descargar Boleta</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Plantilla temporal fuera de pantalla para captura PDF/Imagen -->
     <div id="boleta-template-container"></div>
 
     <script>
-        let datosRedondeados = { mariluz: { agua: 0, luz: 0 }, ks_agua: { agua: 0 }, kendra: { agua: 0, luz: 0 }, sonia: { agua: 0, luz: 0 } };
+        let datosRedondeados = { i1: {agua: 0, luz: 0}, i2: {agua: 0, luz: 0}, i3: {agua: 0, luz: 0}, i4: {agua: 0, luz: 0}, i5: {agua: 0, luz: 0}, i6: {agua: 0, luz: 0}, comp: {agua: 0} };
         let comparteAgua = false;
         let ultimaFuenteProrrateo = null;
         let ultimoTotalCompartidoRedondeado = null;
@@ -320,95 +514,153 @@
 
         const STORAGE_AGUA_SYNC = 'recibos_cayran_agua_sync_v1';
         const STORAGE_LUZ_SYNC = 'recibos_cayran_luz_sync_v1';
-        const STORAGE_REDONDEOS_SESION = 'recibos_cayran_redondeos_sesion_v1';
-        let timerAutosaveRedondeos = null;
-        let restaurandoSesionLocal = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[type=number]').forEach(input => { input.addEventListener('wheel', e => e.preventDefault(), { passive: false }); });
+            evaluarVisibilidadGeneral();
+        });
+
+        // Modales
+        let currentConfirmAction = null;
+        function showConfirmModal(msg, actionCallback) {
+            document.getElementById('globalConfirmMsg').textContent = msg;
+            currentConfirmAction = actionCallback;
+            document.getElementById('globalConfirmModal').classList.add('active');
+        }
+        function closeGlobalConfirm() {
+            document.getElementById('globalConfirmModal').classList.remove('active');
+            currentConfirmAction = null;
+        }
+        document.getElementById('globalConfirmBtn').addEventListener('click', () => {
+            if (currentConfirmAction) currentConfirmAction();
+            closeGlobalConfirm();
+        });
+
+        function showAlertModal(msg, type = 'success') {
+            document.getElementById('globalAlertMsg').textContent = msg;
+            const iconDiv = document.getElementById('globalAlertIcon');
+            if (type === 'success') {
+                iconDiv.className = 'custom-modal-icon icon-success';
+                iconDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+            } else if (type === 'error') {
+                iconDiv.className = 'custom-modal-icon icon-warning';
+                iconDiv.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
+            }
+            document.getElementById('globalAlertModal').classList.add('active');
+        }
+        function closeGlobalAlert() {
+            document.getElementById('globalAlertModal').classList.remove('active');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'invisible');
+            toast.classList.add('opacity-100', 'visible');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'visible');
+                toast.classList.add('opacity-0', 'invisible');
+            }, 3000);
+        }
+
+        function valStr(id) { return document.getElementById(id)?.value.trim() || ''; }
+        function getVal(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+
+        function evaluarVisibilidadGeneral() {
+            let tieneDatos = false;
+
+            for (let i = 1; i <= 6; i++) {
+                const hasAgua = getVal(`agua_${i}`) > 0 || getVal(`m3_${i}`) > 0 || valStr(`fecha_inicio_${i}_agua`) !== '' || valStr(`fecha_fin_${i}_agua`) !== '';
+                const hasLuz = getVal(`luz_${i}`) > 0 || getVal(`kwh_${i}`) > 0 || valStr(`fecha_inicio_${i}_luz`) !== '' || valStr(`fecha_fin_${i}_luz`) !== '';
+                const isVisible = hasAgua || hasLuz;
+
+                document.getElementById(`slot_importes_${i}`).classList.toggle('hidden', !isVisible);
+                document.getElementById(`slot_fechas_${i}_agua`).classList.toggle('hidden', !isVisible);
+                document.getElementById(`slot_fechas_${i}_luz`).classList.toggle('hidden', !isVisible);
+                
+                if (isVisible) tieneDatos = true;
+            }
+
+            const hasComp = getVal('agua_comp') > 0 || getVal('m3_comp') > 0 || valStr('fecha_inicio_comp_agua') !== '' || valStr('fecha_fin_comp_agua') !== '';
+            document.getElementById('slot_importes_comp').classList.toggle('hidden', !hasComp);
+            document.getElementById('slot_fechas_comp').classList.toggle('hidden', !hasComp);
+            if (hasComp) tieneDatos = true;
+
+            if (valStr('mes_cobro') !== '') tieneDatos = true;
+
+            const mainArea = document.getElementById('main_content_area');
+            const controlsCard = document.getElementById('controls_card');
+
+            if (tieneDatos) {
+                mainArea.classList.remove('hidden');
+                controlsCard.classList.remove('m-auto');
+                controlsCard.classList.add('mt-6'); 
+            } else {
+                mainArea.classList.add('hidden');
+                controlsCard.classList.add('m-auto');
+                controlsCard.classList.remove('mt-6');
+            }
+        }
+
+        function borrarTodosLosDatos() {
+            showConfirmModal("¿Desea borrar los datos?", () => {
+                document.querySelectorAll('input').forEach(el => {
+                    if (el.type === 'number' || el.type === 'text' || el.type === 'date') el.value = '';
+                    else if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+                });
+                
+                datosRedondeados = { i1: {agua: 0, luz: 0}, i2: {agua: 0, luz: 0}, i3: {agua: 0, luz: 0}, i4: {agua: 0, luz: 0}, i5: {agua: 0, luz: 0}, i6: {agua: 0, luz: 0}, comp: {agua: 0} };
+                comparteAgua = false;
+                ultimaFuenteProrrateo = null;
+                ultimoTotalCompartidoRedondeado = null;
+                mesImportadoAgua = '';
+                mesImportadoLuz = '';
+                
+                actualizarNombresGlobales(1, "INQUILINO 1");
+                actualizarNombresGlobales(2, "INQUILINO 2");
+                actualizarNombresGlobales(3, "INQUILINO 3");
+                actualizarNombresGlobales(4, "INQUILINO 4");
+                actualizarNombresGlobales(5, "INQUILINO 5");
+                actualizarNombresGlobales(6, "INQUILINO 6");
+                actualizarNombresGlobales('comp', "INQUILINO 2 + INQUILINO 3");
+
+                procesarCalculosGlobales();
+                evaluarVisibilidadGeneral();
+            });
+        }
+
+        function actualizarAvisosProrrateo() {
+            const nom2 = document.getElementById('label_nombre_2').innerText;
+            const nom3 = document.getElementById('label_nombre_3').innerText;
+            const msj = `BLOQUEADO: se está usando el reparto de ${nom2} + ${nom3}.`;
+            const aviso2 = document.getElementById('aviso_agua_2');
+            if (aviso2) aviso2.innerText = msj;
+            const aviso3 = document.getElementById('aviso_agua_3');
+            if (aviso3) aviso3.innerText = msj;
+        }
 
         function actualizarNombresGlobales(slot, nombre) {
             if (!nombre) return;
             const nomUpper = nombre.toUpperCase();
-            if (slot === 1) {
-                document.getElementById('label_nombre_1').innerText = nomUpper;
-                document.getElementById('label_fechas_1').innerText = nomUpper + " AGUA";
-                document.getElementById('label_fechas_1_luz').innerText = nomUpper + " LUZ";
-                document.getElementById('boleta_nombre_1').innerText = nomUpper;
-            } else if (slot === 2) {
-                document.getElementById('label_nombre_2').innerText = nomUpper;
-                document.getElementById('label_fechas_2').innerText = nomUpper + " AGUA (Individual)";
-                document.getElementById('label_fechas_2_luz').innerText = nomUpper + " LUZ";
-                document.getElementById('boleta_nombre_2').innerText = nomUpper;
-                document.getElementById('lbl_prorrateo_kendra').innerText = `Valor compartido ${nomUpper} (S/)`;
+            if (slot >= 1 && slot <= 6) {
+                document.getElementById(`label_nombre_${slot}`).innerText = nomUpper;
+                let suffixAgua = (slot === 2 || slot === 3) ? " AGUA (Individual)" : " AGUA";
+                document.getElementById(`label_fechas_${slot}_agua`).innerText = nomUpper + suffixAgua;
+                document.getElementById(`label_fechas_${slot}_luz`).innerText = nomUpper + " LUZ";
+                document.getElementById(`boleta_nombre_${slot}`).innerText = nomUpper;
                 
-                const avisoK = document.getElementById('aviso_agua_kendra');
-                if (avisoK) avisoK.innerText = `BLOQUEADO: se está usando el reparto de ${nomUpper} + ${document.getElementById('label_nombre_3').innerText}.`;
-                const avisoS = document.getElementById('aviso_agua_sonia');
-                if (avisoS) avisoS.innerText = `BLOQUEADO: se está usando el reparto de ${nomUpper} + ${document.getElementById('label_nombre_3').innerText}.`;
-            } else if (slot === 3) {
-                document.getElementById('label_nombre_3').innerText = nomUpper;
-                document.getElementById('label_fechas_3').innerText = nomUpper + " AGUA (Individual)";
-                document.getElementById('label_fechas_3_luz').innerText = nomUpper + " LUZ";
-                document.getElementById('boleta_nombre_3').innerText = nomUpper;
-                document.getElementById('lbl_prorrateo_sonia').innerText = `Valor compartido ${nomUpper} (S/)`;
-                
-                const avisoK = document.getElementById('aviso_agua_kendra');
-                if (avisoK) avisoK.innerText = `BLOQUEADO: se está usando el reparto de ${document.getElementById('label_nombre_2').innerText} + ${nomUpper}.`;
-                const avisoS = document.getElementById('aviso_agua_sonia');
-                if (avisoS) avisoS.innerText = `BLOQUEADO: se está usando el reparto de ${document.getElementById('label_nombre_2').innerText} + ${nomUpper}.`;
+                if (slot === 2) {
+                    document.getElementById('lbl_prorrateo_2').innerText = `Valor compartido ${nomUpper} (S/)`;
+                    actualizarAvisosProrrateo();
+                } else if (slot === 3) {
+                    document.getElementById('lbl_prorrateo_3').innerText = `Valor compartido ${nomUpper} (S/)`;
+                    actualizarAvisosProrrateo();
+                }
             } else if (slot === 'comp') {
                 const baseName = nomUpper.replace('(AGUA COMPARTIDA)', '').trim();
-                document.getElementById('label_nombre_compartida').innerText = baseName + ' (Agua Compartida)';
-                document.getElementById('label_fechas_comp').innerText = baseName + ' AGUA (Compartida)';
+                document.getElementById('label_nombre_comp').innerText = baseName + ' (Agua Compartida)';
+                document.getElementById('label_fechas_comp_agua').innerText = baseName + ' AGUA (Compartida)';
             }
-        }
-
-        function restaurarSesionLocalRedondeos() {
-            try {
-                const raw = localStorage.getItem(STORAGE_REDONDEOS_SESION);
-                if (!raw) return false;
-                const datos = JSON.parse(raw);
-                if (!datos || datos.tipo !== 'CUENTA_FINAL_INQUILINOS_SESSION' || !datos.campos) return false;
-
-                restaurandoSesionLocal = true;
-                Object.entries(datos.campos).forEach(([id, valor]) => {
-                    const el = document.getElementById(id);
-                    if (!el || el.type === 'file') return;
-                    if (el.type === 'checkbox' || el.type === 'radio') el.checked = Boolean(valor);
-                    else el.value = valor ?? '';
-                });
-
-                if (datos.estado && datos.estado.nombres) {
-                    actualizarNombresGlobales(1, datos.estado.nombres.n1);
-                    actualizarNombresGlobales(2, datos.estado.nombres.n2);
-                    actualizarNombresGlobales(3, datos.estado.nombres.n3);
-                    actualizarNombresGlobales('comp', datos.estado.nombres.nComp.replace(' (AGUA COMPARTIDA)', ''));
-                }
-
-                ultimaFuenteProrrateo = datos.estado && ['kendra', 'sonia'].includes(datos.estado.ultimaFuenteProrrateo)
-                    ? datos.estado.ultimaFuenteProrrateo : null;
-                mesImportadoAgua = datos.estado ? String(datos.estado.mesImportadoAgua || '').trim().toUpperCase() : '';
-                mesImportadoLuz = datos.estado ? String(datos.estado.mesImportadoLuz || '').trim().toUpperCase() : '';
-                return true;
-            } catch (error) {
-                console.warn('No se pudo restaurar la sesión local de Redondeos:', error);
-                return false;
-            } finally {
-                restaurandoSesionLocal = false;
-            }
-        }
-
-        function guardarSesionLocalRedondeos() {
-            if (restaurandoSesionLocal) return;
-            try {
-                const datos = obtenerDatosSesion();
-                localStorage.setItem(STORAGE_REDONDEOS_SESION, JSON.stringify(datos));
-            } catch (error) {
-                console.warn('No se pudo guardar automáticamente Redondeos:', error);
-            }
-        }
-
-        function programarGuardarSesionLocal() {
-            clearTimeout(timerAutosaveRedondeos);
-            timerAutosaveRedondeos = setTimeout(guardarSesionLocalRedondeos, 250);
         }
 
         function aplicarAguaSincronizada(datos) {
@@ -426,33 +678,26 @@
                 const fi = inq.fecha_inicio || '';
                 const ff = inq.fecha_fin || '';
 
-                if (String(inq.id_interno) === '1' || nombreLower.includes('mariluz')) {
-                    document.getElementById('agua_mariluz').value = monto;
-                    document.getElementById('m3_mariluz').value = m3;
-                    document.getElementById('fecha_inicio_mariluz').value = fi;
-                    document.getElementById('fecha_fin_mariluz').value = ff;
-                    actualizarNombresGlobales(1, inq.nombre);
-                    importados++;
-                } else if ((String(inq.id_interno) === '2' && (nombreLower.includes(' y ') || nombreLower.includes('+'))) || (nombreLower.includes('kendra') && nombreLower.includes('sonia'))) {
-                    document.getElementById('agua_compartida').value = monto;
-                    document.getElementById('m3_compartida').value = m3;
-                    document.getElementById('fecha_inicio_ks_agua').value = fi;
-                    document.getElementById('fecha_fin_ks_agua').value = ff;
-                    actualizarNombresGlobales('comp', inq.nombre);
-                    importados++;
-                } else if (String(inq.id_interno) === '2' || nombreLower.includes('kendra')) {
-                    document.getElementById('agua_kendra').value = monto;
-                    document.getElementById('m3_kendra').value = m3;
-                    document.getElementById('fecha_inicio_kendra_agua').value = fi;
-                    document.getElementById('fecha_fin_kendra_agua').value = ff;
-                    actualizarNombresGlobales(2, inq.nombre);
-                    importados++;
-                } else if (String(inq.id_interno) === '3' || nombreLower.includes('sonia')) {
-                    document.getElementById('agua_sonia').value = monto;
-                    document.getElementById('m3_sonia').value = m3;
-                    document.getElementById('fecha_inicio_sonia_agua').value = fi;
-                    document.getElementById('fecha_fin_sonia_agua').value = ff;
-                    actualizarNombresGlobales(3, inq.nombre);
+                let slot = parseInt(inq.id_interno);
+                if ((slot === 2 && (nombreLower.includes(' y ') || nombreLower.includes('+'))) || (nombreLower.includes('kendra') && nombreLower.includes('sonia'))) {
+                    slot = 'comp';
+                } else if (slot === 1 || nombreLower.includes('mariluz')) { slot = 1; } 
+                  else if (slot === 2 || nombreLower.includes('kendra')) { slot = 2; } 
+                  else if (slot === 3 || nombreLower.includes('sonia')) { slot = 3; }
+
+                if (slot) {
+                    if (slot === 'comp') {
+                        document.getElementById('agua_comp').value = monto;
+                        document.getElementById('m3_comp').value = m3;
+                        document.getElementById('fecha_inicio_comp_agua').value = fi;
+                        document.getElementById('fecha_fin_comp_agua').value = ff;
+                    } else {
+                        document.getElementById(`agua_${slot}`).value = monto;
+                        document.getElementById(`m3_${slot}`).value = m3;
+                        document.getElementById(`fecha_inicio_${slot}_agua`).value = fi;
+                        document.getElementById(`fecha_fin_${slot}_agua`).value = ff;
+                    }
+                    actualizarNombresGlobales(slot, inq.nombre);
                     importados++;
                 }
             });
@@ -474,26 +719,17 @@
                 const fi = inq.fecha_inicio || '';
                 const ff = inq.fecha_fin || '';
 
-                if (String(inq.id_interno) === '2' || nombreLower.includes('mariluz')) {
-                    document.getElementById('luz_mariluz').value = monto;
-                    document.getElementById('kwh_mariluz').value = kwh;
-                    document.getElementById('fecha_inicio_mariluz_luz').value = fi;
-                    document.getElementById('fecha_fin_mariluz_luz').value = ff;
-                    actualizarNombresGlobales(1, inq.nombre);
-                    importados++;
-                } else if (String(inq.id_interno) === '3' || nombreLower.includes('kendra')) {
-                    document.getElementById('luz_kendra').value = monto;
-                    document.getElementById('kwh_kendra').value = kwh;
-                    document.getElementById('fecha_inicio_kendra_luz').value = fi;
-                    document.getElementById('fecha_fin_kendra_luz').value = ff;
-                    actualizarNombresGlobales(2, inq.nombre);
-                    importados++;
-                } else if (String(inq.id_interno) === '4' || nombreLower.includes('sonia')) {
-                    document.getElementById('luz_sonia').value = monto;
-                    document.getElementById('kwh_sonia').value = kwh;
-                    document.getElementById('fecha_inicio_sonia_luz').value = fi;
-                    document.getElementById('fecha_fin_sonia_luz').value = ff;
-                    actualizarNombresGlobales(3, inq.nombre);
+                let slot = parseInt(inq.id_interno) - 1; 
+                if (nombreLower.includes('mariluz')) slot = 1;
+                else if (nombreLower.includes('kendra')) slot = 2;
+                else if (nombreLower.includes('sonia')) slot = 3;
+
+                if (slot >= 1 && slot <= 6) {
+                    document.getElementById(`luz_${slot}`).value = monto;
+                    document.getElementById(`kwh_${slot}`).value = kwh;
+                    document.getElementById(`fecha_inicio_${slot}_luz`).value = fi;
+                    document.getElementById(`fecha_fin_${slot}_luz`).value = ff;
+                    actualizarNombresGlobales(slot, inq.nombre);
                     importados++;
                 }
             });
@@ -501,55 +737,21 @@
         }
 
         function cargarDatosSincronizados() {
-            let agua = null;
-            let luz = null;
+            let agua = null; let luz = null;
             try { agua = JSON.parse(localStorage.getItem(STORAGE_AGUA_SYNC) || 'null'); } catch (_) {}
             try { luz = JSON.parse(localStorage.getItem(STORAGE_LUZ_SYNC) || 'null'); } catch (_) {}
-
             if (agua) mesImportadoAgua = '';
             if (luz) mesImportadoLuz = '';
-
             const nAgua = agua ? aplicarAguaSincronizada(agua) : 0;
             const nLuz = luz ? aplicarLuzSincronizada(luz) : 0;
-
-            const estado = document.getElementById('sync_status');
-            if (estado) {
-                if (nAgua > 0 && nLuz > 0) {
-                    estado.textContent = `✓ Sincronizado automáticamente: AGUA (${nAgua}) + LUZ (${nLuz}). Los botones JSON quedan como respaldo.`;
-                    estado.className = 'sm:col-span-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-center';
-                } else if (nAgua > 0 || nLuz > 0) {
-                    estado.textContent = `Sincronización parcial: ${nAgua > 0 ? 'AGUA disponible' : 'falta AGUA'} · ${nLuz > 0 ? 'LUZ disponible' : 'falta LUZ'}.`;
-                    estado.className = 'sm:col-span-2 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-center';
-                } else {
-                    estado.textContent = 'Sin datos sincronizados todavía. Completa Agua y Luz; también puedes usar los JSON de respaldo.';
-                    estado.className = 'sm:col-span-2 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-center';
-                }
-            }
             return { agua: nAgua, luz: nLuz };
         }
 
-        function instalarAutosaveRedondeos() {
-            document.addEventListener('input', programarGuardarSesionLocal, true);
-            document.addEventListener('change', programarGuardarSesionLocal, true);
-            window.addEventListener('pagehide', guardarSesionLocalRedondeos);
-            window.addEventListener('beforeunload', guardarSesionLocalRedondeos);
-            window.addEventListener('storage', (e) => {
-                if (e.key === STORAGE_AGUA_SYNC || e.key === STORAGE_LUZ_SYNC) {
-                    cargarDatosSincronizados();
-                    procesarCalculosGlobales();
-                    guardarSesionLocalRedondeos();
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('input[type=number]').forEach(input => { input.addEventListener('wheel', e => e.preventDefault(), { passive: false }); });
-            restaurarSesionLocalRedondeos();
+        function sincronizarManual() {
             cargarDatosSincronizados();
             procesarCalculosGlobales();
-            instalarAutosaveRedondeos();
-            guardarSesionLocalRedondeos();
-        });
+            showToast("Datos sincronizados");
+        }
 
         function extraerMesDesdeJson(datos) {
             if (Array.isArray(datos)) {
@@ -565,7 +767,6 @@
                 }
                 return '';
             }
-
             if (datos && typeof datos === 'object') {
                 const m = datos.mes_cobro || datos.mes || (datos.periodo && datos.periodo.mes);
                 return String(m || '').trim().toUpperCase();
@@ -583,11 +784,11 @@
             const servicioActual = esAgua ? 'AGUA' : 'LUZ';
 
             if (otroMes && otroMes !== mesNormalizado) {
-                alert(
+                showAlertModal(
                     `No se importaron los datos de ${servicioActual}.\n\n` +
                     `El JSON de ${servicioActual} corresponde a ${mesNormalizado}, ` +
                     `pero el JSON de ${otroServicio} ya cargado corresponde a ${otroMes}.\n\n` +
-                    `Esto evita mezclar servicios de meses distintos en una misma boleta.`
+                    `Esto evita mezclar servicios de meses distintos en una misma boleta.`, "error"
                 );
                 return false;
             }
@@ -613,7 +814,6 @@
             reader.onload = function(e) {
                 try {
                     const datos = JSON.parse(e.target.result);
-
                     if (!Array.isArray(datos) && datos && datos.tipo && String(datos.tipo).toLowerCase() !== 'agua') {
                         throw new Error('El archivo seleccionado no corresponde a un JSON de AGUA.');
                     }
@@ -623,7 +823,6 @@
                     if (!aplicarMesImportado('agua', mesImportado)) return;
 
                     let importados = 0;
-
                     registros.forEach(inq => {
                         if (!inq || typeof inq !== 'object') return;
                         const nombreLower = (inq.nombre || '').toLowerCase();
@@ -634,46 +833,38 @@
                         const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                         const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
-                        if (String(inq.id_interno) === '1' || nombreLower.includes('mariluz')) {
-                            document.getElementById('agua_mariluz').value = monto;
-                            document.getElementById('m3_mariluz').value = m3;
-                            document.getElementById('fecha_inicio_mariluz').value = fi;
-                            document.getElementById('fecha_fin_mariluz').value = ff;
-                            actualizarNombresGlobales(1, inq.nombre);
-                            importados++;
-                        } else if ((String(inq.id_interno) === '2' && (nombreLower.includes(' y ') || nombreLower.includes('+'))) || (nombreLower.includes('kendra') && nombreLower.includes('sonia'))) {
-                            document.getElementById('agua_compartida').value = monto;
-                            document.getElementById('m3_compartida').value = m3;
-                            document.getElementById('fecha_inicio_ks_agua').value = fi;
-                            document.getElementById('fecha_fin_ks_agua').value = ff;
-                            actualizarNombresGlobales('comp', inq.nombre);
-                            importados++;
-                        } else if (String(inq.id_interno) === '2' || nombreLower.includes('kendra')) {
-                            document.getElementById('agua_kendra').value = monto;
-                            document.getElementById('m3_kendra').value = m3;
-                            document.getElementById('fecha_inicio_kendra_agua').value = fi;
-                            document.getElementById('fecha_fin_kendra_agua').value = ff;
-                            actualizarNombresGlobales(2, inq.nombre);
-                            importados++;
-                        } else if (String(inq.id_interno) === '3' || nombreLower.includes('sonia')) {
-                            document.getElementById('agua_sonia').value = monto;
-                            document.getElementById('m3_sonia').value = m3;
-                            document.getElementById('fecha_inicio_sonia_agua').value = fi;
-                            document.getElementById('fecha_fin_sonia_agua').value = ff;
-                            actualizarNombresGlobales(3, inq.nombre);
+                        let slot = parseInt(inq.id_interno);
+                        if ((slot === 2 && (nombreLower.includes(' y ') || nombreLower.includes('+'))) || (nombreLower.includes('kendra') && nombreLower.includes('sonia'))) {
+                            slot = 'comp';
+                        } else if (slot === 1 || nombreLower.includes('mariluz')) { slot = 1; } 
+                          else if (slot === 2 || nombreLower.includes('kendra')) { slot = 2; } 
+                          else if (slot === 3 || nombreLower.includes('sonia')) { slot = 3; }
+
+                        if (slot) {
+                            if (slot === 'comp') {
+                                document.getElementById('agua_comp').value = monto;
+                                document.getElementById('m3_comp').value = m3;
+                                document.getElementById('fecha_inicio_comp_agua').value = fi;
+                                document.getElementById('fecha_fin_comp_agua').value = ff;
+                            } else {
+                                document.getElementById(`agua_${slot}`).value = monto;
+                                document.getElementById(`m3_${slot}`).value = m3;
+                                document.getElementById(`fecha_inicio_${slot}_agua`).value = fi;
+                                document.getElementById(`fecha_fin_${slot}_agua`).value = ff;
+                            }
+                            actualizarNombresGlobales(slot, inq.nombre);
                             importados++;
                         }
                     });
 
                     if (importados > 0) {
-                        const detalleMes = mesImportado ? ` (${mesImportado})` : '';
-                        alert(`¡Los datos de AGUA${detalleMes} fueron importados exitosamente!`);
+                        showAlertModal(`Los datos de agua han sido importados correctamente`, "success");
                         procesarCalculosGlobales();
                     } else {
-                        alert('El archivo se leyó, pero no se encontraron inquilinos válidos.');
+                        showAlertModal('El archivo se leyó, pero no se encontraron inquilinos válidos.', "error");
                     }
                 } catch (err) {
-                    alert('Error al procesar JSON de Agua:\n' + err.message);
+                    showAlertModal('Error al procesar JSON de Agua:\n' + err.message, "error");
                 } finally {
                     event.target.value = '';
                 }
@@ -689,7 +880,6 @@
             reader.onload = function(e) {
                 try {
                     const datos = JSON.parse(e.target.result);
-
                     if (!Array.isArray(datos) && datos && datos.tipo && String(datos.tipo).toLowerCase() !== 'luz') {
                         throw new Error('El archivo seleccionado no corresponde a un JSON de LUZ.');
                     }
@@ -699,7 +889,6 @@
                     if (!aplicarMesImportado('luz', mesImportado)) return;
 
                     let importados = 0;
-
                     registros.forEach(inq => {
                         if (!inq || typeof inq !== 'object') return;
                         const nombreLower = (inq.nombre || '').toLowerCase();
@@ -710,39 +899,29 @@
                         const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                         const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
-                        if (String(inq.id_interno) === '2' || nombreLower.includes('mariluz')) {
-                            document.getElementById('luz_mariluz').value = monto;
-                            document.getElementById('kwh_mariluz').value = kwh;
-                            document.getElementById('fecha_inicio_mariluz_luz').value = fi;
-                            document.getElementById('fecha_fin_mariluz_luz').value = ff;
-                            actualizarNombresGlobales(1, inq.nombre);
-                            importados++;
-                        } else if (String(inq.id_interno) === '3' || nombreLower.includes('kendra')) {
-                            document.getElementById('luz_kendra').value = monto;
-                            document.getElementById('kwh_kendra').value = kwh;
-                            document.getElementById('fecha_inicio_kendra_luz').value = fi;
-                            document.getElementById('fecha_fin_kendra_luz').value = ff;
-                            actualizarNombresGlobales(2, inq.nombre);
-                            importados++;
-                        } else if (String(inq.id_interno) === '4' || nombreLower.includes('sonia')) {
-                            document.getElementById('luz_sonia').value = monto;
-                            document.getElementById('kwh_sonia').value = kwh;
-                            document.getElementById('fecha_inicio_sonia_luz').value = fi;
-                            document.getElementById('fecha_fin_sonia_luz').value = ff;
-                            actualizarNombresGlobales(3, inq.nombre);
+                        let slot = parseInt(inq.id_interno) - 1; 
+                        if (nombreLower.includes('mariluz')) slot = 1;
+                        else if (nombreLower.includes('kendra')) slot = 2;
+                        else if (nombreLower.includes('sonia')) slot = 3;
+
+                        if (slot >= 1 && slot <= 6) {
+                            document.getElementById(`luz_${slot}`).value = monto;
+                            document.getElementById(`kwh_${slot}`).value = kwh;
+                            document.getElementById(`fecha_inicio_${slot}_luz`).value = fi;
+                            document.getElementById(`fecha_fin_${slot}_luz`).value = ff;
+                            actualizarNombresGlobales(slot, inq.nombre);
                             importados++;
                         }
                     });
 
                     if (importados > 0) {
-                        const detalleMes = mesImportado ? ` (${mesImportado})` : '';
-                        alert(`¡Los datos de LUZ${detalleMes} fueron importados exitosamente!`);
+                        showAlertModal(`Los datos de luz han sido importados correctamente`, "success");
                         procesarCalculosGlobales();
                     } else {
-                        alert('El archivo se leyó, pero no se encontraron inquilinos válidos.');
+                        showAlertModal('El archivo se leyó, pero no se encontraron inquilinos válidos.', "error");
                     }
                 } catch (err) {
-                    alert('Error al procesar JSON de Luz:\n' + err.message);
+                    showAlertModal('Error al procesar JSON de Luz:\n' + err.message, "error");
                 } finally {
                     event.target.value = '';
                 }
@@ -779,8 +958,8 @@
 
         function actualizarModoAguaCompartida(activo) {
             const idsIndividuales = [
-                'agua_kendra', 'm3_kendra', 'fecha_inicio_kendra_agua', 'fecha_fin_kendra_agua',
-                'agua_sonia', 'm3_sonia', 'fecha_inicio_sonia_agua', 'fecha_fin_sonia_agua'
+                'agua_2', 'm3_2', 'fecha_inicio_2_agua', 'fecha_fin_2_agua',
+                'agua_3', 'm3_3', 'fecha_inicio_3_agua', 'fecha_fin_3_agua'
             ];
 
             idsIndividuales.forEach(id => {
@@ -793,85 +972,79 @@
                 el.classList.toggle('opacity-70', activo);
             });
 
-            document.getElementById('aviso_agua_kendra').classList.toggle('hidden', !activo);
-            document.getElementById('aviso_agua_sonia').classList.toggle('hidden', !activo);
+            const aviso2 = document.getElementById('aviso_agua_2');
+            if(aviso2) aviso2.classList.toggle('hidden', !activo);
+            const aviso3 = document.getElementById('aviso_agua_3');
+            if(aviso3) aviso3.classList.toggle('hidden', !activo);
         }
 
         function procesarCalculosGlobales() {
-            let aguaMariluz = parseFloat(document.getElementById('agua_mariluz').value) || 0;
-            let luzMariluz = parseFloat(document.getElementById('luz_mariluz').value) || 0;
-            let aguaKS = parseFloat(document.getElementById('agua_compartida').value) || 0;
-            let luzKendra = parseFloat(document.getElementById('luz_kendra').value) || 0;
-            let luzSonia = parseFloat(document.getElementById('luz_sonia').value) || 0;
-
+            let aguaKS = parseFloat(document.getElementById('agua_comp').value) || 0;
             comparteAgua = (aguaKS > 0);
             actualizarModoAguaCompartida(comparteAgua);
 
-            let aguaKendra = comparteAgua ? 0 : (parseFloat(document.getElementById('agua_kendra').value) || 0);
-            let aguaSonia = comparteAgua ? 0 : (parseFloat(document.getElementById('agua_sonia').value) || 0);
+            let arrayInqRedondeo = [];
+            datosRedondeados = { i1: {agua:0, luz:0}, i2: {agua:0, luz:0}, i3: {agua:0, luz:0}, i4: {agua:0, luz:0}, i5: {agua:0, luz:0}, i6: {agua:0, luz:0}, comp: {agua:0} };
 
-            datosRedondeados = {
-                mariluz: { agua: 0, luz: 0 },
-                ks_agua: { agua: 0 },
-                kendra: { agua: 0, luz: 0 },
-                sonia: { agua: 0, luz: 0 }
-            };
+            for (let i = 1; i <= 6; i++) {
+                let agua = parseFloat(document.getElementById(`agua_${i}`).value) || 0;
+                let luz = parseFloat(document.getElementById(`luz_${i}`).value) || 0;
+                if (comparteAgua && (i === 2 || i === 3)) agua = 0;
 
-            let nom1 = document.getElementById('label_nombre_1').innerText;
-            let nom2 = document.getElementById('label_nombre_2').innerText;
-            let nom3 = document.getElementById('label_nombre_3').innerText;
-            let nomComp = document.getElementById('label_nombre_compartida').innerText;
+                let m3 = document.getElementById(`m3_${i}`).value;
+                let kwh = document.getElementById(`kwh_${i}`).value;
+                if (comparteAgua && (i === 2 || i === 3)) m3 = '';
 
-            let inquilinos = [
-                { id: 'mariluz', nombre: nom1, agua: aguaMariluz, luz: luzMariluz, exacto: aguaMariluz + luzMariluz, m3: document.getElementById('m3_mariluz').value, kwh: document.getElementById('kwh_mariluz').value },
-                { id: 'ks_agua', nombre: nomComp, agua: aguaKS, luz: null, exacto: aguaKS, m3: document.getElementById('m3_compartida').value, kwh: '' },
-                { id: 'kendra', nombre: nom2, agua: aguaKendra, luz: luzKendra, exacto: aguaKendra + luzKendra, m3: comparteAgua ? '' : document.getElementById('m3_kendra').value, kwh: document.getElementById('kwh_kendra').value },
-                { id: 'sonia', nombre: nom3, agua: aguaSonia, luz: luzSonia, exacto: aguaSonia + luzSonia, m3: comparteAgua ? '' : document.getElementById('m3_sonia').value, kwh: document.getElementById('kwh_sonia').value }
-            ];
+                let nombre = document.getElementById(`label_nombre_${i}`).innerText;
 
-            let inquilinosFiltrados = inquilinos.filter(inq => inq.exacto > 0);
+                arrayInqRedondeo.push({ id: `i${i}`, nombre: nombre, agua: agua, luz: luz, exacto: agua + luz, m3: m3, kwh: kwh });
+            }
+
+            arrayInqRedondeo.push({
+                id: 'comp', nombre: document.getElementById('label_nombre_comp').innerText, agua: aguaKS, luz: null, exacto: aguaKS, m3: document.getElementById('m3_comp').value, kwh: ''
+            });
+
+            let inquilinosFiltrados = arrayInqRedondeo.filter(inq => inq.exacto > 0);
             calcularRedondeo(inquilinosFiltrados);
             
             inquilinosFiltrados.forEach(inq => {
-                if (inq.id === 'mariluz') datosRedondeados.mariluz = { agua: inq.aguaFinal || 0, luz: inq.luzFinal || 0 };
-                if (inq.id === 'ks_agua') datosRedondeados.ks_agua = { agua: inq.aguaFinal || 0 };
-                if (inq.id === 'kendra') datosRedondeados.kendra = { agua: inq.aguaFinal || 0, luz: inq.luzFinal || 0 };
-                if (inq.id === 'sonia') datosRedondeados.sonia = { agua: inq.aguaFinal || 0, luz: inq.luzFinal || 0 };
+                datosRedondeados[inq.id] = { agua: inq.aguaFinal || 0, luz: inq.luzFinal || 0 };
             });
 
             if (comparteAgua) {
                 document.getElementById('bloque_prorrateo').style.display = 'block';
-                const totalCompartido = datosRedondeados.ks_agua.agua;
+                const totalCompartido = datosRedondeados.comp.agua;
                 document.getElementById('prorrateo_total_text').innerText = `S/ ${totalCompartido}`;
 
                 if (ultimoTotalCompartidoRedondeado !== totalCompartido) {
                     if (ultimaFuenteProrrateo) {
                         calcularProrrateo(ultimaFuenteProrrateo, true);
                     } else {
-                        document.getElementById('prorrateo_kendra').value = '';
-                        document.getElementById('prorrateo_sonia').value = '';
+                        document.getElementById('prorrateo_2').value = '';
+                        document.getElementById('prorrateo_3').value = '';
                     }
                     ultimoTotalCompartidoRedondeado = totalCompartido;
                 }
             } else {
                 document.getElementById('bloque_prorrateo').style.display = 'none';
-                document.getElementById('prorrateo_kendra').value = '';
-                document.getElementById('prorrateo_sonia').value = '';
+                document.getElementById('prorrateo_2').value = '';
+                document.getElementById('prorrateo_3').value = '';
                 ultimaFuenteProrrateo = null;
                 ultimoTotalCompartidoRedondeado = null;
             }
 
             generarBoletas();
+            evaluarVisibilidadGeneral();
         }
 
         function calcularProrrateo(fuente, autoRun = false) {
             if (!comparteAgua) return;
 
-            const totalDistribuir = datosRedondeados.ks_agua.agua;
-            const valK = document.getElementById('prorrateo_kendra');
-            const valS = document.getElementById('prorrateo_sonia');
+            const totalDistribuir = datosRedondeados.comp.agua;
+            const valK = document.getElementById('prorrateo_2');
+            const valS = document.getElementById('prorrateo_3');
 
-            if (fuente === 'kendra') {
+            if (fuente === '2') {
                 if (valK.value === '') {
                     valS.value = '';
                     ultimaFuenteProrrateo = null;
@@ -880,9 +1053,9 @@
                     k = Math.max(0, Math.min(k, totalDistribuir));
                     valK.value = k;
                     valS.value = totalDistribuir - k;
-                    ultimaFuenteProrrateo = 'kendra';
+                    ultimaFuenteProrrateo = '2';
                 }
-            } else if (fuente === 'sonia') {
+            } else if (fuente === '3') {
                 if (valS.value === '') {
                     valK.value = '';
                     ultimaFuenteProrrateo = null;
@@ -891,7 +1064,7 @@
                     s = Math.max(0, Math.min(s, totalDistribuir));
                     valS.value = s;
                     valK.value = totalDistribuir - s;
-                    ultimaFuenteProrrateo = 'sonia';
+                    ultimaFuenteProrrateo = '3';
                 }
             }
 
@@ -938,59 +1111,32 @@
             let mes = valor('mes_cobro').trim().toUpperCase();
             Array.from(document.getElementsByClassName('txt-mes')).forEach(el => el.innerText = mes);
 
-            // SLOT 1
-            let aguaM = datosRedondeados.mariluz.agua; let luzM = datosRedondeados.mariluz.luz;
-            const hayAguaM = tieneValor('agua_mariluz') || tieneValor('m3_mariluz') || tieneValor('fecha_inicio_mariluz') || tieneValor('fecha_fin_mariluz');
-            const hayLuzM = tieneValor('luz_mariluz') || tieneValor('kwh_mariluz') || tieneValor('fecha_inicio_mariluz_luz') || tieneValor('fecha_fin_mariluz_luz');
-            
-            document.getElementById('wrapper-mariluz').style.display = (hayAguaM || hayLuzM) ? 'flex' : 'none';
+            for (let i = 1; i <= 6; i++) {
+                let esCompartidoItem = comparteAgua && (i === 2 || i === 3);
+                let agua = esCompartidoItem ? (parseInt(valor(`prorrateo_${i}`)) || 0) : datosRedondeados[`i${i}`].agua;
+                let luz = datosRedondeados[`i${i}`].luz;
+                
+                let fi_agua = esCompartidoItem ? valor('fecha_inicio_comp_agua') : valor(`fecha_inicio_${i}_agua`);
+                let ff_agua = esCompartidoItem ? valor('fecha_fin_comp_agua') : valor(`fecha_fin_${i}_agua`);
+                
+                const hayAgua = esCompartidoItem 
+                    ? (tieneValor('agua_comp') || tieneValor('m3_comp') || tieneValor('fecha_inicio_comp_agua') || tieneValor('fecha_fin_comp_agua'))
+                    : (tieneValor(`agua_${i}`) || tieneValor(`m3_${i}`) || tieneValor(`fecha_inicio_${i}_agua`) || tieneValor(`fecha_fin_${i}_agua`));
+                
+                const hayLuz = tieneValor(`luz_${i}`) || tieneValor(`kwh_${i}`) || tieneValor(`fecha_inicio_${i}_luz`) || tieneValor(`fecha_fin_${i}_luz`);
 
-            ponerImporte('out_agua_mariluz', hayAguaM, aguaM);
-            ponerImporte('out_luz_mariluz', hayLuzM, luzM);
-            ponerTotal('out_total_mariluz', hayAguaM || hayLuzM, (hayAguaM ? aguaM : 0) + (hayLuzM ? luzM : 0));
-            document.getElementById('detalles_mariluz').innerHTML = 
-                (hayAguaM ? generarFilaDetalle('AGUA', valor('fecha_inicio_mariluz'), valor('fecha_fin_mariluz'), valor('m3_mariluz'), 'M3') : '') + 
-                (hayLuzM ? generarFilaDetalle('LUZ', valor('fecha_inicio_mariluz_luz'), valor('fecha_fin_mariluz_luz'), valor('kwh_mariluz'), 'KWH') : '');
+                document.getElementById(`wrapper-${i}`).style.display = (hayAgua || hayLuz) ? 'flex' : 'none';
 
-            // SLOT 2
-            let aguaK = comparteAgua ? (parseInt(valor('prorrateo_kendra')) || 0) : datosRedondeados.kendra.agua;
-            let luzK = datosRedondeados.kendra.luz;
-            let fi_k_agua = comparteAgua ? valor('fecha_inicio_ks_agua') : valor('fecha_inicio_kendra_agua');
-            let ff_k_agua = comparteAgua ? valor('fecha_fin_ks_agua') : valor('fecha_fin_kendra_agua');
-            const hayAguaK = comparteAgua
-                ? (tieneValor('agua_compartida') || tieneValor('m3_compartida') || tieneValor('fecha_inicio_ks_agua') || tieneValor('fecha_fin_ks_agua'))
-                : (tieneValor('agua_kendra') || tieneValor('m3_kendra') || tieneValor('fecha_inicio_kendra_agua') || tieneValor('fecha_fin_kendra_agua'));
-            const hayLuzK = tieneValor('luz_kendra') || tieneValor('kwh_kendra') || tieneValor('fecha_inicio_kendra_luz') || tieneValor('fecha_fin_kendra_luz');
-            
-            document.getElementById('wrapper-kendra').style.display = (hayAguaK || hayLuzK) ? 'flex' : 'none';
-
-            ponerImporte('out_agua_kendra', hayAguaK, comparteAgua && !tieneValor('prorrateo_kendra') ? '' : aguaK);
-            ponerImporte('out_luz_kendra', hayLuzK, luzK);
-            const aguaKDisponible = hayAguaK && (!comparteAgua || tieneValor('prorrateo_kendra'));
-            ponerTotal('out_total_kendra', aguaKDisponible || hayLuzK, (aguaKDisponible ? aguaK : 0) + (hayLuzK ? luzK : 0));
-            document.getElementById('detalles_kendra').innerHTML = 
-                (hayAguaK ? generarFilaDetalle('AGUA', fi_k_agua, ff_k_agua, comparteAgua ? '' : valor('m3_kendra'), 'M3', comparteAgua) : '') + 
-                (hayLuzK ? generarFilaDetalle('LUZ', valor('fecha_inicio_kendra_luz'), valor('fecha_fin_kendra_luz'), valor('kwh_kendra'), 'KWH') : '');
-
-            // SLOT 3
-            let aguaS = comparteAgua ? (parseInt(valor('prorrateo_sonia')) || 0) : datosRedondeados.sonia.agua;
-            let luzS = datosRedondeados.sonia.luz;
-            let fi_s_agua = comparteAgua ? valor('fecha_inicio_ks_agua') : valor('fecha_inicio_sonia_agua');
-            let ff_s_agua = comparteAgua ? valor('fecha_fin_ks_agua') : valor('fecha_fin_sonia_agua');
-            const hayAguaS = comparteAgua
-                ? (tieneValor('agua_compartida') || tieneValor('m3_compartida') || tieneValor('fecha_inicio_ks_agua') || tieneValor('fecha_fin_ks_agua'))
-                : (tieneValor('agua_sonia') || tieneValor('m3_sonia') || tieneValor('fecha_inicio_sonia_agua') || tieneValor('fecha_fin_sonia_agua'));
-            const hayLuzS = tieneValor('luz_sonia') || tieneValor('kwh_sonia') || tieneValor('fecha_inicio_sonia_luz') || tieneValor('fecha_fin_sonia_luz');
-            
-            document.getElementById('wrapper-sonia').style.display = (hayAguaS || hayLuzS) ? 'flex' : 'none';
-
-            ponerImporte('out_agua_sonia', hayAguaS, comparteAgua && !tieneValor('prorrateo_sonia') ? '' : aguaS);
-            ponerImporte('out_luz_sonia', hayLuzS, luzS);
-            const aguaSDisponible = hayAguaS && (!comparteAgua || tieneValor('prorrateo_sonia'));
-            ponerTotal('out_total_sonia', aguaSDisponible || hayLuzS, (aguaSDisponible ? aguaS : 0) + (hayLuzS ? luzS : 0));
-            document.getElementById('detalles_sonia').innerHTML = 
-                (hayAguaS ? generarFilaDetalle('AGUA', fi_s_agua, ff_s_agua, comparteAgua ? '' : valor('m3_sonia'), 'M3', comparteAgua) : '') + 
-                (hayLuzS ? generarFilaDetalle('LUZ', valor('fecha_inicio_sonia_luz'), valor('fecha_fin_sonia_luz'), valor('kwh_sonia'), 'KWH') : '');
+                ponerImporte(`out_agua_${i}`, hayAgua, (esCompartidoItem && !tieneValor(`prorrateo_${i}`)) ? '' : agua);
+                ponerImporte(`out_luz_${i}`, hayLuz, luz);
+                
+                const aguaDisponible = hayAgua && (!esCompartidoItem || tieneValor(`prorrateo_${i}`));
+                ponerTotal(`out_total_${i}`, aguaDisponible || hayLuz, (aguaDisponible ? agua : 0) + (hayLuz ? luz : 0));
+                
+                document.getElementById(`detalles_${i}`).innerHTML = 
+                    (hayAgua ? generarFilaDetalle('AGUA', fi_agua, ff_agua, esCompartidoItem ? '' : valor(`m3_${i}`), 'M3', esCompartidoItem) : '') + 
+                    (hayLuz ? generarFilaDetalle('LUZ', valor(`fecha_inicio_${i}_luz`), valor(`fecha_fin_${i}_luz`), valor(`kwh_${i}`), 'KWH') : '');
+            }
         }
 
         async function capturarYCompartirBoleta(elementId, nombreArchivo, titulo, textoCompartir) {
@@ -1054,7 +1200,6 @@
                             });
                             compartidoNativo = true;
                         } catch (errShare) {
-                            console.log('Compartir cancelado o no disponible:', errShare);
                             if (errShare && (errShare.name === 'AbortError' || String(errShare.message || '').toLowerCase().includes('canceled') || String(errShare.message || '').toLowerCase().includes('cancelled'))) {
                                 compartidoNativo = true;
                             }
@@ -1073,7 +1218,7 @@
                 }
             } catch (error) {
                 console.error('Error capturando/compartiendo boleta:', error);
-                alert('Hubo un error al generar la imagen de la boleta.\n\n' + (error && error.message ? error.message : error));
+                showAlertModal('Hubo un error al generar la imagen de la boleta.\n\n' + (error && error.message ? error.message : error), "error");
             } finally {
                 if (tempCont) tempCont.innerHTML = '';
             }
@@ -1084,16 +1229,14 @@
             const tempCont = document.getElementById('boleta-template-container');
 
             if (!original || !tempCont) {
-                alert('No se encontró la boleta para generar la imagen.');
+                showAlertModal('No se encontró la boleta para generar la imagen.', "error");
                 return;
             }
 
             procesarCalculosGlobales();
 
-            let nombreBase = 'Boleta';
-            if (slotId === 1) nombreBase = 'Boleta_' + document.getElementById('label_nombre_1').innerText.trim().replace(/\s+/g, '_');
-            if (slotId === 2) nombreBase = 'Boleta_' + document.getElementById('label_nombre_2').innerText.trim().replace(/\s+/g, '_');
-            if (slotId === 3) nombreBase = 'Boleta_' + document.getElementById('label_nombre_3').innerText.trim().replace(/\s+/g, '_');
+            const nombreInq = document.getElementById(`label_nombre_${slotId}`).innerText.trim().replace(/\s+/g, '_');
+            const nombreBase = 'Boleta_' + nombreInq;
 
             const textoOriginal = boton ? boton.textContent : 'Descargar Boleta';
             if (boton) {
@@ -1125,7 +1268,7 @@
                 );
             } catch (error) {
                 console.error('Error preparando la boleta:', error);
-                alert('No se pudo preparar la boleta.\n\n' + (error && error.message ? error.message : error));
+                showAlertModal('No se pudo preparar la boleta.\n\n' + (error && error.message ? error.message : error), "error");
                 tempCont.innerHTML = '';
             } finally {
                 if (boton) {
@@ -1156,7 +1299,10 @@
                         n1: document.getElementById('label_nombre_1').innerText,
                         n2: document.getElementById('label_nombre_2').innerText,
                         n3: document.getElementById('label_nombre_3').innerText,
-                        nComp: document.getElementById('label_nombre_compartida').innerText
+                        n4: document.getElementById('label_nombre_4').innerText,
+                        n5: document.getElementById('label_nombre_5').innerText,
+                        n6: document.getElementById('label_nombre_6').innerText,
+                        nComp: document.getElementById('label_nombre_comp').innerText
                     }
                 }
             };
@@ -1172,7 +1318,7 @@
             try {
                 if (boton) {
                     boton.disabled = true;
-                    boton.textContent = 'GUARDANDO SESIÓN...';
+                    boton.textContent = 'GUARDANDO...';
                 }
 
                 procesarCalculosGlobales();
@@ -1211,16 +1357,13 @@
                                     dialogTitle: 'Compartir o guardar respaldo'
                                 });
                             } catch (errorShareNativo) {
-                                console.warn('El archivo se guardó, pero Android no abrió Compartir:', errorShareNativo);
-                                alert(`Sesión guardada correctamente como:\n${nombreArchivo}\n\nEl archivo quedó almacenado en DOCUMENTS.`);
+                                showAlertModal(`Sesión guardada correctamente como:\n${nombreArchivo}\n\nEl archivo quedó almacenado en DOCUMENTS.`, "success");
                             }
                         } else {
-                            alert(`Sesión guardada correctamente como:\n${nombreArchivo}\n\nEl archivo quedó almacenado en DOCUMENTS.`);
+                            showAlertModal(`Sesión guardada correctamente como:\n${nombreArchivo}\n\nEl archivo quedó almacenado en DOCUMENTS.`, "success");
                         }
                         return;
                     } catch (errorDocuments) {
-                        console.warn('No se pudo escribir en DOCUMENTS:', errorDocuments);
-
                         try {
                             const Filesystem = plugins.Filesystem;
                             const base64Data = textoABase64Utf8(jsonTexto);
@@ -1241,7 +1384,6 @@
                                 return;
                             }
                         } catch (errorCache) {
-                            console.warn('Tampoco funcionó CACHE + Share:', errorCache);
                         }
                     }
                 }
@@ -1265,7 +1407,6 @@
                         if (errorArchivoShare && (errorArchivoShare.name === 'AbortError' || msg.includes('cancel'))) {
                             return;
                         }
-                        console.warn('Android no aceptó compartir el archivo:', errorArchivoShare);
                     }
 
                     try {
@@ -1273,14 +1414,12 @@
                             title: nombreArchivo,
                             text: jsonTexto
                         });
-                        alert('Android no permitió adjuntar el .json como archivo. Se compartió el contenido del respaldo como texto.');
                         return;
                     } catch (errorTextoShare) {
                         const msg = String(errorTextoShare && errorTextoShare.message ? errorTextoShare.message : '').toLowerCase();
                         if (errorTextoShare && (errorTextoShare.name === 'AbortError' || msg.includes('cancel'))) {
                             return;
                         }
-                        console.warn('Tampoco se pudo compartir como texto:', errorTextoShare);
                     }
                 }
 
@@ -1303,12 +1442,12 @@
                     const jsonTexto = JSON.stringify(datosSesion, null, 2);
                     if (navigator.clipboard && navigator.clipboard.writeText) {
                         await navigator.clipboard.writeText(jsonTexto);
-                        alert('La aplicación Android bloqueó el guardado de archivos. Como respaldo alternativo, el contenido JSON fue copiado al portapapeles.');
+                        showAlertModal('La aplicación Android bloqueó el guardado de archivos. Como respaldo alternativo, el contenido JSON fue copiado al portapapeles.', "warning");
                         return;
                     }
                 } catch (_) {}
 
-                alert('No se pudo guardar la sesión en este dispositivo.\n\n' + (error && error.message ? error.message : error));
+                showAlertModal('No se pudo guardar la sesión en este dispositivo.\n\n' + (error && error.message ? error.message : error), "error");
             } finally {
                 if (boton) {
                     boton.disabled = false;
@@ -1338,13 +1477,16 @@
                     });
 
                     if (datos.estado && datos.estado.nombres) {
-                        actualizarNombresGlobales(1, datos.estado.nombres.n1);
-                        actualizarNombresGlobales(2, datos.estado.nombres.n2);
-                        actualizarNombresGlobales(3, datos.estado.nombres.n3);
-                        actualizarNombresGlobales('comp', datos.estado.nombres.nComp.replace(' (AGUA COMPARTIDA)', ''));
+                        if(datos.estado.nombres.n1) actualizarNombresGlobales(1, datos.estado.nombres.n1);
+                        if(datos.estado.nombres.n2) actualizarNombresGlobales(2, datos.estado.nombres.n2);
+                        if(datos.estado.nombres.n3) actualizarNombresGlobales(3, datos.estado.nombres.n3);
+                        if(datos.estado.nombres.n4) actualizarNombresGlobales(4, datos.estado.nombres.n4);
+                        if(datos.estado.nombres.n5) actualizarNombresGlobales(5, datos.estado.nombres.n5);
+                        if(datos.estado.nombres.n6) actualizarNombresGlobales(6, datos.estado.nombres.n6);
+                        if(datos.estado.nombres.nComp) actualizarNombresGlobales('comp', datos.estado.nombres.nComp.replace(' (AGUA COMPARTIDA)', ''));
                     }
 
-                    ultimaFuenteProrrateo = datos.estado && ['kendra', 'sonia'].includes(datos.estado.ultimaFuenteProrrateo)
+                    ultimaFuenteProrrateo = datos.estado && ['2', '3'].includes(datos.estado.ultimaFuenteProrrateo)
                         ? datos.estado.ultimaFuenteProrrateo
                         : null;
                     mesImportadoAgua = datos.estado ? String(datos.estado.mesImportadoAgua || '').trim().toUpperCase() : '';
@@ -1354,29 +1496,27 @@
                     procesarCalculosGlobales();
 
                     if (comparteAgua) {
-                        const kGuardado = datos.campos.prorrateo_kendra;
-                        const sGuardado = datos.campos.prorrateo_sonia;
-                        if (kGuardado !== undefined) document.getElementById('prorrateo_kendra').value = kGuardado;
-                        if (sGuardado !== undefined) document.getElementById('prorrateo_sonia').value = sGuardado;
+                        const kGuardado = datos.campos.prorrateo_2;
+                        const sGuardado = datos.campos.prorrateo_3;
+                        if (kGuardado !== undefined) document.getElementById('prorrateo_2').value = kGuardado;
+                        if (sGuardado !== undefined) document.getElementById('prorrateo_3').value = sGuardado;
                         generarBoletas();
                     }
 
-                    alert('¡Sesión importada correctamente!');
+                    showAlertModal('¡Sesión importada correctamente!', "success");
                 } catch (error) {
                     console.error('Error al importar sesión:', error);
-                    alert('No se pudo importar la sesión:\n' + error.message);
+                    showAlertModal('No se pudo importar la sesión:\n' + error.message, "error");
                 } finally {
                     input.value = '';
                 }
             };
             reader.onerror = function() {
-                alert('No se pudo leer el archivo de sesión.');
+                showAlertModal('No se pudo leer el archivo de sesión.', "error");
                 input.value = '';
             };
             reader.readAsText(file);
         }
-
-        function formatearFecha(fechaStr) { if (!fechaStr) return ''; const p = fechaStr.split('-'); if(p.length !== 3) return fechaStr; return `${parseInt(p[2], 10)}/${parseInt(p[1], 10)}/${p[0]}`; }
     </script>
 </body>
 </html>
