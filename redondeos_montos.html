@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: redondeos_montos_v6.html -->
+<!-- Nombre del archivo: redondeos_montos_v7.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -87,7 +87,7 @@
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 p-4 md:p-8 min-h-screen flex flex-col" oninput="procesarCalculosGlobales()">
 
-    <!-- Toast Notification (Flotante) -->
+    <!-- Toast Notification -->
     <div id="toastNotification" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm transition-all duration-300 opacity-0 invisible z-[9999]">
         Datos sincronizados
     </div>
@@ -174,14 +174,24 @@
                         <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm">1</span> 
                         Importes y Consumos
                     </h2>
+
+                    <!-- AGUA COMPARTIDA 12 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_comp_12">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_comp_12">GRUPO 1 (Agua Compartida)</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label><input type="number" id="agua_comp_12" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_comp_12" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
                     
                     <!-- Inquilino 1 -->
                     <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_1">
                         <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_1">INQUILINO 1</h3>
-                        <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div class="grid grid-cols-2 gap-4 mb-2">
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_1" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_1" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
+                        <p id="aviso_agua_1" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto compartido.</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_1" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_1" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -195,10 +205,19 @@
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_2" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_2" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
-                        <p id="aviso_agua_2" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto de compartidos.</p>
+                        <p id="aviso_agua_2" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto compartido.</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_2" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_2" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+
+                    <!-- AGUA COMPARTIDA 34 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_comp_34">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_comp_34">GRUPO 2 (Agua Compartida)</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label><input type="number" id="agua_comp_34" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_comp_34" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
                     </div>
 
@@ -209,19 +228,10 @@
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_3" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_3" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
-                        <p id="aviso_agua_3" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto de compartidos.</p>
+                        <p id="aviso_agua_3" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto compartido.</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_3" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_3" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                        </div>
-                    </div>
-
-                    <!-- Agua Compartida (Slot 2 + Slot 3) -->
-                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_comp">
-                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_comp">INQUILINO 2 + INQUILINO 3 (Agua Compartida)</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label><input type="number" id="agua_comp" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
-                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_comp" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
                     </div>
 
@@ -232,9 +242,19 @@
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_4" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_4" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
+                        <p id="aviso_agua_4" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto compartido.</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_4" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_4" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                        </div>
+                    </div>
+
+                    <!-- AGUA COMPARTIDA 56 -->
+                    <div class="hidden p-4 bg-gray-50 rounded-xl border border-gray-100" id="slot_importes_comp_56">
+                        <h3 class="font-bold text-gray-700 mb-3 text-sm" id="label_nombre_comp_56">GRUPO 3 (Agua Compartida)</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua Total (S/)</label><input type="number" id="agua_comp_56" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
+                            <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_comp_56" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
                     </div>
 
@@ -245,6 +265,7 @@
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_5" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_5" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
+                        <p id="aviso_agua_5" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto compartido.</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_5" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_5" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -258,6 +279,7 @@
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Agua (S/)</label><input type="number" id="agua_6" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (m³)</label><input type="number" id="m3_6" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                         </div>
+                        <p id="aviso_agua_6" class="hidden text-[11px] font-bold text-blue-600 mb-3">BLOQUEADO: se está usando el reparto compartido.</p>
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Luz (S/)</label><input type="number" id="luz_6" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
                             <div><label class="block text-xs font-semibold text-gray-500 mb-1">Consumo (KWH)</label><input type="number" id="kwh_6" step="0.01" class="w-full px-3 py-2 border rounded-lg" placeholder="0.00"></div>
@@ -280,6 +302,13 @@
                         </div>
 
                         <div class="space-y-4 max-h-[450px] overflow-y-auto pr-2">
+                            
+                            <!-- Fechas Comp 12 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_comp_12">
+                                <label class="block text-xs font-bold text-blue-600 mb-2" id="label_fechas_comp_12_agua">GRUPO 1 AGUA (Compartida)</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_comp_12_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"><input type="date" id="fecha_fin_comp_12_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"></div>
+                            </div>
+
                             <!-- Fechas 1 -->
                             <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_1_agua">
                                 <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_1_agua">INQUILINO 1 AGUA</label>
@@ -292,7 +321,7 @@
                             
                             <!-- Fechas 2 -->
                             <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_2_agua">
-                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_2_agua">INQUILINO 2 AGUA (Individual)</label>
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_2_agua">INQUILINO 2 AGUA</label>
                                 <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_2_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_2_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                             </div>
                             <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_2_luz">
@@ -300,20 +329,20 @@
                                 <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_2_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_2_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                             </div>
 
+                            <!-- Fechas Comp 34 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_comp_34">
+                                <label class="block text-xs font-bold text-blue-600 mb-2" id="label_fechas_comp_34_agua">GRUPO 2 AGUA (Compartida)</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_comp_34_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"><input type="date" id="fecha_fin_comp_34_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"></div>
+                            </div>
+
                             <!-- Fechas 3 -->
                             <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_3_agua">
-                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3_agua">INQUILINO 3 AGUA (Individual)</label>
+                                <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3_agua">INQUILINO 3 AGUA</label>
                                 <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_3_agua" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_3_agua" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                             </div>
                             <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_3_luz">
                                 <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_3_luz">INQUILINO 3 LUZ</label>
                                 <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_3_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_3_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
-                            </div>
-
-                            <!-- Fechas Comp -->
-                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_comp">
-                                <label class="block text-xs font-bold text-blue-600 mb-2" id="label_fechas_comp_agua">INQUILINO 2 + INQUILINO 3 AGUA (Compartida)</label>
-                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_comp_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"><input type="date" id="fecha_fin_comp_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"></div>
                             </div>
 
                             <!-- Fechas 4 -->
@@ -324,6 +353,12 @@
                             <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_4_luz">
                                 <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_4_luz">INQUILINO 4 LUZ</label>
                                 <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_4_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_4_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
+                            </div>
+
+                            <!-- Fechas Comp 56 -->
+                            <div class="hidden p-3 border border-gray-100 rounded-lg bg-gray-50" id="slot_fechas_comp_56">
+                                <label class="block text-xs font-bold text-blue-600 mb-2" id="label_fechas_comp_56_agua">GRUPO 3 AGUA (Compartida)</label>
+                                <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_comp_56_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"><input type="date" id="fecha_fin_comp_56_agua" class="w-full px-2 py-1.5 text-sm border rounded border-blue-200"></div>
                             </div>
 
                             <!-- Fechas 5 -->
@@ -345,29 +380,65 @@
                                 <label class="block text-xs font-bold text-gray-600 mb-2" id="label_fechas_6_luz">INQUILINO 6 LUZ</label>
                                 <div class="grid grid-cols-2 gap-3"><input type="date" id="fecha_inicio_6_luz" class="w-full px-2 py-1.5 text-sm border rounded"><input type="date" id="fecha_fin_6_luz" class="w-full px-2 py-1.5 text-sm border rounded"></div>
                             </div>
+
                         </div>
                     </div>
 
-                    <!-- BLOQUE DE PRORRATEO (Se muestra solo si hay Agua Compartida) -->
-                    <div id="bloque_prorrateo" class="bg-blue-50 p-6 rounded-2xl shadow-sm border border-blue-200 space-y-4" style="display: none;">
-                        <h2 class="text-md font-black text-blue-800 uppercase tracking-wide">
-                            Distribución de Agua Compartida
-                        </h2>
-                        <p class="text-xs text-blue-600 mb-2">Ingresa el valor histórico/de referencia para el primer integrante. El valor del otro se calculará automáticamente restándolo del Total Compartido Redondeado. Mientras este modo esté activo, el agua individual de ambos queda bloqueada y fuera de las boletas.</p>
-                        
+                    <!-- BLOQUES DE PRORRATEO MÚLTIPLES -->
+                    
+                    <!-- Prorrateo 12 -->
+                    <div id="bloque_prorrateo_12" class="hidden bg-blue-50 p-6 rounded-2xl shadow-sm border border-blue-200 space-y-4">
+                        <h2 class="text-md font-black text-blue-800 uppercase tracking-wide">Distribución de Agua (Grupo 1)</h2>
                         <div class="bg-white p-3 rounded-lg border border-blue-100 mb-3 text-center">
-                            <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Ya Redondeado)</span>
-                            <span class="text-2xl font-black text-blue-600" id="prorrateo_total_text"></span>
+                            <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Redondeado)</span>
+                            <span class="text-2xl font-black text-blue-600" id="prorrateo_total_text_12"></span>
                         </div>
-
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_2">Valor compartido Inq 2 (S/)</label>
-                                <input type="number" id="prorrateo_2" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('2')">
+                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_1">Valor Inq 1 (S/)</label>
+                                <input type="number" id="prorrateo_1" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('12', '1')">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_3">Valor compartido Inq 3 (S/)</label>
-                                <input type="number" id="prorrateo_3" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('3')">
+                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_2">Valor Inq 2 (S/)</label>
+                                <input type="number" id="prorrateo_2" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('12', '2')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prorrateo 34 -->
+                    <div id="bloque_prorrateo_34" class="hidden bg-blue-50 p-6 rounded-2xl shadow-sm border border-blue-200 space-y-4">
+                        <h2 class="text-md font-black text-blue-800 uppercase tracking-wide">Distribución de Agua (Grupo 2)</h2>
+                        <div class="bg-white p-3 rounded-lg border border-blue-100 mb-3 text-center">
+                            <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Redondeado)</span>
+                            <span class="text-2xl font-black text-blue-600" id="prorrateo_total_text_34"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_3">Valor Inq 3 (S/)</label>
+                                <input type="number" id="prorrateo_3" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('34', '3')">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_4">Valor Inq 4 (S/)</label>
+                                <input type="number" id="prorrateo_4" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('34', '4')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prorrateo 56 -->
+                    <div id="bloque_prorrateo_56" class="hidden bg-blue-50 p-6 rounded-2xl shadow-sm border border-blue-200 space-y-4">
+                        <h2 class="text-md font-black text-blue-800 uppercase tracking-wide">Distribución de Agua (Grupo 3)</h2>
+                        <div class="bg-white p-3 rounded-lg border border-blue-100 mb-3 text-center">
+                            <span class="text-xs font-bold text-gray-500 block uppercase">Total a Distribuir (Redondeado)</span>
+                            <span class="text-2xl font-black text-blue-600" id="prorrateo_total_text_56"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_5">Valor Inq 5 (S/)</label>
+                                <input type="number" id="prorrateo_5" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('56', '5')">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1" id="lbl_prorrateo_6">Valor Inq 6 (S/)</label>
+                                <input type="number" id="prorrateo_6" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500" placeholder="0" oninput="calcularProrrateo('56', '6')">
                             </div>
                         </div>
                     </div>
@@ -505,16 +576,19 @@
     <div id="boleta-template-container"></div>
 
     <script>
-        let datosRedondeados = { i1: {agua: 0, luz: 0}, i2: {agua: 0, luz: 0}, i3: {agua: 0, luz: 0}, i4: {agua: 0, luz: 0}, i5: {agua: 0, luz: 0}, i6: {agua: 0, luz: 0}, comp: {agua: 0} };
-        let comparteAgua = false;
-        let ultimaFuenteProrrateo = null;
-        let ultimoTotalCompartidoRedondeado = null;
-        let mesImportadoAgua = '';
-        let mesImportadoLuz = '';
-        let inquilinosVisibles = 0;
+        let datosRedondeados = { 
+            i1: {agua: 0, luz: 0}, i2: {agua: 0, luz: 0}, i3: {agua: 0, luz: 0}, 
+            i4: {agua: 0, luz: 0}, i5: {agua: 0, luz: 0}, i6: {agua: 0, luz: 0}, 
+            c12: {agua: 0}, c34: {agua: 0}, c56: {agua: 0} 
+        };
+        let comparteAgua_12 = false; let comparteAgua_34 = false; let comparteAgua_56 = false;
+        let ultimaFuenteProrrateo_12 = null; let ultimaFuenteProrrateo_34 = null; let ultimaFuenteProrrateo_56 = null;
+        let ultimoTotalCompartidoRedondeado_12 = null; let ultimoTotalCompartidoRedondeado_34 = null; let ultimoTotalCompartidoRedondeado_56 = null;
+        let mesImportadoAgua = ''; let mesImportadoLuz = '';
 
         const STORAGE_AGUA_SYNC = 'recibos_cayran_agua_sync_v1';
         const STORAGE_LUZ_SYNC = 'recibos_cayran_luz_sync_v1';
+        const STORAGE_REDONDEOS_SESION = 'recibos_cayran_redondeos_sesion_v1';
 
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('input[type=number]').forEach(input => { input.addEventListener('wheel', e => e.preventDefault(), { passive: false }); });
@@ -578,14 +652,16 @@
                 document.getElementById(`slot_importes_${i}`).classList.toggle('hidden', !isVisible);
                 document.getElementById(`slot_fechas_${i}_agua`).classList.toggle('hidden', !isVisible);
                 document.getElementById(`slot_fechas_${i}_luz`).classList.toggle('hidden', !isVisible);
-                
                 if (isVisible) tieneDatos = true;
             }
 
-            const hasComp = getVal('agua_comp') > 0 || getVal('m3_comp') > 0 || valStr('fecha_inicio_comp_agua') !== '' || valStr('fecha_fin_comp_agua') !== '';
-            document.getElementById('slot_importes_comp').classList.toggle('hidden', !hasComp);
-            document.getElementById('slot_fechas_comp').classList.toggle('hidden', !hasComp);
-            if (hasComp) tieneDatos = true;
+            const grupos = ['12', '34', '56'];
+            grupos.forEach(g => {
+                const hasComp = getVal(`agua_comp_${g}`) > 0 || getVal(`m3_comp_${g}`) > 0 || valStr(`fecha_inicio_comp_${g}_agua`) !== '' || valStr(`fecha_fin_comp_${g}_agua`) !== '';
+                document.getElementById(`slot_importes_comp_${g}`).classList.toggle('hidden', !hasComp);
+                document.getElementById(`slot_fechas_comp_${g}`).classList.toggle('hidden', !hasComp);
+                if (hasComp) tieneDatos = true;
+            });
 
             if (valStr('mes_cobro') !== '') tieneDatos = true;
 
@@ -610,21 +686,16 @@
                     else if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
                 });
                 
-                datosRedondeados = { i1: {agua: 0, luz: 0}, i2: {agua: 0, luz: 0}, i3: {agua: 0, luz: 0}, i4: {agua: 0, luz: 0}, i5: {agua: 0, luz: 0}, i6: {agua: 0, luz: 0}, comp: {agua: 0} };
-                comparteAgua = false;
-                ultimaFuenteProrrateo = null;
-                ultimoTotalCompartidoRedondeado = null;
-                mesImportadoAgua = '';
-                mesImportadoLuz = '';
-                inquilinosVisibles = 0;
+                datosRedondeados = { i1: {}, i2: {}, i3: {}, i4: {}, i5: {}, i6: {}, c12: {}, c34: {}, c56: {} };
+                comparteAgua_12 = false; comparteAgua_34 = false; comparteAgua_56 = false;
+                ultimaFuenteProrrateo_12 = null; ultimaFuenteProrrateo_34 = null; ultimaFuenteProrrateo_56 = null;
+                ultimoTotalCompartidoRedondeado_12 = null; ultimoTotalCompartidoRedondeado_34 = null; ultimoTotalCompartidoRedondeado_56 = null;
+                mesImportadoAgua = ''; mesImportadoLuz = '';
                 
-                actualizarNombresGlobales(1, "INQUILINO 1");
-                actualizarNombresGlobales(2, "INQUILINO 2");
-                actualizarNombresGlobales(3, "INQUILINO 3");
-                actualizarNombresGlobales(4, "INQUILINO 4");
-                actualizarNombresGlobales(5, "INQUILINO 5");
-                actualizarNombresGlobales(6, "INQUILINO 6");
-                actualizarNombresGlobales('comp', "INQUILINO 2 + INQUILINO 3");
+                for(let i=1; i<=6; i++) actualizarNombresGlobales(i, `INQUILINO ${i}`);
+                actualizarNombresGlobales('comp_12', "GRUPO 1");
+                actualizarNombresGlobales('comp_34', "GRUPO 2");
+                actualizarNombresGlobales('comp_56', "GRUPO 3");
 
                 procesarCalculosGlobales();
                 evaluarVisibilidadGeneral();
@@ -632,13 +703,18 @@
         }
 
         function actualizarAvisosProrrateo() {
-            const nom2 = document.getElementById('label_nombre_2').innerText;
-            const nom3 = document.getElementById('label_nombre_3').innerText;
-            const msj = `BLOQUEADO: se está usando el reparto de ${nom2} + ${nom3}.`;
-            const aviso2 = document.getElementById('aviso_agua_2');
-            if (aviso2) aviso2.innerText = msj;
-            const aviso3 = document.getElementById('aviso_agua_3');
-            if (aviso3) aviso3.innerText = msj;
+            ['12', '34', '56'].forEach(g => {
+                const isActivo = window[`comparteAgua_${g}`];
+                const i1 = parseInt(g.charAt(0)); const i2 = parseInt(g.charAt(1));
+                const nom1 = document.getElementById(`label_nombre_${i1}`).innerText;
+                const nom2 = document.getElementById(`label_nombre_${i2}`).innerText;
+                const msj = `BLOQUEADO: se usa el reparto de ${nom1} + ${nom2}.`;
+                
+                const aviso1 = document.getElementById(`aviso_agua_${i1}`);
+                if (aviso1) { aviso1.innerText = msj; aviso1.classList.toggle('hidden', !isActivo); }
+                const aviso2 = document.getElementById(`aviso_agua_${i2}`);
+                if (aviso2) { aviso2.innerText = msj; aviso2.classList.toggle('hidden', !isActivo); }
+            });
         }
 
         function actualizarNombresGlobales(slot, nombre) {
@@ -646,22 +722,15 @@
             const nomUpper = nombre.toUpperCase();
             if (slot >= 1 && slot <= 6) {
                 document.getElementById(`label_nombre_${slot}`).innerText = nomUpper;
-                let suffixAgua = (slot === 2 || slot === 3) ? " AGUA (Individual)" : " AGUA";
-                document.getElementById(`label_fechas_${slot}_agua`).innerText = nomUpper + suffixAgua;
+                document.getElementById(`label_fechas_${slot}_agua`).innerText = nomUpper + " AGUA";
                 document.getElementById(`label_fechas_${slot}_luz`).innerText = nomUpper + " LUZ";
                 document.getElementById(`boleta_nombre_${slot}`).innerText = nomUpper;
-                
-                if (slot === 2) {
-                    document.getElementById('lbl_prorrateo_2').innerText = `Valor compartido ${nomUpper} (S/)`;
-                    actualizarAvisosProrrateo();
-                } else if (slot === 3) {
-                    document.getElementById('lbl_prorrateo_3').innerText = `Valor compartido ${nomUpper} (S/)`;
-                    actualizarAvisosProrrateo();
-                }
-            } else if (slot === 'comp') {
+                document.getElementById(`lbl_prorrateo_${slot}`).innerText = `Valor Inq ${slot} (${nomUpper}) S/`;
+                actualizarAvisosProrrateo();
+            } else if (slot.toString().startsWith('comp_')) {
                 const baseName = nomUpper.replace('(AGUA COMPARTIDA)', '').trim();
-                document.getElementById('label_nombre_comp').innerText = baseName + ' (Agua Compartida)';
-                document.getElementById('label_fechas_comp_agua').innerText = baseName + ' AGUA (Compartida)';
+                document.getElementById(`label_nombre_${slot}`).innerText = baseName + ' (Agua Compartida)';
+                document.getElementById(`label_fechas_${slot}_agua`).innerText = baseName + ' AGUA (Compartida)';
             }
         }
 
@@ -669,42 +738,46 @@
             const nombreLower = (nombreOriginal || '').toLowerCase().trim();
             if (!nombreLower) return null;
 
-            // 1. Detección de inquilinos compartidos (Ej: MANUEL+LOPEZ)
             if (tipoServicio === 'agua' && (nombreLower.includes('+') || nombreLower.includes(' y '))) {
-                const separador = nombreLower.includes('+') ? '+' : ' y ';
                 const partes = nombreOriginal.split(new RegExp(`\\+| y `, 'i')).map(n => n.trim());
                 
-                // Forzar la asignación de los implicados a los slots 2 y 3 para prepararlos para luz
-                if (partes[0]) document.getElementById('label_nombre_2').innerText = partes[0].toUpperCase();
-                if (partes[1]) document.getElementById('label_nombre_3').innerText = partes[1].toUpperCase();
-                
-                return 'comp';
+                if (!valStr('agua_comp_12') && !valStr('m3_comp_12')) {
+                    if (partes[0]) actualizarNombresGlobales(1, partes[0]);
+                    if (partes[1]) actualizarNombresGlobales(2, partes[1]);
+                    return 'comp_12';
+                }
+                if (!valStr('agua_comp_34') && !valStr('m3_comp_34')) {
+                    if (partes[0]) actualizarNombresGlobales(3, partes[0]);
+                    if (partes[1]) actualizarNombresGlobales(4, partes[1]);
+                    return 'comp_34';
+                }
+                if (!valStr('agua_comp_56') && !valStr('m3_comp_56')) {
+                    if (partes[0]) actualizarNombresGlobales(5, partes[0]);
+                    if (partes[1]) actualizarNombresGlobales(6, partes[1]);
+                    return 'comp_56';
+                }
+                return 'comp_12';
             }
 
-            // 2. Buscar si el nombre ya existe en algún slot asignado (1 al 6)
             for (let i = 1; i <= 6; i++) {
                 const labelEl = document.getElementById(`label_nombre_${i}`);
-                if (labelEl && labelEl.innerText.toLowerCase().trim() === nombreLower) {
-                    return i;
+                if (labelEl && labelEl.innerText.toLowerCase().trim() === nombreLower) return i;
+            }
+
+            // Fallback para inquilinos del bloque compartido en Luz
+            ['12', '34', '56'].forEach(g => {
+                const compLabel = document.getElementById(`label_nombre_comp_${g}`).innerText.toLowerCase();
+                if (compLabel.includes(nombreLower) && compLabel.includes('compartida')) {
+                    const partes = compLabel.replace('(agua compartida)','').split('+').map(n=>n.trim());
+                    if (partes[0] === nombreLower) return parseInt(g.charAt(0));
+                    if (partes[1] === nombreLower) return parseInt(g.charAt(1));
                 }
-            }
+            });
 
-            // Si es Luz y coincide con uno de los nombres del bloque compartido (para que caigan en 2 o 3)
-            const compLabel = document.getElementById('label_nombre_comp').innerText.toLowerCase();
-            if (compLabel.includes(nombreLower) && compLabel.includes('compartida')) {
-                const partes = compLabel.replace('(agua compartida)','').split('+').map(n=>n.trim());
-                if (partes[0] === nombreLower) return 2;
-                if (partes[1] === nombreLower) return 3;
-            }
-
-            // 3. Si no hay coincidencia, asignar al primer slot vacío ("INQUILINO X")
-            // Orden: 1, 4, 5, 6 (Reservamos 2 y 3 para posibles compartidos por defecto)
             const ordenPreferencia = [1, 4, 5, 6, 2, 3]; 
             for (let i of ordenPreferencia) {
                 const labelEl = document.getElementById(`label_nombre_${i}`);
-                if (labelEl && labelEl.innerText.trim().toUpperCase() === `INQUILINO ${i}`) {
-                    return i;
-                }
+                if (labelEl && labelEl.innerText.trim().toUpperCase() === `INQUILINO ${i}`) return i;
             }
             return null;
         }
@@ -726,19 +799,19 @@
                 let slot = determinarSlot(inq.nombre, 'agua');
 
                 if (slot) {
-                    if (slot === 'comp') {
-                        document.getElementById('agua_comp').value = monto;
-                        document.getElementById('m3_comp').value = m3;
-                        document.getElementById('fecha_inicio_comp_agua').value = fi;
-                        document.getElementById('fecha_fin_comp_agua').value = ff;
+                    if (slot.toString().startsWith('comp_')) {
+                        document.getElementById(`agua_${slot}`).value = monto;
+                        document.getElementById(`m3_${slot}`).value = m3;
+                        document.getElementById(`fecha_inicio_${slot}_agua`).value = fi;
+                        document.getElementById(`fecha_fin_${slot}_agua`).value = ff;
+                        actualizarNombresGlobales(slot, inq.nombre);
                     } else {
                         document.getElementById(`agua_${slot}`).value = monto;
                         document.getElementById(`m3_${slot}`).value = m3;
                         document.getElementById(`fecha_inicio_${slot}_agua`).value = fi;
                         document.getElementById(`fecha_fin_${slot}_agua`).value = ff;
-                        if (slot > inquilinosVisibles) inquilinosVisibles = slot;
+                        actualizarNombresGlobales(slot, inq.nombre);
                     }
-                    actualizarNombresGlobales(slot, inq.nombre);
                     importados++;
                 }
             });
@@ -761,13 +834,12 @@
 
                 let slot = determinarSlot(inq.nombre, 'luz');
 
-                if (slot && slot !== 'comp') {
+                if (slot && !slot.toString().startsWith('comp_')) {
                     document.getElementById(`luz_${slot}`).value = monto;
                     document.getElementById(`kwh_${slot}`).value = kwh;
                     document.getElementById(`fecha_inicio_${slot}_luz`).value = fi;
                     document.getElementById(`fecha_fin_${slot}_luz`).value = ff;
                     actualizarNombresGlobales(slot, inq.nombre);
-                    if (slot > inquilinosVisibles) inquilinosVisibles = slot;
                     importados++;
                 }
             });
@@ -782,10 +854,8 @@
             if (agua) mesImportadoAgua = '';
             if (luz) mesImportadoLuz = '';
             
-            // Prioridad: Agua corre primero para preparar los slots 2 y 3 si hay agua compartida
             const nAgua = agua ? aplicarAguaSincronizada(agua) : 0;
             const nLuz = luz ? aplicarLuzSincronizada(luz) : 0;
-            
             return { agua: nAgua, luz: nLuz };
         }
 
@@ -869,20 +939,18 @@
                     registros.forEach(inq => {
                         if (!inq || typeof inq !== 'object') return;
                         const monto = (parseFloat(inq.monto_pagar) || 0).toFixed(2);
-                        const m3 = inq.consumo_m3 !== undefined
-                            ? inq.consumo_m3
-                            : (inq.consumo && inq.consumo.m3_real !== undefined ? inq.consumo.m3_real : '');
+                        const m3 = inq.consumo_m3 !== undefined ? inq.consumo_m3 : (inq.consumo && inq.consumo.m3_real !== undefined ? inq.consumo.m3_real : '');
                         const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                         const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
                         let slot = determinarSlot(inq.nombre, 'agua');
 
                         if (slot) {
-                            if (slot === 'comp') {
-                                document.getElementById('agua_comp').value = monto;
-                                document.getElementById('m3_comp').value = m3;
-                                document.getElementById('fecha_inicio_comp_agua').value = fi;
-                                document.getElementById('fecha_fin_comp_agua').value = ff;
+                            if (slot.toString().startsWith('comp_')) {
+                                document.getElementById(`agua_${slot}`).value = monto;
+                                document.getElementById(`m3_${slot}`).value = m3;
+                                document.getElementById(`fecha_inicio_${slot}_agua`).value = fi;
+                                document.getElementById(`fecha_fin_${slot}_agua`).value = ff;
                             } else {
                                 document.getElementById(`agua_${slot}`).value = monto;
                                 document.getElementById(`m3_${slot}`).value = m3;
@@ -930,15 +998,13 @@
                     registros.forEach(inq => {
                         if (!inq || typeof inq !== 'object') return;
                         const monto = (parseFloat(inq.monto_pagar) || 0).toFixed(2);
-                        const kwh = inq.kwh_real !== undefined
-                            ? inq.kwh_real
-                            : (inq.consumo && inq.consumo.kwh_real !== undefined ? inq.consumo.kwh_real : '');
+                        const kwh = inq.kwh_real !== undefined ? inq.kwh_real : (inq.consumo && inq.consumo.kwh_real !== undefined ? inq.consumo.kwh_real : '');
                         const fi = inq.fecha_inicio || (inq.consumo && inq.consumo.periodo_facturado_inicio) || '';
                         const ff = inq.fecha_fin || (inq.consumo && inq.consumo.periodo_facturado_fin) || '';
 
                         let slot = determinarSlot(inq.nombre, 'luz');
 
-                        if (slot && slot !== 'comp') {
+                        if (slot && !slot.toString().startsWith('comp_')) {
                             document.getElementById(`luz_${slot}`).value = monto;
                             document.getElementById(`kwh_${slot}`).value = kwh;
                             document.getElementById(`fecha_inicio_${slot}_luz`).value = fi;
@@ -991,10 +1057,11 @@
             return totalRedondeadoGeneral;
         }
 
-        function actualizarModoAguaCompartida(activo) {
+        function actualizarModoAguaCompartida(g, activo) {
+            const i1 = parseInt(g.charAt(0)); const i2 = parseInt(g.charAt(1));
             const idsIndividuales = [
-                'agua_2', 'm3_2', 'fecha_inicio_2_agua', 'fecha_fin_2_agua',
-                'agua_3', 'm3_3', 'fecha_inicio_3_agua', 'fecha_fin_3_agua'
+                `agua_${i1}`, `m3_${i1}`, `fecha_inicio_${i1}_agua`, `fecha_fin_${i1}_agua`,
+                `agua_${i2}`, `m3_${i2}`, `fecha_inicio_${i2}_agua`, `fecha_fin_${i2}_agua`
             ];
 
             idsIndividuales.forEach(id => {
@@ -1006,37 +1073,39 @@
                 el.classList.toggle('cursor-not-allowed', activo);
                 el.classList.toggle('opacity-70', activo);
             });
-
-            const aviso2 = document.getElementById('aviso_agua_2');
-            if(aviso2) aviso2.classList.toggle('hidden', !activo);
-            const aviso3 = document.getElementById('aviso_agua_3');
-            if(aviso3) aviso3.classList.toggle('hidden', !activo);
         }
 
         function procesarCalculosGlobales() {
-            let aguaKS = parseFloat(document.getElementById('agua_comp').value) || 0;
-            comparteAgua = (aguaKS > 0);
-            actualizarModoAguaCompartida(comparteAgua);
+            ['12', '34', '56'].forEach(g => {
+                const val = parseFloat(document.getElementById(`agua_comp_${g}`).value) || 0;
+                window[`comparteAgua_${g}`] = (val > 0);
+                actualizarModoAguaCompartida(g, window[`comparteAgua_${g}`]);
+            });
+            actualizarAvisosProrrateo();
 
             let arrayInqRedondeo = [];
-            datosRedondeados = { i1: {agua:0, luz:0}, i2: {agua:0, luz:0}, i3: {agua:0, luz:0}, i4: {agua:0, luz:0}, i5: {agua:0, luz:0}, i6: {agua:0, luz:0}, comp: {agua:0} };
+            datosRedondeados = { i1: {}, i2: {}, i3: {}, i4: {}, i5: {}, i6: {}, c12: {}, c34: {}, c56: {} };
 
             for (let i = 1; i <= 6; i++) {
                 let agua = parseFloat(document.getElementById(`agua_${i}`).value) || 0;
                 let luz = parseFloat(document.getElementById(`luz_${i}`).value) || 0;
-                if (comparteAgua && (i === 2 || i === 3)) agua = 0;
+                
+                let g = (i===1||i===2) ? '12' : ((i===3||i===4) ? '34' : '56');
+                if (window[`comparteAgua_${g}`]) agua = 0;
 
                 let m3 = document.getElementById(`m3_${i}`).value;
                 let kwh = document.getElementById(`kwh_${i}`).value;
-                if (comparteAgua && (i === 2 || i === 3)) m3 = '';
+                if (window[`comparteAgua_${g}`]) m3 = '';
 
                 let nombre = document.getElementById(`label_nombre_${i}`).innerText;
-
                 arrayInqRedondeo.push({ id: `i${i}`, nombre: nombre, agua: agua, luz: luz, exacto: agua + luz, m3: m3, kwh: kwh });
             }
 
-            arrayInqRedondeo.push({
-                id: 'comp', nombre: document.getElementById('label_nombre_comp').innerText, agua: aguaKS, luz: null, exacto: aguaKS, m3: document.getElementById('m3_comp').value, kwh: ''
+            ['12', '34', '56'].forEach(g => {
+                let aguaKS = parseFloat(document.getElementById(`agua_comp_${g}`).value) || 0;
+                arrayInqRedondeo.push({
+                    id: `c${g}`, nombre: document.getElementById(`label_nombre_comp_${g}`).innerText, agua: aguaKS, luz: null, exacto: aguaKS, m3: document.getElementById(`m3_comp_${g}`).value, kwh: ''
+                });
             });
 
             let inquilinosFiltrados = arrayInqRedondeo.filter(inq => inq.exacto > 0);
@@ -1046,59 +1115,65 @@
                 datosRedondeados[inq.id] = { agua: inq.aguaFinal || 0, luz: inq.luzFinal || 0 };
             });
 
-            if (comparteAgua) {
-                document.getElementById('bloque_prorrateo').style.display = 'block';
-                const totalCompartido = datosRedondeados.comp.agua;
-                document.getElementById('prorrateo_total_text').innerText = `S/ ${totalCompartido}`;
+            ['12', '34', '56'].forEach(g => {
+                const bloque = document.getElementById(`bloque_prorrateo_${g}`);
+                if (window[`comparteAgua_${g}`]) {
+                    bloque.style.display = 'block';
+                    const totalCompartido = datosRedondeados[`c${g}`].agua;
+                    document.getElementById(`prorrateo_total_text_${g}`).innerText = `S/ ${totalCompartido}`;
 
-                if (ultimoTotalCompartidoRedondeado !== totalCompartido) {
-                    if (ultimaFuenteProrrateo) {
-                        calcularProrrateo(ultimaFuenteProrrateo, true);
-                    } else {
-                        document.getElementById('prorrateo_2').value = '';
-                        document.getElementById('prorrateo_3').value = '';
+                    if (window[`ultimoTotalCompartidoRedondeado_${g}`] !== totalCompartido) {
+                        if (window[`ultimaFuenteProrrateo_${g}`]) {
+                            calcularProrrateo(g, window[`ultimaFuenteProrrateo_${g}`], true);
+                        } else {
+                            const i1 = g.charAt(0); const i2 = g.charAt(1);
+                            document.getElementById(`prorrateo_${i1}`).value = '';
+                            document.getElementById(`prorrateo_${i2}`).value = '';
+                        }
+                        window[`ultimoTotalCompartidoRedondeado_${g}`] = totalCompartido;
                     }
-                    ultimoTotalCompartidoRedondeado = totalCompartido;
+                } else {
+                    bloque.style.display = 'none';
+                    const i1 = g.charAt(0); const i2 = g.charAt(1);
+                    document.getElementById(`prorrateo_${i1}`).value = '';
+                    document.getElementById(`prorrateo_${i2}`).value = '';
+                    window[`ultimaFuenteProrrateo_${g}`] = null;
+                    window[`ultimoTotalCompartidoRedondeado_${g}`] = null;
                 }
-            } else {
-                document.getElementById('bloque_prorrateo').style.display = 'none';
-                document.getElementById('prorrateo_2').value = '';
-                document.getElementById('prorrateo_3').value = '';
-                ultimaFuenteProrrateo = null;
-                ultimoTotalCompartidoRedondeado = null;
-            }
+            });
 
             generarBoletas();
         }
 
-        function calcularProrrateo(fuente, autoRun = false) {
-            if (!comparteAgua) return;
+        function calcularProrrateo(grupo, fuente, autoRun = false) {
+            if (!window[`comparteAgua_${grupo}`]) return;
 
-            const totalDistribuir = datosRedondeados.comp.agua;
-            const valK = document.getElementById('prorrateo_2');
-            const valS = document.getElementById('prorrateo_3');
+            const totalDistribuir = datosRedondeados[`c${grupo}`].agua;
+            const i1 = grupo.charAt(0); const i2 = grupo.charAt(1);
+            const val1 = document.getElementById(`prorrateo_${i1}`);
+            const val2 = document.getElementById(`prorrateo_${i2}`);
 
-            if (fuente === '2') {
-                if (valK.value === '') {
-                    valS.value = '';
-                    ultimaFuenteProrrateo = null;
+            if (fuente === i1) {
+                if (val1.value === '') {
+                    val2.value = '';
+                    window[`ultimaFuenteProrrateo_${grupo}`] = null;
                 } else {
-                    let k = Math.round(parseFloat(valK.value) || 0);
+                    let k = Math.round(parseFloat(val1.value) || 0);
                     k = Math.max(0, Math.min(k, totalDistribuir));
-                    valK.value = k;
-                    valS.value = totalDistribuir - k;
-                    ultimaFuenteProrrateo = '2';
+                    val1.value = k;
+                    val2.value = totalDistribuir - k;
+                    window[`ultimaFuenteProrrateo_${grupo}`] = i1;
                 }
-            } else if (fuente === '3') {
-                if (valS.value === '') {
-                    valK.value = '';
-                    ultimaFuenteProrrateo = null;
+            } else if (fuente === i2) {
+                if (val2.value === '') {
+                    val1.value = '';
+                    window[`ultimaFuenteProrrateo_${grupo}`] = null;
                 } else {
-                    let s = Math.round(parseFloat(valS.value) || 0);
+                    let s = Math.round(parseFloat(val2.value) || 0);
                     s = Math.max(0, Math.min(s, totalDistribuir));
-                    valS.value = s;
-                    valK.value = totalDistribuir - s;
-                    ultimaFuenteProrrateo = '3';
+                    val2.value = s;
+                    val1.value = totalDistribuir - s;
+                    window[`ultimaFuenteProrrateo_${grupo}`] = i2;
                 }
             }
 
@@ -1135,26 +1210,24 @@
         function generarBoletas() {
             const valor = id => document.getElementById(id)?.value ?? '';
             const tieneValor = id => String(valor(id)).trim() !== '';
-            const ponerImporte = (id, presente, importe) => {
-                document.getElementById(id).innerText = presente ? importe : '';
-            };
-            const ponerTotal = (id, presentes, total) => {
-                document.getElementById(id).innerText = presentes ? `S/. ${total}` : '';
-            };
+            const ponerImporte = (id, presente, importe) => { document.getElementById(id).innerText = presente ? importe : ''; };
+            const ponerTotal = (id, presentes, total) => { document.getElementById(id).innerText = presentes ? `S/. ${total}` : ''; };
 
             let mes = valor('mes_cobro').trim().toUpperCase();
             Array.from(document.getElementsByClassName('txt-mes')).forEach(el => el.innerText = mes);
 
             for (let i = 1; i <= 6; i++) {
-                let esCompartidoItem = comparteAgua && (i === 2 || i === 3);
+                let grupo = (i===1||i===2) ? '12' : ((i===3||i===4) ? '34' : '56');
+                let esCompartidoItem = window[`comparteAgua_${grupo}`];
+                
                 let agua = esCompartidoItem ? (parseInt(valor(`prorrateo_${i}`)) || 0) : datosRedondeados[`i${i}`].agua;
                 let luz = datosRedondeados[`i${i}`].luz;
                 
-                let fi_agua = esCompartidoItem ? valor('fecha_inicio_comp_agua') : valor(`fecha_inicio_${i}_agua`);
-                let ff_agua = esCompartidoItem ? valor('fecha_fin_comp_agua') : valor(`fecha_fin_${i}_agua`);
+                let fi_agua = esCompartidoItem ? valor(`fecha_inicio_comp_${grupo}_agua`) : valor(`fecha_inicio_${i}_agua`);
+                let ff_agua = esCompartidoItem ? valor(`fecha_fin_comp_${grupo}_agua`) : valor(`fecha_fin_${i}_agua`);
                 
                 const hayAgua = esCompartidoItem 
-                    ? (tieneValor('agua_comp') || tieneValor('m3_comp') || tieneValor('fecha_inicio_comp_agua') || tieneValor('fecha_fin_comp_agua'))
+                    ? (tieneValor(`agua_comp_${grupo}`) || tieneValor(`m3_comp_${grupo}`) || tieneValor(`fecha_inicio_comp_${grupo}_agua`) || tieneValor(`fecha_fin_comp_${grupo}_agua`))
                     : (tieneValor(`agua_${i}`) || tieneValor(`m3_${i}`) || tieneValor(`fecha_inicio_${i}_agua`) || tieneValor(`fecha_fin_${i}_agua`));
                 
                 const hayLuz = tieneValor(`luz_${i}`) || tieneValor(`kwh_${i}`) || tieneValor(`fecha_inicio_${i}_luz`) || tieneValor(`fecha_fin_${i}_luz`);
@@ -1227,14 +1300,10 @@
 
                     if (puedeCompartir) {
                         try {
-                            await navigator.share({
-                                files: [archivo],
-                                title: titulo,
-                                text: textoCompartir
-                            });
+                            await navigator.share({ files: [archivo], title: titulo, text: textoCompartir });
                             compartidoNativo = true;
                         } catch (errShare) {
-                            if (errShare && (errShare.name === 'AbortError' || String(errShare.message || '').toLowerCase().includes('canceled') || String(errShare.message || '').toLowerCase().includes('cancelled'))) {
+                            if (errShare && (errShare.name === 'AbortError' || String(errShare.message || '').toLowerCase().includes('cancel'))) {
                                 compartidoNativo = true;
                             }
                         }
@@ -1243,12 +1312,8 @@
 
                 if (!compartidoNativo) {
                     const enlace = document.createElement('a');
-                    enlace.href = base64Uri;
-                    enlace.download = nombreArchivo;
-                    enlace.style.display = 'none';
-                    document.body.appendChild(enlace);
-                    enlace.click();
-                    document.body.removeChild(enlace);
+                    enlace.href = base64Uri; enlace.download = nombreArchivo; enlace.style.display = 'none';
+                    document.body.appendChild(enlace); enlace.click(); document.body.removeChild(enlace);
                 }
             } catch (error) {
                 console.error('Error capturando/compartiendo boleta:', error);
@@ -1289,9 +1354,7 @@
                 await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
                 const mesVisible = (document.getElementById('mes_cobro').value.trim() || 'MES').toUpperCase();
-                const mesArchivo = mesVisible
-                    .replace(/[\\/:*?"<>|]+/g, '-')
-                    .replace(/\s+/g, '_');
+                const mesArchivo = mesVisible.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_');
                 const nombreArchivo = `${nombreBase}_${mesArchivo}.png`;
 
                 await capturarYCompartirBoleta(
@@ -1322,11 +1385,13 @@
 
             return {
                 tipo: 'CUENTA_FINAL_INQUILINOS_SESSION',
-                version: 1,
+                version: 2,
                 guardado_en: new Date().toISOString(),
                 campos,
                 estado: {
-                    ultimaFuenteProrrateo: ultimaFuenteProrrateo || null,
+                    ultimaFuenteProrrateo_12: ultimaFuenteProrrateo_12 || null,
+                    ultimaFuenteProrrateo_34: ultimaFuenteProrrateo_34 || null,
+                    ultimaFuenteProrrateo_56: ultimaFuenteProrrateo_56 || null,
                     mesImportadoAgua: mesImportadoAgua || '',
                     mesImportadoLuz: mesImportadoLuz || '',
                     nombres: {
@@ -1336,7 +1401,9 @@
                         n4: document.getElementById('label_nombre_4').innerText,
                         n5: document.getElementById('label_nombre_5').innerText,
                         n6: document.getElementById('label_nombre_6').innerText,
-                        nComp: document.getElementById('label_nombre_comp').innerText
+                        nComp12: document.getElementById('label_nombre_comp_12').innerText,
+                        nComp34: document.getElementById('label_nombre_comp_34').innerText,
+                        nComp56: document.getElementById('label_nombre_comp_56').innerText
                     }
                 }
             };
@@ -1359,37 +1426,21 @@
 
                 const datosSesion = obtenerDatosSesion();
                 const mesOriginal = document.getElementById('mes_cobro').value.trim() || 'SIN MES';
-                const mesArchivo = mesOriginal
-                    .toUpperCase()
-                    .replace(/[\\/:*?"<>|]+/g, '-')
-                    .replace(/\s+/g, ' ');
+                const mesArchivo = mesOriginal.toUpperCase().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ');
                 const nombreArchivo = `CUENTA FINAL INQUILINOS-${mesArchivo}.json`;
                 const jsonTexto = JSON.stringify(datosSesion, null, 2);
 
-                const plugins = window.Capacitor && window.Capacitor.Plugins
-                    ? window.Capacitor.Plugins
-                    : null;
+                const plugins = window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins : null;
 
                 if (plugins && plugins.Filesystem) {
                     try {
                         const Filesystem = plugins.Filesystem;
                         const base64Data = textoABase64Utf8(jsonTexto);
-
-                        const guardado = await Filesystem.writeFile({
-                            path: nombreArchivo,
-                            data: base64Data,
-                            directory: 'DOCUMENTS',
-                            recursive: true
-                        });
+                        const guardado = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'DOCUMENTS', recursive: true });
 
                         if (plugins.Share) {
                             try {
-                                await plugins.Share.share({
-                                    title: nombreArchivo,
-                                    text: 'Copia de seguridad de Cuenta Final Inquilinos',
-                                    url: guardado.uri,
-                                    dialogTitle: 'Compartir o guardar respaldo'
-                                });
+                                await plugins.Share.share({ title: nombreArchivo, text: 'Copia de seguridad de Cuenta Final Inquilinos', url: guardado.uri, dialogTitle: 'Compartir o guardar respaldo' });
                             } catch (errorShareNativo) {
                                 showAlertModal(`Sesión guardada correctamente como:\n${nombreArchivo}\n\nEl archivo quedó almacenado en DOCUMENTS.`, "success");
                             }
@@ -1401,20 +1452,10 @@
                         try {
                             const Filesystem = plugins.Filesystem;
                             const base64Data = textoABase64Utf8(jsonTexto);
-                            const temporal = await Filesystem.writeFile({
-                                path: nombreArchivo,
-                                data: base64Data,
-                                directory: 'CACHE',
-                                recursive: true
-                            });
+                            const temporal = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'CACHE', recursive: true });
 
                             if (plugins.Share) {
-                                await plugins.Share.share({
-                                    title: nombreArchivo,
-                                    text: 'Copia de seguridad de Cuenta Final Inquilinos',
-                                    url: temporal.uri,
-                                    dialogTitle: 'Guardar respaldo'
-                                });
+                                await plugins.Share.share({ title: nombreArchivo, text: 'Copia de seguridad de Cuenta Final Inquilinos', url: temporal.uri, dialogTitle: 'Guardar respaldo' });
                                 return;
                             }
                         } catch (errorCache) {
@@ -1423,54 +1464,32 @@
                 }
 
                 if (navigator.share && typeof File !== 'undefined') {
-                    const archivoCompatible = new File(
-                        [jsonTexto],
-                        nombreArchivo,
-                        { type: 'text/plain' }
-                    );
-
+                    const archivoCompatible = new File([jsonTexto], nombreArchivo, { type: 'text/plain' });
                     try {
-                        await navigator.share({
-                            files: [archivoCompatible],
-                            title: nombreArchivo,
-                            text: 'Copia de seguridad de Cuenta Final Inquilinos'
-                        });
+                        await navigator.share({ files: [archivoCompatible], title: nombreArchivo, text: 'Copia de seguridad de Cuenta Final Inquilinos' });
                         return;
                     } catch (errorArchivoShare) {
                         const msg = String(errorArchivoShare && errorArchivoShare.message ? errorArchivoShare.message : '').toLowerCase();
-                        if (errorArchivoShare && (errorArchivoShare.name === 'AbortError' || msg.includes('cancel'))) {
-                            return;
-                        }
+                        if (errorArchivoShare && (errorArchivoShare.name === 'AbortError' || msg.includes('cancel'))) return;
                     }
-
                     try {
-                        await navigator.share({
-                            title: nombreArchivo,
-                            text: jsonTexto
-                        });
+                        await navigator.share({ title: nombreArchivo, text: jsonTexto });
                         return;
                     } catch (errorTextoShare) {
                         const msg = String(errorTextoShare && errorTextoShare.message ? errorTextoShare.message : '').toLowerCase();
-                        if (errorTextoShare && (errorTextoShare.name === 'AbortError' || msg.includes('cancel'))) {
-                            return;
-                        }
+                        if (errorTextoShare && (errorTextoShare.name === 'AbortError' || msg.includes('cancel'))) return;
                     }
                 }
 
                 const blob = new Blob([jsonTexto], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const enlace = document.createElement('a');
-                enlace.href = url;
-                enlace.download = nombreArchivo;
-                enlace.style.display = 'none';
-                document.body.appendChild(enlace);
-                enlace.click();
-                enlace.remove();
+                enlace.href = url; enlace.download = nombreArchivo; enlace.style.display = 'none';
+                document.body.appendChild(enlace); enlace.click(); enlace.remove();
                 setTimeout(() => URL.revokeObjectURL(url), 1500);
 
             } catch (error) {
                 console.error('Error al guardar sesión:', error);
-
                 try {
                     const datosSesion = obtenerDatosSesion();
                     const jsonTexto = JSON.stringify(datosSesion, null, 2);
@@ -1480,77 +1499,10 @@
                         return;
                     }
                 } catch (_) {}
-
                 showAlertModal('No se pudo guardar la sesión en este dispositivo.\n\n' + (error && error.message ? error.message : error), "error");
             } finally {
-                if (boton) {
-                    boton.disabled = false;
-                    boton.textContent = textoOriginal || 'GUARDAR SESIÓN';
-                }
+                if (boton) { boton.disabled = false; boton.textContent = textoOriginal || 'GUARDAR SESIÓN'; }
             }
-        }
-
-        function importarSesion(event) {
-            const input = event.target;
-            const file = input.files && input.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const datos = JSON.parse(e.target.result);
-                    if (!datos || datos.tipo !== 'CUENTA_FINAL_INQUILINOS_SESSION' || !datos.campos || typeof datos.campos !== 'object') {
-                        throw new Error('El archivo no corresponde a una sesión válida de esta calculadora.');
-                    }
-
-                    Object.entries(datos.campos).forEach(([id, valor]) => {
-                        const el = document.getElementById(id);
-                        if (!el || el.type === 'file') return;
-                        if (el.type === 'checkbox' || el.type === 'radio') el.checked = Boolean(valor);
-                        else el.value = valor ?? '';
-                    });
-
-                    if (datos.estado && datos.estado.nombres) {
-                        if(datos.estado.nombres.n1) actualizarNombresGlobales(1, datos.estado.nombres.n1);
-                        if(datos.estado.nombres.n2) actualizarNombresGlobales(2, datos.estado.nombres.n2);
-                        if(datos.estado.nombres.n3) actualizarNombresGlobales(3, datos.estado.nombres.n3);
-                        if(datos.estado.nombres.n4) actualizarNombresGlobales(4, datos.estado.nombres.n4);
-                        if(datos.estado.nombres.n5) actualizarNombresGlobales(5, datos.estado.nombres.n5);
-                        if(datos.estado.nombres.n6) actualizarNombresGlobales(6, datos.estado.nombres.n6);
-                        if(datos.estado.nombres.nComp) actualizarNombresGlobales('comp', datos.estado.nombres.nComp.replace(' (AGUA COMPARTIDA)', ''));
-                    }
-
-                    ultimaFuenteProrrateo = datos.estado && ['2', '3'].includes(datos.estado.ultimaFuenteProrrateo)
-                        ? datos.estado.ultimaFuenteProrrateo
-                        : null;
-                    mesImportadoAgua = datos.estado ? String(datos.estado.mesImportadoAgua || '').trim().toUpperCase() : '';
-                    mesImportadoLuz = datos.estado ? String(datos.estado.mesImportadoLuz || '').trim().toUpperCase() : '';
-                    ultimoTotalCompartidoRedondeado = null;
-
-                    procesarCalculosGlobales();
-                    evaluarVisibilidadGeneral();
-
-                    if (comparteAgua) {
-                        const kGuardado = datos.campos.prorrateo_2;
-                        const sGuardado = datos.campos.prorrateo_3;
-                        if (kGuardado !== undefined) document.getElementById('prorrateo_2').value = kGuardado;
-                        if (sGuardado !== undefined) document.getElementById('prorrateo_3').value = sGuardado;
-                        generarBoletas();
-                    }
-
-                    showAlertModal('¡Sesión importada correctamente!', "success");
-                } catch (error) {
-                    console.error('Error al importar sesión:', error);
-                    showAlertModal('No se pudo importar la sesión:\n' + error.message, "error");
-                } finally {
-                    input.value = '';
-                }
-            };
-            reader.onerror = function() {
-                showAlertModal('No se pudo leer el archivo de sesión.', "error");
-                input.value = '';
-            };
-            reader.readAsText(file);
         }
     </script>
 </body>
