@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: redondeos_montos_v10.html -->
+<!-- Nombre del archivo: redondeos_montos_v11.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -627,6 +627,7 @@
         let ultimaFuenteProrrateo_12 = null; let ultimaFuenteProrrateo_34 = null; let ultimaFuenteProrrateo_56 = null;
         let ultimoTotalCompartidoRedondeado_12 = null; let ultimoTotalCompartidoRedondeado_34 = null; let ultimoTotalCompartidoRedondeado_56 = null;
         let mesImportadoAgua = ''; let mesImportadoLuz = '';
+        let estadoSinMedidor = {1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false};
 
         const STORAGE_AGUA_SYNC = 'recibos_cayran_agua_sync_v1';
         const STORAGE_LUZ_SYNC = 'recibos_cayran_luz_sync_v1';
@@ -683,6 +684,42 @@
         function valStr(id) { return document.getElementById(id)?.value.trim() || ''; }
         function getVal(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
 
+        function marcarComoSinMedidor(slot, isSin) {
+            estadoSinMedidor[slot] = isSin;
+            
+            const m3El = document.getElementById(`m3_${slot}`);
+            if (m3El && m3El.parentElement) {
+                m3El.parentElement.style.display = isSin ? 'none' : 'block';
+                const gridDiv = m3El.parentElement.parentElement;
+                if (gridDiv) {
+                    if (isSin) {
+                        gridDiv.classList.remove('grid-cols-2');
+                        gridDiv.classList.add('grid-cols-1');
+                        m3El.value = ''; 
+                    } else {
+                        gridDiv.classList.remove('grid-cols-1');
+                        gridDiv.classList.add('grid-cols-2');
+                    }
+                }
+            }
+            
+            const kwhEl = document.getElementById(`kwh_${slot}`);
+            if (kwhEl && kwhEl.parentElement) {
+                kwhEl.parentElement.style.display = isSin ? 'none' : 'block';
+                const gridDivLuz = kwhEl.parentElement.parentElement;
+                if (gridDivLuz) {
+                    if (isSin) {
+                        gridDivLuz.classList.remove('grid-cols-2');
+                        gridDivLuz.classList.add('grid-cols-1');
+                        kwhEl.value = ''; 
+                    } else {
+                        gridDivLuz.classList.remove('grid-cols-1');
+                        gridDivLuz.classList.add('grid-cols-2');
+                    }
+                }
+            }
+        }
+
         function evaluarVisibilidadGeneral() {
             let tieneDatos = false;
 
@@ -734,7 +771,10 @@
                 ultimoTotalCompartidoRedondeado_12 = null; ultimoTotalCompartidoRedondeado_34 = null; ultimoTotalCompartidoRedondeado_56 = null;
                 mesImportadoAgua = ''; mesImportadoLuz = '';
                 
-                for(let i=1; i<=7; i++) actualizarNombresGlobales(i, `INQUILINO ${i}`);
+                for(let i=1; i<=7; i++) {
+                    actualizarNombresGlobales(i, `INQUILINO ${i}`);
+                    marcarComoSinMedidor(i, false);
+                }
                 actualizarNombresGlobales('comp_12', "GRUPO 1");
                 actualizarNombresGlobales('comp_34', "GRUPO 2");
                 actualizarNombresGlobales('comp_56', "GRUPO 3");
@@ -877,6 +917,10 @@
                 let slot = determinarSlot(inq, 'agua');
 
                 if (slot) {
+                    if (!slot.toString().startsWith('comp_')) {
+                        if (inq.con_medidor === false) marcarComoSinMedidor(slot, true);
+                        else if (inq.con_medidor === true) marcarComoSinMedidor(slot, false);
+                    }
                     if (slot.toString().startsWith('comp_')) {
                         document.getElementById(`agua_${slot}`).value = monto;
                         document.getElementById(`m3_${slot}`).value = m3;
@@ -913,6 +957,9 @@
                 let slot = determinarSlot(inq, 'luz');
 
                 if (slot && !slot.toString().startsWith('comp_')) {
+                    if (inq.con_medidor === false) marcarComoSinMedidor(slot, true);
+                    else if (inq.con_medidor === true) marcarComoSinMedidor(slot, false);
+
                     document.getElementById(`luz_${slot}`).value = monto;
                     document.getElementById(`kwh_${slot}`).value = kwh;
                     document.getElementById(`fecha_inicio_${slot}_luz`).value = fi;
@@ -1026,6 +1073,10 @@
                         let slot = determinarSlot(inq, 'agua');
 
                         if (slot) {
+                            if (!slot.toString().startsWith('comp_')) {
+                                if (inq.con_medidor === false) marcarComoSinMedidor(slot, true);
+                                else if (inq.con_medidor === true) marcarComoSinMedidor(slot, false);
+                            }
                             if (slot.toString().startsWith('comp_')) {
                                 document.getElementById(`agua_${slot}`).value = monto;
                                 document.getElementById(`m3_${slot}`).value = m3;
@@ -1087,6 +1138,9 @@
                         let slot = determinarSlot(inq, 'luz');
 
                         if (slot && !slot.toString().startsWith('comp_')) {
+                            if (inq.con_medidor === false) marcarComoSinMedidor(slot, true);
+                            else if (inq.con_medidor === true) marcarComoSinMedidor(slot, false);
+
                             document.getElementById(`luz_${slot}`).value = monto;
                             document.getElementById(`kwh_${slot}`).value = kwh;
                             document.getElementById(`fecha_inicio_${slot}_luz`).value = fi;
@@ -1148,6 +1202,12 @@
                         ultimaFuenteProrrateo_56 = datos.estado.ultimaFuenteProrrateo_56 || null;
                         mesImportadoAgua = datos.estado.mesImportadoAgua || '';
                         mesImportadoLuz = datos.estado.mesImportadoLuz || '';
+
+                        if (datos.estado.estadoSinMedidor) {
+                            for (let i = 1; i <= 7; i++) {
+                                marcarComoSinMedidor(i, datos.estado.estadoSinMedidor[i] === true);
+                            }
+                        }
 
                         if (datos.estado.nombres) {
                             if (datos.estado.nombres.n1) actualizarNombresGlobales(1, datos.estado.nombres.n1);
@@ -1244,8 +1304,8 @@
                     if (window[`comparteAgua_${g}`]) agua = 0;
                 }
 
-                let m3 = document.getElementById(`m3_${i}`).value;
-                let kwh = document.getElementById(`kwh_${i}`).value;
+                let m3 = document.getElementById(`m3_${i}`)?.value || '';
+                let kwh = document.getElementById(`kwh_${i}`)?.value || '';
                 
                 if (i <= 6) {
                     let g = (i===1||i===2) ? '12' : ((i===3||i===4) ? '34' : '56');
@@ -1400,9 +1460,11 @@
                 const aguaDisponible = hayAgua && (!esCompartidoItem || tieneValor(`prorrateo_${i}`));
                 ponerTotal(`out_total_${i}`, aguaDisponible || hayLuz, (aguaDisponible ? agua : 0) + (hayLuz ? luz : 0));
                 
+                let isSin = estadoSinMedidor[i] === true;
+                
                 document.getElementById(`detalles_${i}`).innerHTML = 
-                    (hayAgua ? generarFilaDetalle('AGUA', fi_agua, ff_agua, esCompartidoItem ? '' : valor(`m3_${i}`), 'M3', esCompartidoItem) : '') + 
-                    (hayLuz ? generarFilaDetalle('LUZ', valor(`fecha_inicio_${i}_luz`), valor(`fecha_fin_${i}_luz`), valor(`kwh_${i}`), 'KWH') : '');
+                    (hayAgua ? generarFilaDetalle('AGUA', fi_agua, ff_agua, esCompartidoItem ? '' : valor(`m3_${i}`), 'M3', esCompartidoItem || isSin) : '') + 
+                    (hayLuz ? generarFilaDetalle('LUZ', valor(`fecha_inicio_${i}_luz`), valor(`fecha_fin_${i}_luz`), valor(`kwh_${i}`), 'KWH', isSin) : '');
             }
         }
 
@@ -1554,6 +1616,7 @@
                     ultimaFuenteProrrateo_56: ultimaFuenteProrrateo_56 || null,
                     mesImportadoAgua: mesImportadoAgua || '',
                     mesImportadoLuz: mesImportadoLuz || '',
+                    estadoSinMedidor: estadoSinMedidor,
                     nombres: {
                         n1: document.getElementById('label_nombre_1').innerText,
                         n2: document.getElementById('label_nombre_2').innerText,
