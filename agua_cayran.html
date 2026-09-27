@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v10.html -->
+<!-- Nombre del archivo: agua_cayran_v11.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1065,8 +1065,8 @@
         if (hasNoMeter) {
             html += `
             <div class="col-xl-4 col-lg-6 col-md-6 col-12">
-                <div class="receipt-container" id="pdf_area_nometer" style="border: 2px solid var(--card-border); border-top: 5px solid var(--text-muted);">
-                    <div id="pdf_content_wrapper_nometer" class="d-flex flex-column h-100">
+                <div class="receipt-container" id="pdf_area_nometer" style="border: 2px solid var(--card-border); border-top: 5px solid var(--text-muted); height: auto !important;">
+                    <div id="pdf_content_wrapper_nometer" class="d-flex flex-column">
                         
                         <div id="pdf_header_nometer" class="pdf-only-section">
                             <span id="pdf_mes_nometer">---</span>
@@ -1082,10 +1082,7 @@
                             <input type="text" id="inometer_name" class="tenant-name-input" value="" placeholder="" oninput="calc()">
                         </div>
                         
-                        <div class="tenant-body">
-                            <!-- Espaciador flexible para empujar los botones hacia abajo y mantener la simetría visual -->
-                            <div class="flex-grow-1"></div>
-
+                        <div class="tenant-body" style="padding-bottom: 20px; flex-grow: 0;">
                             <!-- Datos ocultos para exportación y cálculos -->
                             <div class="hidden-data">
                                 <span id="inometer_pdf_total_val">0.00</span>
@@ -1098,15 +1095,6 @@
                                 <span id="inometer_val_red_ant">0.00</span>
                                 <span id="inometer_val_red_act">0.00</span>
                                 <span id="inometer_val_total">0.00</span>
-                            </div>
-
-                            <div class="d-flex gap-2 mt-4 action-buttons-container">
-                                <button class="btn btn-action-mobile btn-whatsapp-style flex-fill shadow-sm" onclick="exportPDF('nometer')">
-                                    <i class="bi bi-file-earmark-ruled"></i> Recibo
-                                </button>
-                                <button class="btn btn-action-mobile btn-calc-style flex-fill shadow-sm" onclick="exportCalculos('nometer')">
-                                    <i class="bi bi-calculator"></i> Cálculos
-                                </button>
                             </div>
                         </div>
                     </div>
