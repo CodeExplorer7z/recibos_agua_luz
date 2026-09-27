@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: luz_cayran_v11.html -->
+<!-- Nombre del archivo: luz_cayran_v13.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -78,8 +78,20 @@
             -moz-appearance: textfield;
         }
         
-        .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 30px; padding: 0 20px; }
-        @media (min-width: 1024px) { .container { grid-template-columns: 380px 1fr; align-items: start; } }
+        .container { 
+            max-width: 1300px; 
+            margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 30px; 
+            padding: 0 20px; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @media (min-width: 1024px) { 
+            .container { grid-template-columns: 380px 1fr; align-items: start; } 
+            .container.layout-centered { grid-template-columns: minmax(380px, 460px); justify-content: center; }
+        }
         
         /* === NAVEGACIÓN FLOTANTE (ESTILO ISLA) === */
         .nav-island-container {
@@ -357,14 +369,6 @@
             padding-bottom: max(24px, env(safe-area-inset-bottom));
         }
 
-        .container {
-            width: min(100%, 1320px);
-            max-width: 1320px;
-            min-width: 0;
-            gap: clamp(18px, 2.4vw, 30px);
-            padding-inline: clamp(12px, 2.6vw, 28px);
-        }
-
         .container > *,
         #inquilinos-container,
         .panel,
@@ -529,7 +533,7 @@
         }
 
         @media (max-width: 900px) {
-            .container { grid-template-columns: 1fr; }
+            .container { grid-template-columns: 1fr !important; }
             #inquilinos-container { gap: 18px !important; }
         }
 
@@ -664,7 +668,7 @@
 
 <div id="pdf-template-container"></div> 
 
-<div class="container">
+<div class="container layout-centered" id="main-container">
     <div class="panel" id="main-receipt">
         <div class="header-hero">
             <h1>RECIBO LUZ <span>PRINCIPAL</span></h1>
@@ -713,10 +717,7 @@
             </div>
             <div class="input-group-custom">
                 <label>Inquilinos con Medidor</label>
-                <select id="num_medidores" class="filled" onchange="actualizarVista()">
-                    <option value="" selected>Seleccione...</option>
-                    <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
-                </select>
+                <input type="number" id="num_medidores" class="filled" min="1" max="5" placeholder="" value="" oninput="if(this.value !== '') { if(parseInt(this.value) > 5) this.value = 5; if(parseInt(this.value) < 1) this.value = 1; } actualizarVista();">
             </div>
         </div>
         
@@ -760,7 +761,7 @@
     </div>
 
     <!-- Contenedor dinámico de inquilinos -->
-    <div id="inquilinos-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; align-items: start;"></div>
+    <div id="inquilinos-container" style="display: none; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; align-items: start;"></div>
 </div>
 
 <script>
@@ -854,7 +855,7 @@
                 const cb = document.getElementById('has_sin_medidor');
                 if(cb) cb.checked = false;
 
-                for(let i=2; i<=5; i++) { limpiarInquilino(i, true); }
+                for(let i=2; i<=6; i++) { limpiarInquilino(i, true); }
                 limpiarInquilino(1, true);
 
                 actualizarVista();
@@ -944,7 +945,7 @@
             }
         }
 
-        for (let i = 2; i <= 5; i++) { if (document.getElementById(`modo_dias_i${i}`)) toggleModoDias(i, false); }
+        for (let i = 2; i <= 6; i++) { if (document.getElementById(`modo_dias_i${i}`)) toggleModoDias(i, false); }
         calculate();
     }
 
@@ -960,7 +961,7 @@
 
         let numMedidores = metadata && metadata.configuracion ? parseInt(metadata.configuracion.num_medidores) : conMedidor.length;
         if (!Number.isFinite(numMedidores)) numMedidores = conMedidor.length;
-        numMedidores = Math.min(4, Math.max(1, numMedidores || 1));
+        numMedidores = Math.min(5, Math.max(1, numMedidores || 1));
 
         let hasSinMedidor = (metadata && metadata.configuracion && typeof metadata.configuracion.inquilino_sin_medidor === 'boolean') ? metadata.configuracion.inquilino_sin_medidor : !!sinMedidor;
 
@@ -986,7 +987,7 @@
         asignarValorLuz('int_m', importesM.interes_compensatorio); asignarValorLuz('red_ant_m', importesM.redondeo_anterior);
         asignarValorLuz('red_act_m', importesM.redondeo_actual);
 
-        for (let i = 2; i <= 5; i++) {
+        for (let i = 2; i <= 6; i++) {
             asignarValorLuz(`titulo_i${i}`, ''); asignarValorLuz(`lec_ant_i${i}`, ''); asignarValorLuz(`lec_act_i${i}`, '');
             asignarValorLuz(`fec_ant_i${i}`, ''); asignarValorLuz(`fec_act_i${i}`, '');
             asignarValorLuz(`modo_dias_i${i}`, 'recibo'); asignarValorLuz(`dias_vividos_i${i}`, '');
@@ -995,8 +996,8 @@
 
         conMedidor.forEach((inq, indice) => {
             let i = parseInt(inq.id_interno);
-            if (!Number.isFinite(i) || i < 2 || i > 5) i = indice + 2;
-            if (i > 5) return;
+            if (!Number.isFinite(i) || i < 2 || i > 6) i = indice + 2;
+            if (i > 6) return;
             const lecturas = inq.lecturas || {};
             asignarValorLuz(`titulo_i${i}`, inq.nombre || `Inquilino ${i - 1}`);
             asignarValorLuz(`lec_ant_i${i}`, lecturas.lectura_anterior); asignarValorLuz(`lec_act_i${i}`, lecturas.lectura_actual);
@@ -1046,7 +1047,7 @@
 
     function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault) {
         return `
-        <div class="panel" id="recibo_i${id}" style="border-top: 4px solid ${colorBorde};">
+        <div class="panel" id="recibo_i${id}" style="border-top: 4px solid ${colorBorde}; display: none;">
             <div class="header-card">
                 <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">
                     <i class="bi bi-person-badge"></i> CLIENTE MEDIDOR #${id - 1}
@@ -1117,9 +1118,10 @@
     container.innerHTML += generarTarjetaInquilino(3, "Inquilino 2", "#3b82f6", "recibo"); // Blue
     container.innerHTML += generarTarjetaInquilino(4, "Inquilino 3", "#d946ef", "recibo"); // Fuchsia
     container.innerHTML += generarTarjetaInquilino(5, "Inquilino 4", "#f97316", "recibo"); // Orange
+    container.innerHTML += generarTarjetaInquilino(6, "Inquilino 5", "#8b5cf6", "recibo"); // Purple
 
     container.innerHTML += `
-        <div class="panel" id="recibo_i1" style="border-top: 4px solid #ef4444;">
+        <div class="panel" id="recibo_i1" style="border-top: 4px solid #ef4444; display: none;">
             <div class="header-card">
                 <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px;">
                     <i class="bi bi-person-fill-exclamation"></i> CLIENTE SIN MEDIDOR
@@ -1149,15 +1151,31 @@
     }
 
     function actualizarVista() {
-        const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
+        const inputNumMedidoresStr = document.getElementById('num_medidores').value;
+        const numMedidores = inputNumMedidoresStr === '' ? 0 : (parseInt(inputNumMedidoresStr) || 0);
         const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
+        
         const tarjetaI1 = document.getElementById('recibo_i1');
         if (tarjetaI1) tarjetaI1.style.display = hasSinMedidor ? 'block' : 'none';
-        for (let i = 2; i <= 5; i++) {
-            const index = i - 1; const debeMostrar = index <= numMedidores;
+        
+        for (let i = 2; i <= 6; i++) {
+            const index = i - 1; 
+            const debeMostrar = index <= numMedidores;
             const tarjeta = document.getElementById(`recibo_i${i}`);
             if (tarjeta) tarjeta.style.display = debeMostrar ? 'block' : 'none';
         }
+
+        const mainContainer = document.getElementById('main-container');
+        const inqContainer = document.getElementById('inquilinos-container');
+        
+        if (numMedidores === 0 && !hasSinMedidor) {
+            mainContainer.classList.add('layout-centered');
+            inqContainer.style.display = 'none';
+        } else {
+            mainContainer.classList.remove('layout-centered');
+            inqContainer.style.display = 'grid';
+        }
+
         calculate();
     }
 
@@ -1215,7 +1233,8 @@
 
     function calculate() {
         const factorLey = (2 * UIT_VIGENTE) / 1000000;
-        const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
+        const numMedidoresInput = document.getElementById('num_medidores').value;
+        const numMedidores = numMedidoresInput === '' ? 0 : (parseInt(numMedidoresInput) || 0);
         const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
         const totalInquilinosReales = numMedidores + (hasSinMedidor ? 1 : 0);
         const n = totalInquilinosReales > 0 ? totalInquilinosReales : 1; 
@@ -1240,7 +1259,7 @@
         let sumaKwhInquilinosMedidorReal = 0;
         let sumaMontosInquilinosMedidor = 0;
 
-        for (let i = 2; i <= 5; i++) {
+        for (let i = 2; i <= 6; i++) {
             if ((i - 1) > numMedidores) { 
                 document.getElementById(`total_pagar_i${i}`).value = 'S/. 0.00';
                 continue; 
@@ -1312,7 +1331,8 @@
         const d_f1m = parseDateLocal(f1m_val); const d_f2m = parseDateLocal(f2m_val);
         const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
-        const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
+        const numMedidoresStr = document.getElementById('num_medidores').value;
+        const numMedidores = numMedidoresStr === '' ? 0 : (parseInt(numMedidoresStr) || 0);
         const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
         const totalInquilinosReales = numMedidores + (hasSinMedidor ? 1 : 0);
         const n = totalInquilinosReales > 0 ? totalInquilinosReales : 1;
@@ -1441,7 +1461,7 @@
         } else {
             const diasFct = document.getElementById(`dias_vividos_i${id}`).value;
             diasFacturadosTexto = `<b>DIAS FACTURADOS:</b> ${diasFct}<br>`;
-            let color = '#3b82f6'; if (id === 2) color = '#10b981'; if (id === 4) color = '#d946ef'; if (id === 5) color = '#f97316';
+            let color = '#3b82f6'; if (id === 2) color = '#10b981'; if (id === 4) color = '#d946ef'; if (id === 5) color = '#f97316'; if (id === 6) color = '#8b5cf6';
             const l_ant = getVal(`lec_ant_i${id}`); const l_act = getVal(`lec_act_i${id}`);
             tempCont.innerHTML = `
                 <div class="modo-recibo" id="recibo-captura">
@@ -1481,6 +1501,7 @@
         if (id === 2) { colorFondo = '#10b981'; colorTitulo = '#d1fae5'; colorTextoTitulo = '#064e3b'; }
         if (id === 4) { colorFondo = '#d946ef'; colorTitulo = '#fae8ff'; colorTextoTitulo = '#701a75'; }
         if (id === 5) { colorFondo = '#f97316'; colorTitulo = '#ffedd5'; colorTextoTitulo = '#7c2d12'; }
+        if (id === 6) { colorFondo = '#8b5cf6'; colorTitulo = '#ede9fe'; colorTextoTitulo = '#4c1d95'; }
 
         const l_ant = getVal(`lec_ant_i${id}`); const l_act = getVal(`lec_act_i${id}`);
         const f1i = document.getElementById(`fec_act_i${id}`).value; const f2i = document.getElementById(`fec_ant_i${id}`).value;
@@ -1587,7 +1608,7 @@
         });
     }
 
-    toggleModoDias(2, false); toggleModoDias(3, false); toggleModoDias(4, false); toggleModoDias(5, false); actualizarVista(); 
+    toggleModoDias(2, false); toggleModoDias(3, false); toggleModoDias(4, false); toggleModoDias(5, false); toggleModoDias(6, false); actualizarVista(); 
     document.addEventListener('wheel', function(event) { if (document.activeElement.type === 'number') event.preventDefault(); }, { passive: false });
 
 
@@ -1630,7 +1651,8 @@
         const diasRecibo = dFin && dAnt ? Math.max(1, Math.floor((dFin - dAnt) / 864e5) + 1) : 0;
         const mes = String(document.getElementById('mes_principal')?.value || '').trim().toUpperCase();
         const anio = dFin ? dFin.getFullYear() : null;
-        const numMedidores = parseInt(document.getElementById('num_medidores')?.value) || 0;
+        const numMedidoresInput = document.getElementById('num_medidores').value;
+        const numMedidores = numMedidoresInput === '' ? 0 : (parseInt(numMedidoresInput) || 0);
         const hasSinMedidor = !!document.getElementById('has_sin_medidor')?.checked;
         const numero = (v, dec = 2) => {
             const n = Number(v);
