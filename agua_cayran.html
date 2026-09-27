@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v11.html -->
+<!-- Nombre del archivo: agua_cayran_v12.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -439,15 +439,7 @@
                             <label class="small-label text-primary d-flex align-items-center gap-2 mb-3" style="color: var(--blue-light) !important;">
                                 <i class="bi bi-people-fill"></i> N° Inquilinos (Con Medidor)
                             </label>
-                            <select id="n_tenants_meter" class="form-select input-editable mb-3 fw-bold" style="border-color: var(--blue-light) !important; box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);" onchange="render()">
-                                <option value="" selected>Seleccionar...</option>
-                                <option value="1">1 Inquilino</option>
-                                <option value="2">2 Inquilinos</option>
-                                <option value="3">3 Inquilinos</option>
-                                <option value="4">4 Inquilinos</option>
-                                <option value="5">5 Inquilinos</option>
-                                <option value="6">6 Inquilinos</option>
-                            </select>
+                            <input type="number" id="n_tenants_meter" class="form-control input-editable mb-3 fw-bold" style="border-color: var(--blue-light) !important; box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);" min="1" max="5" placeholder="" value="" oninput="if(this.value !== '') { if(parseInt(this.value) > 5) this.value = 5; if(parseInt(this.value) < 1) this.value = 1; } render();">
                             <div class="form-check ms-1 mt-2">
                                 <input class="form-check-input" type="checkbox" id="has_nometer" style="transform: scale(1.2); cursor: pointer;" onchange="render()">
                                 <label class="form-check-label small-label ms-2" for="has_nometer" style="cursor: pointer; padding-top: 2px;">Incluir Inquilino Sin Medidor</label>
@@ -698,7 +690,9 @@
                 const { Filesystem, Share } = window.Capacitor.Plugins;
                 const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
                 const savedFile = await Filesystem.writeFile({
-                    path: nombreArchivo, data: base64Data, directory: 'CACHE'
+                    path: nombreArchivo,
+                    data: base64Data,
+                    directory: 'CACHE'
                 });
                 await Share.share({ title: nombreArchivo, url: savedFile.uri, dialogTitle: 'Guardar JSON' });
                 return;
@@ -726,7 +720,8 @@
 
         const fechaActualObj = fechaAguaLocal(mCurrD);
         const anio = fechaActualObj ? fechaActualObj.getFullYear() : null;
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
+        const nMeteredInput = document.getElementById('n_tenants_meter').value;
+        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
 
@@ -851,7 +846,8 @@
         const mainPrevDateVal = document.getElementById('m_prev_d').value;
         const mesTexto = document.getElementById('m_mes').value || "---";
 
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
+        const nMeteredInput = document.getElementById('n_tenants_meter').value;
+        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
 
@@ -952,7 +948,8 @@
     }
 
     function render() {
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
+        const nMeteredInput = document.getElementById('n_tenants_meter').value;
+        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
         
@@ -1112,7 +1109,8 @@
 
     async function exportResumenPDF() {
         const mes = document.getElementById('m_mes').value || '';
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
+        const nMeteredInput = document.getElementById('n_tenants_meter').value;
+        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalPrincipalText = document.getElementById('v_total_main').value; 
         
@@ -1235,7 +1233,8 @@
         let mainDays = 0; if (!isNaN(mCurrD) && !isNaN(mPrevD)) mainDays = Math.floor((mCurrD - mPrevD) / 864e5) + 1;
         mainDays = mainDays > 0 ? mainDays : 1; 
 
-        const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
+        const nMeteredInput = document.getElementById('n_tenants_meter').value;
+        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
         const hasNoMeter = document.getElementById('has_nometer').checked;
         const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
         const tAgua = diffTotal > 0 ? (vWater / diffTotal) : 0;
@@ -1310,7 +1309,8 @@
         const mCurrD = document.getElementById('m_curr_d')?.value || '';
         const fechaActualObj = fechaAguaLocal(mCurrD);
         const anio = fechaActualObj ? fechaActualObj.getFullYear() : null;
-        const nMetered = parseInt(document.getElementById('n_tenants_meter')?.value) || 0;
+        const nMeteredInput = document.getElementById('n_tenants_meter').value;
+        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
         const hasNoMeter = !!document.getElementById('has_nometer')?.checked;
         const diasRecibo = diasInclusivosAgua(mPrevD, mCurrD);
         const inquilinos = [];
