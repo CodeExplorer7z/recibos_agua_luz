@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v12.html -->
+<!-- Nombre del archivo: agua_cayran_v12_sheets.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,6 +15,9 @@
         // Inicializar tema sin parpadeos
         const savedTheme = localStorage.getItem('themeAgua') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
         document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // URL DE TU GOOGLE APPS SCRIPT
+        const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyCYnwsiRUg1GalEKjWv9CPliKLeH0JXW3bh-YGM47SbdI2yOLPvpHH6e626aRfR8hc/exec";
     </script>
 
     <style>
@@ -118,6 +121,13 @@
         }
         .btn-save-json:hover { background-color: #059669 !important; }
         
+        .btn-cloud {
+            background-color: var(--blue-light) !important;
+            color: white !important;
+            border: none !important;
+        }
+        .btn-cloud:hover { filter: brightness(0.9); }
+
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
         
@@ -321,10 +331,18 @@
             <button id="btn-theme-toggle" class="btn-top-action btn-import shadow-sm" onclick="toggleTheme()" title="Cambiar Tema">
                 <!-- Se inyecta por JS -->
             </button>
-            <button class="btn-top-action btn-save-json shadow-sm" onclick="guardarEstadoApp()">
-                <i class="bi bi-cloud-arrow-down-fill"></i> <span class="hide-mobile">Guardar JSON</span>
+            
+            <!-- Botón Cargar de Google Sheets -->
+            <button class="btn-top-action btn-cloud shadow-sm" onclick="cargarDesdeGoogleSheets()" title="Cargar desde Google Sheets">
+                <i class="bi bi-cloud-arrow-down-fill"></i> <span class="hide-mobile">Cargar Nube</span>
             </button>
-            <button class="btn-top-action btn-import shadow-sm" onclick="document.getElementById('file_import').click()">
+            
+            <!-- Botón Guardar en Google Sheets -->
+            <button class="btn-top-action btn-save-json shadow-sm" onclick="guardarEstadoApp()" title="Guardar en Google Sheets y Local">
+                <i class="bi bi-cloud-arrow-up-fill"></i> <span class="hide-mobile">Guardar Nube</span>
+            </button>
+            
+            <button class="btn-top-action btn-import shadow-sm" onclick="document.getElementById('file_import').click()" title="Importar JSON local">
                 <i class="bi bi-folder-symlink-fill"></i> <span class="hide-mobile">Importar</span>
             </button>
             <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
@@ -519,7 +537,7 @@
 
     function borrarTodosLosDatos() {
         showConfirmModal("¿Estas seguro de borrar todos los datos?", () => {
-            setTimeout(() => { // Esperamos la transición del modal para limpiar
+            setTimeout(() => { 
                 document.querySelectorAll('#main_card_col input').forEach(inp => {
                     if(inp.type === 'number' || inp.type === 'text' || inp.type === 'date') {
                         if(inp.id !== 'v_total_main') inp.value = '';
@@ -709,8 +727,68 @@
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
+    
+    // Función integrada para guardar en NUBE y LOCAL
+    async function guardarEnNubeYLocal(jsonUnificado, nombreArchivo) {
+        // 1. Descarga local de respaldo
+        descargarJSONAgua(jsonUnificado, nombreArchivo);
 
-    function exportarJSONAgua() {
+        // 2. Envío automático a Google Sheets
+        try {
+            showAlertModal("Guardando en Google Sheets...", "info");
+            let respuesta = await fetch(URL_APPS_SCRIPT, {
+                method: 'POST',
+                body: JSON.stringify(jsonUnificado)
+            });
+            let resultado = await respuesta.json();
+            
+            if (resultado.status === "success") {
+                showAlertModal("¡Datos guardados y sincronizados en Google Sheets con éxito!", "success");
+            } else {
+                showAlertModal("Se guardó localmente, pero hubo un error en la nube: " + resultado.message, "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showAlertModal("Guardado local exitoso. Sin conexión a Google Sheets.", "info");
+        }
+    }
+    
+    // Función para Cargar desde Google Sheets
+    async function cargarDesdeGoogleSheets() {
+        const mesSeleccionado = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
+        if (!mesSeleccionado) {
+            showAlertModal("Selecciona un mes en el selector (Mes a Facturar) antes de cargar desde la nube.", "error");
+            return;
+        }
+        
+        const urlConMes = `${URL_APPS_SCRIPT}?mes=${mesSeleccionado}`;
+        
+        try {
+            showAlertModal("Buscando datos en Google Sheets...", "info");
+            let respuesta = await fetch(urlConMes);
+            let datosNube = await respuesta.json();
+            
+            if (datosNube.error) {
+                showAlertModal(datosNube.error, "error");
+                return;
+            }
+            
+            if (datosNube && datosNube.estado_app) {
+                restaurandoAguaLocal = true;
+                cargarEstadoLegacyAgua(datosNube.estado_app);
+                restaurandoAguaLocal = false;
+                
+                showAlertModal(`¡Datos de ${mesSeleccionado} cargados desde Google Sheets con éxito!`, "success");
+            } else {
+                showAlertModal("El formato de los datos en la nube no es válido.", "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showAlertModal("No se pudo conectar con Google Sheets. Revisa tu conexión.", "error");
+        }
+    }
+
+    function guardarEstadoApp() {
         calc();
         const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
         const mPrevD = document.getElementById('m_prev_d').value;
@@ -797,10 +875,9 @@
             resumen: { tipo_registro: 'resumen', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, consumo_total_recibo_m3: numeroAgua(consumoTotal, 2), consumo_total_distribuido_m3: numeroAgua(sumaConsumo, 2), diferencia_consumo_m3: numeroAgua(consumoTotal - sumaConsumo, 2), total_recibo_principal: numeroAgua(totalPrincipal, 2), total_distribuido_inquilinos: numeroAgua(sumaMontos, 2), diferencia_montos: numeroAgua(totalPrincipal - sumaMontos, 2), cantidad_inquilinos: totalTenants }
         };
 
-        descargarJSONAgua(jsonUnificado, `DATA AGUA ${mes} - ${anio || 'SIN_ANIO'}.json`);
+        // LLAMAMOS A LA NUEVA FUNCIÓN PARA GUARDAR EN LA NUBE Y LOCAL
+        guardarEnNubeYLocal(jsonUnificado, `DATA AGUA ${mes} - ${anio || 'SIN_ANIO'}.json`);
     }
-
-    function guardarEstadoApp() { exportarJSONAgua(); }
 
     function cargarEstadoLegacyAgua(estado) {
         if (!estado || typeof estado !== 'object' || Array.isArray(estado)) throw new Error('Estado de Agua Cayrán no válido.');
