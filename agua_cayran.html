@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v12_sheets.html -->
+<!-- Nombre del archivo: agua_cayran_v13_nube.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -99,7 +99,6 @@
         }
         .btn-back:hover { background: var(--card-border); filter: brightness(0.95); }
 
-        /* Estilos de botones superiores */
         .btn-trash {
             background-color: var(--bg-subtle) !important;
             color: #fb7185 !important;
@@ -131,7 +130,6 @@
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
         
-        /* Ajuste específico para Inputs de Fecha (Evita año cortado) */
         input[type="date"].input-editable {
             padding-left: 6px !important;
             padding-right: 6px !important;
@@ -139,11 +137,9 @@
             letter-spacing: -0.5px;
         }
 
-        /* Tarjetas (Cards) */
         .main-card { border: 1px solid var(--card-border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border-radius: 12px; background: var(--bg-surface); overflow: hidden; transition: background-color 0.3s; }
         .card-header-custom { background: var(--blue-dark); color: white; padding: 16px 20px; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: background-color 0.3s; }
         
-        /* Ajustes de inputs generales */
         .input-editable { background-color: var(--input-bg) !important; border: 1px solid var(--card-border) !important; font-size: 15px !important; border-radius: 8px; color: var(--input-text) !important; padding: 10px 14px; transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s; }
         .input-editable:focus { border-color: var(--blue-light) !important; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.15) !important; outline: none; }
         .input-editable:disabled { opacity: 0.6; }
@@ -152,7 +148,6 @@
         
         .section-divider { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700; margin: 20px 0 10px 0; border-bottom: 1px solid var(--card-border); padding-bottom: 6px; display: flex; align-items: center; gap: 6px; }
         
-        /* Estilos Inquilinos */
         .receipt-container { 
             background: var(--bg-surface); 
             border-radius: 12px;
@@ -212,11 +207,9 @@
 
         .small-label { font-size: 0.85rem; font-weight: 600; display: block; color: var(--text-main); margin-bottom: 6px; }
         
-        /* Ocultamiento seguro para PDF */
         .pdf-only-section, .hidden-data { position: absolute; left: -9999px; top: 0; visibility: hidden; height: 0; overflow: hidden; }
         #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
 
-        /* Botón Ciclo */
         .btn-ciclo {
             background-color: var(--bg-subtle) !important;
             color: var(--blue-light) !important;
@@ -234,7 +227,6 @@
         .btn-ciclo:active { transform: scale(0.9); }
         .btn-ciclo svg { width: 16px; height: 16px; }
 
-        /* === Estilos para Modales Personalizados === */
         .custom-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
@@ -274,7 +266,6 @@
         .btn-modal-ok:hover { background: #059669; }
         .btn-modal-ok:active { transform: scale(0.95); }
 
-        /* === MEDIA QUERIES === */
         @media (max-width: 991px) { 
             .container-fluid { padding: 10px; } 
             .action-buttons-container { width: 100% !important; margin-top: 15px; flex-direction: column; }
@@ -284,36 +275,14 @@
 
         @media (max-width: 640px) {
             .hide-mobile { display: none !important; }
-            
-            .nav-back-bar-container {
-                padding: max(6px, env(safe-area-inset-top)) 10px 6px;
-            }
-            
+            .nav-back-bar-container { padding: max(6px, env(safe-area-inset-top)) 10px 6px; }
             .nav-back-bar { gap: 6px; }
             .nav-back-bar .d-flex { gap: 6px !important; }
-
             .btn-back, .btn-top-action {
-                width: 40px;
-                min-width: 40px;
-                height: 40px;
-                padding: 0 !important;
-                justify-content: center;
-                border-radius: 10px !important;
+                width: 40px; min-width: 40px; height: 40px; padding: 0 !important;
+                justify-content: center; border-radius: 10px !important;
             }
-
-            .btn-back i, .btn-top-action i {
-                font-size: 1.1rem;
-                margin: 0;
-            }
-        }
-        
-        @media (max-width: 380px) {
-            /* Fix extra para celulares muy pequeños */
-            input[type="date"].input-editable {
-                font-size: 12px !important;
-                padding-left: 2px !important;
-                padding-right: 2px !important;
-            }
+            .btn-back i, .btn-top-action i { font-size: 1.1rem; margin: 0; }
         }
     </style>
 </head>
@@ -325,8 +294,8 @@
             <i class="bi bi-arrow-left"></i> <span class="hide-mobile">Menú</span>
         </a>
         <div class="d-flex gap-2 align-items-center">
-            <button class="btn-top-action btn-trash shadow-sm" onclick="borrarTodosLosDatos()" title="Borrar Todos los Datos">
-                <i class="bi bi-trash-fill"></i> <span class="hide-mobile">Borrar</span>
+            <button class="btn-top-action btn-trash shadow-sm" onclick="borrarTodosLosDatos()" title="Limpiar Campos">
+                <i class="bi bi-trash-fill"></i> <span class="hide-mobile">Limpiar</span>
             </button>
             <button id="btn-theme-toggle" class="btn-top-action btn-import shadow-sm" onclick="toggleTheme()" title="Cambiar Tema">
                 <!-- Se inyecta por JS -->
@@ -338,7 +307,7 @@
             </button>
             
             <!-- Botón Guardar en Google Sheets -->
-            <button class="btn-top-action btn-save-json shadow-sm" onclick="guardarEstadoApp()" title="Guardar en Google Sheets y Local">
+            <button class="btn-top-action btn-save-json shadow-sm" onclick="guardarEstadoApp()" title="Guardar en Google Sheets">
                 <i class="bi bi-cloud-arrow-up-fill"></i> <span class="hide-mobile">Guardar Nube</span>
             </button>
             
@@ -350,7 +319,6 @@
     </div>
 </div>
 
-<!-- Estructuras HTML de los Modales Globales -->
 <div class="custom-modal-overlay" id="globalConfirmModal">
     <div class="custom-modal-box">
         <div class="custom-modal-icon icon-warning"><i class="bi bi-exclamation-circle-fill"></i></div>
@@ -376,7 +344,6 @@
 
 <div class="container-fluid" style="max-width: 1500px;">
     <div class="row" id="main_row">
-        <!-- SECCIÓN VERTICAL: RECIBO PRINCIPAL -->
         <div class="col-lg-3 col-md-12 mb-4" id="main_card_col">
             <div class="main-card h-100">
                 <div class="card-header-custom">
@@ -384,8 +351,6 @@
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end">
-                        
-                        <!-- Categoría 1: Período -->
                         <div class="col-12 mt-0">
                             <div class="section-divider mt-0"><i class="bi bi-calendar3"></i> Período</div>
                             <label class="small-label">Mes a Facturar</label>
@@ -405,7 +370,6 @@
                             <input type="date" id="m_curr_d" class="form-control input-editable" oninput="calc()">
                         </div>
 
-                        <!-- Categoría 2: Lecturas Generales -->
                         <div class="col-12">
                             <div class="section-divider"><i class="bi bi-speedometer2"></i> Medidor Principal</div>
                         </div>
@@ -423,7 +387,6 @@
                             <input type="number" id="m_curr_r" class="form-control input-editable" oninput="calc()">
                         </div>
 
-                        <!-- Categoría 3: Importes -->
                         <div class="col-12">
                             <div class="section-divider"><i class="bi bi-cash-stack"></i> Importes Recibo (S/.)</div>
                         </div>
@@ -452,7 +415,6 @@
                             <input type="number" id="v_red_act" class="form-control input-editable" oninput="calc()">
                         </div>
                         
-                        <!-- Categoría 4: Configuración Inquilinos -->
                         <div class="col-12 mt-4 p-4" style="background-color: var(--bg-subtle); border-radius: 10px; border: 1px solid var(--card-border);">
                             <label class="small-label text-primary d-flex align-items-center gap-2 mb-3" style="color: var(--blue-light) !important;">
                                 <i class="bi bi-people-fill"></i> N° Inquilinos (Con Medidor)
@@ -464,7 +426,6 @@
                             </div>
                         </div>
 
-                        <!-- TOTAL -->
                         <div class="col-12 mt-4">
                             <label class="small-label text-center d-block text-uppercase fw-bold text-success mb-2">Total Recibo Principal</label>
                             <input type="text" id="v_total_main" class="form-control input-total-main text-center" value="S/. 0.00" readonly>
@@ -477,7 +438,6 @@
             </div>
         </div>
 
-        <!-- SECCIÓN GRILLA: INQUILINOS -->
         <div class="col-lg-9 col-md-12" id="tenants_col">
             <div class="row g-3" id="tenants_grid"></div>
         </div>
@@ -485,9 +445,6 @@
 </div>
 
 <script>
-    // =========================================================================
-    // LÓGICA DE MODALES PERSONALIZADOS
-    // =========================================================================
     let currentConfirmAction = null;
 
     function showConfirmModal(msg, actionCallback) {
@@ -531,12 +488,8 @@
         document.getElementById('globalAlertModal').classList.remove('active');
     }
 
-    // =========================================================================
-    // FUNCIONES PRINCIPALES Y DE INTERFAZ
-    // =========================================================================
-
     function borrarTodosLosDatos() {
-        showConfirmModal("¿Estas seguro de borrar todos los datos?", () => {
+        showConfirmModal("¿Deseas limpiar todos los campos del formulario?", () => {
             setTimeout(() => { 
                 document.querySelectorAll('#main_card_col input').forEach(inp => {
                     if(inp.type === 'number' || inp.type === 'text' || inp.type === 'date') {
@@ -551,7 +504,6 @@
 
                 render();
                 calc();
-                guardarAutomaticoAgua();
             }, 300);
         });
     }
@@ -573,7 +525,6 @@
         }
     }
     window.addEventListener('DOMContentLoaded', () => actualizarIconoTema(document.documentElement.getAttribute('data-theme')));
-
 
     document.addEventListener('wheel', function(event) {
         if (document.activeElement.type === 'number') {
@@ -629,7 +580,7 @@
     }
 
     function avanzarCicloPrincipalAgua() {
-        showConfirmModal("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores? Los datos actuales quedarán en blanco para que ingreses los nuevos.", () => {
+        showConfirmModal("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores?", () => {
             const lecAct = document.getElementById('m_curr_r');
             const lecAnt = document.getElementById('m_prev_r');
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
@@ -642,7 +593,7 @@
 
     function avanzarCicloInquilinoAgua(id) {
         const nombreInq = document.getElementById(`i${id}_name`)?.value || `Inquilino #${id}`;
-        showConfirmModal(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores? Los campos actuales quedarán en blanco para el nuevo mes.`, () => {
+        showConfirmModal(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores?`, () => {
             const lecAct = document.getElementById(`i${id}_curr_r`);
             const lecAnt = document.getElementById(`i${id}_prev_r`);
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
@@ -703,24 +654,7 @@
 
     async function descargarJSONAgua(datos, nombreArchivo) {
         const jsonString = JSON.stringify(datos, null, 2);
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
-            try {
-                const { Filesystem, Share } = window.Capacitor.Plugins;
-                const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
-                const savedFile = await Filesystem.writeFile({
-                    path: nombreArchivo,
-                    data: base64Data,
-                    directory: 'CACHE'
-                });
-                await Share.share({ title: nombreArchivo, url: savedFile.uri, dialogTitle: 'Guardar JSON' });
-                return;
-            } catch (err) { console.error('Error Capacitor Share:', err); }
-        }
         const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
-        const file = new File([blob], nombreArchivo, { type: 'application/json' });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try { await navigator.share({ files: [file], title: 'Respaldo JSON', text: nombreArchivo }); return; } catch (e) { console.error(e); }
-        }
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = nombreArchivo;
@@ -728,12 +662,8 @@
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
     
-    // Función integrada para guardar en NUBE y LOCAL
+    // Función para guardar en NUBE (Google Sheets)
     async function guardarEnNubeYLocal(jsonUnificado, nombreArchivo) {
-        // 1. Descarga local de respaldo
-        descargarJSONAgua(jsonUnificado, nombreArchivo);
-
-        // 2. Envío automático a Google Sheets
         try {
             showAlertModal("Guardando en Google Sheets...", "info");
             let respuesta = await fetch(URL_APPS_SCRIPT, {
@@ -745,11 +675,11 @@
             if (resultado.status === "success") {
                 showAlertModal("¡Datos guardados y sincronizados en Google Sheets con éxito!", "success");
             } else {
-                showAlertModal("Se guardó localmente, pero hubo un error en la nube: " + resultado.message, "error");
+                showAlertModal("Error en la nube: " + resultado.message, "error");
             }
         } catch (error) {
             console.error(error);
-            showAlertModal("Guardado local exitoso. Sin conexión a Google Sheets.", "info");
+            showAlertModal("No se pudo conectar con Google Sheets.", "error");
         }
     }
     
@@ -774,10 +704,7 @@
             }
             
             if (datosNube && datosNube.estado_app) {
-                restaurandoAguaLocal = true;
                 cargarEstadoLegacyAgua(datosNube.estado_app);
-                restaurandoAguaLocal = false;
-                
                 showAlertModal(`¡Datos de ${mesSeleccionado} cargados desde Google Sheets con éxito!`, "success");
             } else {
                 showAlertModal("El formato de los datos en la nube no es válido.", "error");
@@ -793,7 +720,7 @@
         const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
         const mPrevD = document.getElementById('m_prev_d').value;
         const mCurrD = document.getElementById('m_curr_d').value;
-        if (!mes) { showAlertModal('Selecciona el MES antes de guardar el JSON.', 'error'); return; }
+        if (!mes) { showAlertModal('Selecciona el MES antes de guardar.', 'error'); return; }
         if (!mCurrD) { showAlertModal('Es necesario ingresar la Fecha Actual del recibo principal.', 'error'); return; }
 
         const fechaActualObj = fechaAguaLocal(mCurrD);
@@ -875,7 +802,6 @@
             resumen: { tipo_registro: 'resumen', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, consumo_total_recibo_m3: numeroAgua(consumoTotal, 2), consumo_total_distribuido_m3: numeroAgua(sumaConsumo, 2), diferencia_consumo_m3: numeroAgua(consumoTotal - sumaConsumo, 2), total_recibo_principal: numeroAgua(totalPrincipal, 2), total_distribuido_inquilinos: numeroAgua(sumaMontos, 2), diferencia_montos: numeroAgua(totalPrincipal - sumaMontos, 2), cantidad_inquilinos: totalTenants }
         };
 
-        // LLAMAMOS A LA NUEVA FUNCIÓN PARA GUARDAR EN LA NUBE Y LOCAL
         guardarEnNubeYLocal(jsonUnificado, `DATA AGUA ${mes} - ${anio || 'SIN_ANIO'}.json`);
     }
 
@@ -1108,7 +1034,6 @@
                                 </div>
                             </div>
 
-                            <!-- Datos ocultos para exportación y cálculos -->
                             <div class="hidden-data">
                                 <span id="i${i}_pdf_total_val">0.00</span>
                                 <span id="i${i}_res_cons">0.00</span>
@@ -1133,7 +1058,7 @@
                         </div>
                     </div>
                 </div>
-            </div>`;
+            `;
         }
 
         if (hasNoMeter) {
@@ -1157,7 +1082,6 @@
                         </div>
                         
                         <div class="tenant-body" style="padding-bottom: 20px; flex-grow: 0;">
-                            <!-- Datos ocultos para exportación y cálculos -->
                             <div class="hidden-data">
                                 <span id="inometer_pdf_total_val">0.00</span>
                                 <span id="inometer_res_cons">0.00</span>
@@ -1173,7 +1097,7 @@
                         </div>
                     </div>
                 </div>
-            </div>`;
+            `;
         }
 
         grid.innerHTML = html;
@@ -1358,7 +1282,7 @@
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;"><div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 3: CARGO AGUA Y ALCANTARILLADO</div><h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿A cuánto dinero equivale ese consumo en el recibo completo?</h3><div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;"><div style="font-size: 14px; color: #0f172a;"><strong>Agua:</strong> ${cCons} m³ x S/. ${tAgua.toFixed(4)} = <strong style="color: #0fa968;">S/. ${cWater}</strong><br><div style="margin-top: 5px;"><strong>Alcantarillado:</strong> ${cCons} m³ x S/. ${tDesague.toFixed(4)} = <strong style="color: #0fa968;">S/. ${cSewer}</strong></div></div></div></div>
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;"><div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 4: SERVICIOS COMPARTIDOS</div><h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cómo se dividen los gastos fijos no dependientes del volumen?</h3><div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;"><div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; font-style: italic; color: #64748b; font-size: 13px;">Fórmula: (Monto Total ÷ ${mainDays} días) ÷ ${totalTenants} inquilinos × ${billedDays} días cobrados.</div><div style="font-size: 14px; color: #0f172a; line-height: 1.6;">• <strong>Cargo Fijo:</strong> S/. ${vFixed.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cFixed}</strong><br>• <strong>Mora:</strong> S/. ${vMora.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cMora}</strong><br>• <strong>Redondeo Ant.:</strong> S/. ${vRedAnt.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cRedAnt}</strong><br>• <strong>Redondeo Act.:</strong> S/. ${vRedAct.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cRedAct}</strong></div></div></div>
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;"><div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 5: IGV (18%)</div><div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;"><div style="font-size: 14px; color: #0f172a;"><strong>Operación:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/.${cFixed}) = <strong style="color: #0fa968;">S/. ${cIgv}</strong></div></div></div>
-                <div style="page-break-inside: avoid; background-color: #064e3b; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"><p style="margin: 0 0 15px 0; color: #a7f3d0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose Final de Conceptos</p><table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #d1fae5; border-bottom: 1px dashed #047857; padding-bottom: 15px;"><tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr><tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr><tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr></table><h3 style="margin: 0; font-size: 24px; font-weight: bold; text-align: center; color: #10b981;">TOTAL A PAGAR: S/. ${total}</h3></div>
+                <div style="page-break-inside: avoid; background-color: #064e3b; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"><p style="margin: 0 0 15px 0; color: #a7f3d0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose Final de Conceptos</p><table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #d1fae5; border-bottom: 1px dashed #047857; padding-bottom: 15px;"><tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr><tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr><tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr></table><h3 style="margin: 0; font-size: 24px; font-weight: bold; text-align: center; color: #10b981;">TOTAL A PAGAR: S/. ${total}</h3></div>
             </div>`;
         }
 
@@ -1369,122 +1293,10 @@
         try { const pdfBase64 = await html2pdf().set(opt).from(document.getElementById('calculos-captura')).outputPdf('datauristring'); await guardarOCompartirPDF(exportFileName, pdfBase64); } finally { tempCont.innerHTML = ''; }
     }
 
-
-    // =========================================================================
-    // SINCRONIZACIÓN AUTOMÁTICA LOCAL - AGUA CAYRÁN
-    // =========================================================================
-    const STORAGE_AGUA_BORRADOR = 'recibos_cayran_agua_borrador_v1';
-    const STORAGE_AGUA_SYNC = 'recibos_cayran_agua_sync_v1';
-    let timerAutosaveAgua = null;
-    let restaurandoAguaLocal = false;
-
-    function construirSyncAgua() {
-        calc();
-
-        const mes = String(document.getElementById('m_mes')?.value || '').trim().toUpperCase();
-        const mPrevD = document.getElementById('m_prev_d')?.value || '';
-        const mCurrD = document.getElementById('m_curr_d')?.value || '';
-        const fechaActualObj = fechaAguaLocal(mCurrD);
-        const anio = fechaActualObj ? fechaActualObj.getFullYear() : null;
-        const nMeteredInput = document.getElementById('n_tenants_meter').value;
-        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
-        const hasNoMeter = !!document.getElementById('has_nometer')?.checked;
-        const diasRecibo = diasInclusivosAgua(mPrevD, mCurrD);
-        const inquilinos = [];
-
-        for (let i = 1; i <= nMetered; i++) {
-            const nombre = document.getElementById(`i${i}_name`)?.value || `Inquilino #${i}`;
-            const modo = document.getElementById(`i${i}_calc_mode`)?.value || 'auto';
-            const diasFacturados = modo === 'manual'
-                ? Math.max(0, parseFloat(document.getElementById(`i${i}_manual_days`)?.value) || 0)
-                : diasRecibo;
-            const consumoM3 = numeroAgua(textoNumeroAgua(`i${i}_res_cons`), 2);
-            const total = numeroAgua(textoNumeroAgua(`i${i}_pdf_total_val`), 2);
-            inquilinos.push({
-                nombre,
-                id_interno: i,
-                con_medidor: true,
-                consumo_m3: consumoM3,
-                monto_pagar: total,
-                fecha_inicio: calcularInicioFacturadoAgua(mCurrD, diasFacturados),
-                fecha_fin: mCurrD,
-                dias_facturados: diasFacturados
-            });
-        }
-
-        if (hasNoMeter && document.getElementById('inometer_name')) {
-            const nombre = document.getElementById('inometer_name').value || 'Inquilino Sin Medidor';
-            const consumoM3 = numeroAgua(textoNumeroAgua('inometer_res_cons'), 2);
-            const total = numeroAgua(textoNumeroAgua('inometer_pdf_total_val'), 2);
-            inquilinos.push({
-                nombre,
-                id_interno: 'nometer',
-                con_medidor: false,
-                consumo_m3: consumoM3,
-                monto_pagar: total,
-                fecha_inicio: calcularInicioFacturadoAgua(mCurrD, diasRecibo),
-                fecha_fin: mCurrD,
-                dias_facturados: diasRecibo
-            });
-        }
-
-        return {
-            schema: 'agua_cayran_sync',
-            schema_version: '1.0',
-            tipo: 'agua',
-            mes,
-            mes_cobro: mes,
-            anio,
-            periodo: { mes, anio },
-            actualizado_en: new Date().toISOString(),
-            inquilinos
-        };
-    }
-
-    function guardarAutomaticoAgua() {
-        if (restaurandoAguaLocal) return;
-        try {
-            localStorage.setItem(STORAGE_AGUA_BORRADOR, JSON.stringify(capturarEstadoAppAgua()));
-            const sync = construirSyncAgua();
-            localStorage.setItem(STORAGE_AGUA_SYNC, JSON.stringify(sync));
-        } catch (error) {
-            console.warn('No se pudo guardar automáticamente:', error);
-        }
-    }
-
-    function programarGuardadoAutomaticoAgua() {
-        clearTimeout(timerAutosaveAgua);
-        timerAutosaveAgua = setTimeout(guardarAutomaticoAgua, 250);
-    }
-
-    function restaurarAutomaticoAgua() {
-        try {
-            const raw = localStorage.getItem(STORAGE_AGUA_BORRADOR);
-            if (!raw) return false;
-            const estado = JSON.parse(raw);
-            restaurandoAguaLocal = true;
-            cargarEstadoLegacyAgua(estado);
-            return true;
-        } catch (error) {
-            console.warn('No se pudo restaurar automáticamente:', error);
-            return false;
-        } finally {
-            restaurandoAguaLocal = false;
-        }
-    }
-
-    function instalarAutosaveAgua() {
-        document.addEventListener('input', programarGuardadoAutomaticoAgua, true);
-        document.addEventListener('change', programarGuardadoAutomaticoAgua, true);
-        window.addEventListener('pagehide', guardarAutomaticoAgua);
-        window.addEventListener('beforeunload', guardarAutomaticoAgua);
-    }
-
+    // Inicialización limpia sin autoguardados locales en segundo plano
     window.onload = function() {
         render();
-        restaurarAutomaticoAgua();
-        instalarAutosaveAgua();
-        guardarAutomaticoAgua();
+        calc();
     };
 
 </script>
