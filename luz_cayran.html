@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: luz_cayran_v14_sin_autosave.html -->
+<!-- Nombre del archivo: luz_cayran_nube_directa.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,332 +7,86 @@
     <title>CÁLCULO LUZ - ENERGÍA Y CONTROL</title>
     <link rel="icon" type="image/x-icon" href="recibo_luz.ico">
     
-    <!-- Bootstrap y Google Fonts -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     
-    <!-- Librerías JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <script>
-        // Inicializar tema sin parpadeos
         const savedTheme = localStorage.getItem('themeLuz') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
         document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // URL DE TU GOOGLE APPS SCRIPT DE LUZ
+        const URL_APPS_SCRIPT_LUZ = "https://script.google.com/macros/s/AKfycbwUA33zRTjHWU3pnGOfT6D8DCEUHcb6QB-WTn-fwFfC9Pfr6LxqJ0L8YP1dqDwwsi-_/exec";
     </script>
 
     <style>
-        /* === PALETA DIFERENCIADA PARA LUZ === */
         :root { 
-            --accent-main: #8b5cf6; 
-            --accent-secondary: #f59e0b; 
-            --bg-app: #f3f4f6; 
-            --surface: #ffffff; 
-            --text-main: #1f2937; 
-            --text-muted: #6b7280;
-            --border-color: #e5e7eb; 
-            --input-bg: #f9fafb; 
-            --input-focus-ring: rgba(139, 92, 246, 0.25);
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05);
-            --radius-box: 20px;
-            --radius-btn: 50px; 
+            --accent-main: #8b5cf6; --accent-secondary: #f59e0b; --bg-app: #f3f4f6; 
+            --surface: #ffffff; --text-main: #1f2937; --text-muted: #6b7280;
+            --border-color: #e5e7eb; --input-bg: #f9fafb; --input-focus-ring: rgba(139, 92, 246, 0.25);
+            --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05); --radius-box: 20px; --radius-btn: 50px; 
         }
-
         [data-theme="dark"] {
-            --accent-main: #a78bfa; 
-            --accent-secondary: #fbbf24; 
-            --bg-app: #111827; 
-            --surface: #1f2937; 
-            --text-main: #f9fafb; 
-            --text-muted: #9ca3af;
-            --border-color: #374151; 
-            --input-bg: #111827; 
-            --input-focus-ring: rgba(167, 139, 250, 0.25);
+            --accent-main: #a78bfa; --accent-secondary: #fbbf24; --bg-app: #111827; 
+            --surface: #1f2937; --text-main: #f9fafb; --text-muted: #9ca3af;
+            --border-color: #374151; --input-bg: #111827; --input-focus-ring: rgba(167, 139, 250, 0.25);
             --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.3);
         }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Nunito', system-ui, sans-serif; background-color: var(--bg-app); color: var(--text-main); margin: 0; padding-top: env(safe-area-inset-top); padding-bottom: max(30px, env(safe-area-inset-bottom)); overflow-x: hidden; }
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+        .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 30px; padding: 0 20px; }
+        @media (min-width: 1024px) { .container { grid-template-columns: 380px 1fr; align-items: start; } .container.layout-centered { grid-template-columns: minmax(380px, 460px); justify-content: center; } }
         
-        body { 
-            font-family: 'Nunito', system-ui, sans-serif; 
-            background-color: var(--bg-app); 
-            color: var(--text-main); 
-            margin: 0; 
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: max(30px, env(safe-area-inset-bottom)); 
-            transition: background-color 0.3s, color 0.3s;
-            overflow-x: hidden;
-        }
-
-        /* Quitar flechas a los inputs de tipo number */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-        
-        .container { 
-            max-width: 1300px; 
-            margin: 0 auto; 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 30px; 
-            padding: 0 20px; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        @media (min-width: 1024px) { 
-            .container { grid-template-columns: 380px 1fr; align-items: start; } 
-            .container.layout-centered { grid-template-columns: minmax(380px, 460px); justify-content: center; }
-        }
-        
-        /* === NAVEGACIÓN FLOTANTE (ESTILO ISLA) === */
-        .nav-island-container {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: flex-end;
-            padding: max(10px, env(safe-area-inset-top)) 20px 8px 20px;
-            pointer-events: none;
-        }
-        
-        .nav-island {
-            background-color: var(--surface);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-color);
-            padding: 10px 20px;
-            border-radius: 50px;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            width: auto;
-            max-width: 1260px;
-            pointer-events: auto;
-            transition: all 0.3s;
-        }
-        
-        .nav-island .btn-back {
-            color: var(--text-main);
-            text-decoration: none;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 1rem;
-            padding: 8px 16px;
-            border-radius: 50px;
-            transition: background 0.2s;
-        }
+        .nav-island-container { position: sticky; top: 0; z-index: 1000; margin-bottom: 30px; display: flex; justify-content: flex-end; padding: max(10px, env(safe-area-inset-top)) 20px 8px 20px; pointer-events: none; }
+        .nav-island { background-color: var(--surface); backdrop-filter: blur(12px); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 50px; display: flex; justify-content: flex-end; align-items: center; gap: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); pointer-events: auto; }
+        .nav-island .btn-back { color: var(--text-main); text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 1rem; padding: 8px 16px; border-radius: 50px; }
         .nav-island .btn-back:hover { background: var(--input-bg); }
+        .btn-trash { background-color: var(--input-bg) !important; color: #fb7185 !important; border: 1px solid var(--border-color) !important; }
         
-        /* Botones extras de NavBar */
-        .btn-trash {
-            background-color: var(--input-bg) !important;
-            color: #fb7185 !important;
-            border: 1px solid var(--border-color) !important;
-        }
-        .btn-trash:hover { background-color: rgba(251, 113, 133, 0.1) !important; }
-
-        /* === TARJETAS ESTILO PANEL === */
-        .panel { 
-            background: var(--surface); 
-            border-radius: var(--radius-box); 
-            padding: 28px; 
-            box-shadow: var(--shadow-md); 
-            border: 1px solid var(--border-color); 
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        #main-receipt { 
-            border-top: none;
-            background: linear-gradient(to bottom, var(--surface), var(--surface)), linear-gradient(to right, var(--accent-main), var(--accent-secondary));
-            background-clip: padding-box, border-box;
-            border: 3px solid transparent;
-        }
-        
-        /* Títulos de Secciones Minimalistas */
-        .panel-title { 
-            font-weight: 800; margin: 30px 0 20px 0; font-size: 1.1rem; 
-            color: var(--text-main);
-            display: flex; align-items: center; gap: 10px;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
+        .panel { background: var(--surface); border-radius: var(--radius-box); padding: 28px; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); position: relative; }
+        #main-receipt { border: 3px solid transparent; background: linear-gradient(to bottom, var(--surface), var(--surface)), linear-gradient(to right, var(--accent-main), var(--accent-secondary)); background-clip: padding-box, border-box; }
+        .panel-title { font-weight: 800; margin: 30px 0 20px 0; font-size: 1.1rem; color: var(--text-main); display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
         .panel-title i { color: var(--accent-secondary); font-size: 1.4rem; }
-        
         .header-hero { text-align: center; margin-bottom: 30px; }
         .header-hero h1 { font-size: 1.8rem; font-weight: 900; color: var(--text-main); margin: 0; }
         .header-hero h1 span { color: var(--accent-main); }
-        
-        .titulo-editable { 
-            font-size: 1.4rem; font-weight: 800; color: var(--text-main); 
-            border: none; border-bottom: 2px solid var(--border-color);
-            padding: 8px 0; border-radius: 0; 
-            width: 100%; background: transparent; transition: all 0.2s;
-        }
+        .titulo-editable { font-size: 1.4rem; font-weight: 800; color: var(--text-main); border: none; border-bottom: 2px solid var(--border-color); padding: 8px 0; width: 100%; background: transparent; }
         .titulo-editable:focus { border-bottom-color: var(--accent-main); outline: none; }
-        .titulo-editable::placeholder { font-weight: 600; opacity: 0.4; }
-        
-        /* === Cajas de Información === */
-        .alert-box { 
-            background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent-secondary); 
-            padding: 16px; border-radius: 12px; font-size: 0.9rem; 
-            margin-bottom: 25px; color: var(--text-main); font-weight: 600;
-        }
-        
-        /* === Inputs Estilo Filled === */
+        .alert-box { background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent-secondary); padding: 16px; border-radius: 12px; font-size: 0.9rem; margin-bottom: 25px; font-weight: 600; }
         .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-        
-        /* Alineación perfecta hacia abajo para todos los inputs */
-        .input-group-custom { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: flex-end; 
-            height: 100%;
-        }
-        .input-group-custom label { 
-            font-size: 0.85rem; 
-            font-weight: 700; 
-            margin-bottom: 8px; 
-            color: var(--text-muted); 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: flex-end;
-            min-height: 40px; /* Asegura espacio para 2 líneas y alinea todo abajo */
-            line-height: 1.2;
-        }
-        
-        input.filled, select.filled { 
-            padding: 14px 16px; border: 2px solid transparent; border-radius: 12px; 
-            font-size: 1.05rem; width: 100%; background-color: var(--input-bg); 
-            color: var(--text-main); font-family: 'Nunito', sans-serif; font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        input.filled:focus, select.filled:focus {
-            border-color: var(--accent-main); outline: none; background-color: var(--surface);
-            box-shadow: 0 0 0 4px var(--input-focus-ring);
-        }
+        .input-group-custom { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+        .input-group-custom label { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; min-height: 40px; display: flex; align-items: flex-end; }
+        input.filled, select.filled { padding: 14px 16px; border: 2px solid transparent; border-radius: 12px; font-size: 1.05rem; width: 100%; background-color: var(--input-bg); color: var(--text-main); font-weight: 600; }
+        input.filled:focus, select.filled:focus { border-color: var(--accent-main); outline: none; background-color: var(--surface); box-shadow: 0 0 0 4px var(--input-focus-ring); }
         input.filled:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        .readonly-box { 
-            background: rgba(139, 92, 246, 0.05); font-weight: 800; color: var(--accent-main); 
-            padding: 14px 16px; border: 2px dashed rgba(139, 92, 246, 0.3); border-radius: 12px; 
-            font-size: 1.1rem; width: 100%; text-align: center;
-        }
-        
-        /* === Botones === */
-        .btn-pill { 
-            border: none; padding: 12px 24px; border-radius: var(--radius-btn); 
-            font-weight: 700; cursor: pointer; text-align: center; font-size: 0.95rem; 
-            transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px;
-        }
-        .btn-pill:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-pill:active { transform: translateY(0); }
-        
+        .btn-pill { border: none; padding: 12px 24px; border-radius: var(--radius-btn); font-weight: 700; cursor: pointer; text-align: center; font-size: 0.95rem; display: inline-flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s; }
+        .btn-pill:hover { filter: brightness(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .btn-primary-custom { background: var(--accent-main); color: white; }
         .btn-secondary-custom { background: var(--border-color); color: var(--text-main); }
         .btn-success-custom { background: #10b981; color: white; } 
-        .btn-danger-custom { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-        [data-theme="dark"] .btn-danger-custom { color: #f87171; }
-        
-        /* Checkbox switch moderno */
-        .switch-wrapper {
-            display: flex; align-items: center; gap: 15px; padding: 18px 20px; 
-            border: 2px solid var(--border-color); border-radius: 16px; 
-            background: var(--surface); cursor: pointer; transition: all 0.2s;
-        }
-        .switch-wrapper:hover { border-color: var(--accent-main); }
-        .switch-wrapper input[type="checkbox"] { width: 24px; height: 24px; cursor: pointer; accent-color: var(--accent-main); }
+        .switch-wrapper { display: flex; align-items: center; gap: 15px; padding: 18px 20px; border: 2px solid var(--border-color); border-radius: 16px; background: var(--surface); cursor: pointer; }
+        .switch-wrapper input[type="checkbox"] { width: 24px; height: 24px; accent-color: var(--accent-main); }
 
-        /* === Estilos para Modales Personalizados === */
-        .custom-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999; opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
+        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s; }
         .custom-modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        .custom-modal-box {
-            background: var(--surface); border-radius: 16px;
-            padding: 28px 24px; width: 90%; max-width: 360px;
-            text-align: center; box-shadow: var(--shadow-md);
-            transform: scale(0.95) translateY(10px);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid var(--border-color);
-        }
-        .custom-modal-overlay.active .custom-modal-box { transform: scale(1) translateY(0); }
-        
-        .custom-modal-icon { font-size: 3.5rem; margin-bottom: 15px; line-height: 1; }
-        .icon-warning { color: #fb7185; }
-        .icon-success { color: #10b981; }
-        .icon-info { color: var(--accent-main); }
-        
-        .custom-modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 24px; line-height: 1.4; }
-        
+        .custom-modal-box { background: var(--surface); border-radius: 16px; padding: 28px 24px; width: 90%; max-width: 360px; text-align: center; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
+        .custom-modal-icon { font-size: 3.5rem; margin-bottom: 15px; }
+        .icon-warning { color: #fb7185; } .icon-success { color: #10b981; } .icon-info { color: var(--accent-main); }
+        .custom-modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 24px; }
         .custom-modal-actions { display: flex; gap: 12px; justify-content: center; }
-        .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; flex: 1; transition: all 0.2s; font-size: 1rem; }
+        .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 700; border: none; flex: 1; font-size: 1rem; cursor: pointer; }
         .btn-modal-cancel { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); }
-        .btn-modal-cancel:hover { filter: brightness(0.9); }
-        .btn-modal-cancel:active { transform: scale(0.95); }
         .btn-modal-confirm { background: #fb7185; color: white; }
-        .btn-modal-confirm:hover { background: #e11d48; }
-        .btn-modal-confirm:active { transform: scale(0.95); }
-        .btn-modal-ok { background: #10b981; color: white; width: 100%; flex: none; }
-        .btn-modal-ok:hover { background: #059669; }
-        .btn-modal-ok:active { transform: scale(0.95); }
-        
-        /* === Responsive & Menú Comprimido en Móvil (Estilo App) === */
-        @media (max-width: 768px) { 
-            .container { padding: 0 10px; }
-            .panel { padding: 16px; border-radius: 16px; }
-            .grid-2 { grid-template-columns: 1fr; gap: 12px; }
-            
-            .nav-island-container { top: 0; margin-bottom: 20px; padding: max(6px, env(safe-area-inset-top)) 10px 6px 10px; justify-content: flex-end; }
-            .nav-island { padding: 6px 10px; border-radius: 16px; gap: 6px; flex-direction: row; width: auto; }
-            .nav-island .btn-back { width: auto; justify-content: center; padding: 6px 10px; font-size: 0.9rem; margin: 0; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border-color); }
-            
-            .nav-island .d-flex { width: auto; flex-direction: row !important; gap: 6px !important; flex-wrap: nowrap !important; align-items: center; }
-            .btn-pill { padding: 6px 10px; font-size: 0.8rem; flex: 0 0 auto; flex-direction: row; gap: 4px; border-radius: 10px; min-height: 38px; height: 38px; }
-            .btn-pill i { font-size: 1rem; margin: 0; }
-            .btn-pill span { display: inline-block; }
+        .btn-modal-ok { background: #10b981; color: white; width: 100%; }
 
-            .input-group-custom label { font-size: 0.75rem; }
-            input.filled, select.filled { padding: 12px 14px; font-size: 1rem; }
-            .titulo-editable { font-size: 1.2rem; }
-            .header-hero h1 { font-size: 1.5rem; }
-        }
-        
-        /* === GALERÍA OCR === */
-        .ocr-zone { background: var(--input-bg); border: 2px dashed var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 30px; text-align: center; transition: all 0.3s; }
-        .ocr-zone:hover { border-color: var(--accent-main); }
-        .gallery-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; align-items: center; justify-content: center; flex-wrap: wrap; }
-        .thumb-wrapper { position: relative; width: 90px; height: 90px; flex-shrink: 0; }
-        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; border: 2px solid var(--accent-main); }
-        .btn-remove-thumb { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
-        .btn-add-photo { width: 90px; height: 90px; flex-shrink: 0; background: var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
-        .btn-add-photo:hover { background: var(--accent-main); color: white; }
-        
-        .btn-ciclo { cursor: pointer; font-size: 1.2rem; color: var(--accent-secondary); transition: transform 0.2s; }
-        .btn-ciclo:hover { transform: rotate(180deg); }
-
-        /* Estilos PDF Inalterados (Protegidos) */
         #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
         .modo-recibo { font-family: Arial, sans-serif !important; padding: 40px !important; color: #000 !important; background: white !important; }
         .modo-recibo .header-pdf { display: flex; justify-content: space-between; border-bottom: 3px solid var(--accent-main); padding-bottom: 10px; margin-bottom: 20px; }
@@ -341,282 +95,42 @@
         .modo-recibo .tabla-pdf th { text-align: left; background: #f1f5f9 !important; padding: 10px; border-bottom: 2px solid #cbd5e1 !important; color: #000 !important; }
         .modo-recibo .tabla-pdf td { padding: 10px; border-bottom: 1px solid #e2e8f0 !important; color: #000 !important; }
         
-        .pdf-calculos { font-family: 'Segoe UI', Helvetica, Arial, sans-serif !important; padding: 25px !important; color: #1e293b !important; background: #f8fafc !important; }
+        .pdf-calculos { font-family: 'Segoe UI', sans-serif !important; padding: 25px !important; color: #1e293b !important; background: #f8fafc !important; }
         .pdf-calculos .main-header { background: linear-gradient(135deg, #4c1d95, #8b5cf6); color: white; padding: 14px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
-        .pdf-calculos .main-header h2 { margin: 0; font-size: 1.2rem; font-weight: 800; color: white !important;}
-        .pdf-calculos .main-header p { margin: 3px 0 0 0; font-size: 0.9rem; opacity: 0.9; color: white !important;}
-        .pdf-calculos .bloque-paso { background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 8px; padding: 12px 15px; margin-bottom: 10px; page-break-inside: avoid; }
+        .pdf-calculos .bloque-paso { background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 8px; padding: 12px 15px; margin-bottom: 10px; }
         .pdf-calculos .paso-titulo { display: inline-block; background: #ede9fe !important; color: #4c1d95 !important; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; margin-bottom: 5px; text-transform: uppercase; }
         .pdf-calculos .pregunta { font-weight: 700; color: #1e293b !important; font-size: 0.9rem; margin-bottom: 6px; }
-        .pdf-calculos .desarrollo { background: #f8fafc !important; border-left: 3px solid #8b5cf6; padding: 8px 12px; font-size: 0.85rem; line-height: 1.4; color: #334155 !important; border-radius: 0 6px 6px 0; }
-        .pdf-calculos .lista-valores { display: table; width: 100%; margin: 4px 0; }
-        .pdf-calculos .fila-valor { display: table-row; }
-        .pdf-calculos .celda-label { display: table-cell; font-weight: 600; padding: 2px 5px 2px 0; color: #475569 !important; width: 45%; }
-        .pdf-calculos .celda-operacion { display: table-cell; padding: 2px 5px; color: #334155 !important; font-family: monospace; font-weight: bold; }
-        .pdf-calculos .formula-box { font-style: italic; color: #64748b !important; margin-bottom: 6px; font-size: 0.8rem; background: #f1f5f9 !important; padding: 4px 8px; border-radius: 4px; border: 1px dashed #cbd5e1 !important; }
+        .pdf-calculos .desarrollo { background: #f8fafc !important; border-left: 3px solid #8b5cf6; padding: 8px 12px; font-size: 0.85rem; border-radius: 0 6px 6px 0; }
         .pdf-calculos .linea-operacion { margin-top: 6px; padding-top: 4px; border-top: 1px solid #cbd5e1 !important; font-weight: 700; color: #0f172a !important; }
-        .pdf-calculos .bloque-total { background: #ffffff !important; border: 2px solid #6d28d9 !important; box-shadow: 0 4px 6px -1px rgba(109, 40, 217, 0.1); }
-        .pdf-calculos .bloque-total .paso-titulo { background: #fef08a !important; color: #854d0e !important; }
-        .pdf-calculos .bloque-total .desarrollo { background: #fafafa !important; border-left-color: #f59e0b !important; color: #1e293b !important; }
-        .pdf-calculos .bloque-total .linea-operacion { border-top: 2px solid #6d28d9 !important; color: #d97706 !important; font-size: 1.05rem; padding-top: 6px; }
+        .pdf-calculos .bloque-total { background: #ffffff !important; border: 2px solid #6d28d9 !important; }
+        
+        /* Ocultamiento para PDF */
+        .pdf-hidden-box { display: none !important; }
 
-        html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-
-        body {
-            min-width: 0;
-            min-height: 100dvh;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: max(24px, env(safe-area-inset-bottom));
-        }
-
-        .container > *,
-        #inquilinos-container,
-        .panel,
-        .grid-2,
-        .input-group-custom,
-        .header-card,
-        .d-flex { min-width: 0; }
-
-        .nav-island-container {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            margin: 0 0 clamp(16px, 2vw, 26px);
-            padding: max(8px, env(safe-area-inset-top)) clamp(12px, 2.6vw, 28px) 8px;
-            display: flex;
-            justify-content: flex-end;
-            background: color-mix(in srgb, var(--bg-app) 88%, transparent);
-            border-bottom: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
-            backdrop-filter: blur(16px) saturate(150%);
-            -webkit-backdrop-filter: blur(16px) saturate(150%);
-            pointer-events: auto;
-        }
-
-        .nav-island {
-            width: auto;
-            max-width: 1264px;
-            min-height: 50px;
-            margin: 0;
-            margin-left: auto;
-            padding: 4px;
-            border: 0;
-            border-radius: 14px;
-            background: transparent;
-            box-shadow: none;
-            gap: 10px;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-        .nav-island > .d-flex {
-            width: auto;
-            gap: 7px !important;
-            align-items: center;
-            flex-wrap: nowrap !important;
-        }
-
-        .nav-island .btn-back,
-        .nav-island .btn-pill {
-            min-height: 42px;
-            height: 42px;
-            padding: 0 14px;
-            border-radius: 12px;
-            font-size: .88rem;
-            font-weight: 800;
-            line-height: 1;
-            gap: 7px;
-            white-space: nowrap;
-            flex: 0 0 auto;
-            flex-direction: row;
-            box-shadow: none;
-        }
-
-        .nav-island .btn-back {
-            background: var(--surface);
-            border: 1px solid var(--border-color);
-        }
-
-        .nav-island .btn-pill {
-            border: 1px solid transparent;
-        }
-
-        .nav-island .btn-secondary-custom {
-            background: var(--surface);
-            border-color: var(--border-color);
-        }
-
-        .nav-island .btn-success-custom {
-            background: #10b981;
-        }
-
-        .nav-island .btn-back:hover,
-        .nav-island .btn-pill:hover {
-            transform: none;
-            box-shadow: 0 5px 14px rgba(0,0,0,.08);
-        }
-
-        .nav-island .btn-back i,
-        .nav-island .btn-pill i {
-            font-size: 1rem;
-            margin: 0;
-        }
-
-        .panel {
-            padding: clamp(18px, 2.5vw, 28px);
-            border-radius: clamp(16px, 2vw, 22px);
-            box-shadow: 0 12px 34px -24px rgba(15, 23, 42, .35);
-        }
-
-        #main-receipt { border-width: 2px; }
-
-        .header-hero {
-            margin-bottom: clamp(20px, 3vw, 30px);
-        }
-
-        .header-hero h1 {
-            font-size: clamp(1.45rem, 3vw, 1.9rem);
-            line-height: 1.08;
-            letter-spacing: -.02em;
-        }
-
-        .panel-title {
-            margin: clamp(24px, 3vw, 30px) 0 14px;
-            font-size: clamp(.92rem, 1.6vw, 1.05rem);
-            line-height: 1.3;
-            letter-spacing: .065em;
-        }
-
-        .input-group-custom label {
-            margin-bottom: 6px;
-            font-size: .76rem;
-            line-height: 1.25;
-        }
-
-        input.filled,
-        select.filled {
-            min-height: 48px;
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-size: 1rem;
-        }
-
-        .switch-wrapper {
-            gap: 12px;
-            padding: 14px 15px;
-            border-width: 1px;
-            border-radius: 14px;
-            line-height: 1.35;
-        }
-
-        .alert-box {
-            padding: 13px 14px;
-            border-radius: 12px;
-            line-height: 1.4;
-        }
-
-        #total_pagar_m {
-            max-width: 100%;
-            font-size: clamp(2rem, 7vw, 2.5rem) !important;
-        }
-
-        .btn-pill {
-            min-height: 44px;
-            padding: 10px 16px;
-            font-size: .9rem;
-            line-height: 1.2;
-        }
-
-        .titulo-editable {
-            min-width: 0 !important;
-            font-size: clamp(1.08rem, 2vw, 1.35rem);
-        }
-
-        @media (max-width: 900px) {
-            .container { grid-template-columns: 1fr !important; }
-            #inquilinos-container { gap: 18px !important; }
-        }
-
-        @media (max-width: 640px) {
-            .nav-island-container {
-                padding: max(6px, env(safe-area-inset-top)) 10px 6px;
-                margin-bottom: 12px;
-                justify-content: flex-end;
-            }
-
-            .nav-island {
-                min-height: 46px;
-                padding: 2px 0;
-                gap: 5px;
-                border-radius: 0;
-                width: auto;
-                justify-content: flex-end;
-            }
-
-            .nav-island > .d-flex {
-                margin-left: 0;
-                gap: 5px !important;
-            }
-
-            .nav-island .btn-back,
-            .nav-island .btn-pill {
-                width: auto;
-                min-width: 38px;
-                height: 38px;
-                min-height: 38px;
-                padding: 0 8px;
-                border-radius: 10px;
-                justify-content: center;
-            }
-
-            .nav-island .btn-back span,
-            .nav-island .btn-pill span { display: none !important; }
-
-            .container { padding-inline: 10px; gap: 14px; }
-            .panel { padding: 16px 14px; border-radius: 16px; }
-            .grid-2 { grid-template-columns: 1fr; gap: 11px; }
-
-            .header-hero { margin-bottom: 20px; }
-            .header-hero h1 { font-size: 1.38rem; }
-
-            .panel-title { margin-top: 22px; margin-bottom: 12px; font-size: .88rem; letter-spacing: .045em; }
-            .input-group-custom label { font-size: .72rem; }
-
-            input.filled,
-            select.filled { min-height: 47px; padding: 11px 12px; font-size: 16px; }
-
-            .switch-wrapper { padding: 12px; align-items: flex-start; }
-            .switch-wrapper input[type="checkbox"] { width: 21px; height: 21px; flex: 0 0 21px; margin-top: 1px; }
-            .switch-wrapper span { font-size: .9rem !important; }
-            .alert-box { font-size: .82rem; gap: 8px; }
-
-            .btn-pill { min-height: 38px; padding: 6px 10px; font-size: .8rem; flex-direction: row; gap: 4px; border-radius: 10px; }
-            .titulo-editable { width: 100%; font-size: 1.08rem; }
+        @media (max-width: 768px) { 
+            .container { padding: 0 10px; }
+            .panel { padding: 16px; border-radius: 16px; }
+            .grid-2 { grid-template-columns: 1fr; gap: 12px; }
             
-            .ocr-zone { padding: 14px; border-radius: 14px; }
-            .gallery-container { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x proximity; }
-            .thumb-wrapper, .btn-add-photo { width: 76px; height: 76px; scroll-snap-align: start; }
-            .mt-5.p-4.rounded-4.text-center { margin-top: 26px !important; padding: 18px 10px !important; }
+            .nav-island-container { top: 0; margin-bottom: 20px; padding: max(6px, env(safe-area-inset-top)) 10px 6px 10px; justify-content: flex-end; }
+            .nav-island { padding: 6px 10px; border-radius: 16px; gap: 6px; flex-direction: row; width: auto; }
+            .nav-island .btn-back { width: auto; justify-content: center; padding: 6px 10px; font-size: 0.9rem; margin: 0; background: var(--input-bg); border-radius: 10px; border: 1px solid var(--border-color); }
+            .nav-island .d-flex { width: auto; flex-direction: row !important; gap: 6px !important; flex-wrap: nowrap !important; align-items: center; }
+            .btn-pill { padding: 6px 10px; font-size: 0.8rem; flex: 0 0 auto; flex-direction: row; gap: 4px; border-radius: 10px; min-height: 38px; height: 38px; }
+            .btn-pill span { display: inline-block; }
+            .input-group-custom label { font-size: 0.75rem; }
+            input.filled, select.filled { padding: 12px 14px; font-size: 1rem; }
         }
-
-        @media (max-width: 360px) {
-            .container { padding-inline: 7px; }
-            .panel { padding-inline: 11px; }
-            .nav-island-container { padding-inline: 7px; }
-            .nav-island .btn-back,
-            .nav-island .btn-pill { width: 36px; min-width: 36px; height: 36px; min-height: 36px; padding: 0; }
-        }
-
-        @media (hover: none) {
-            .btn-pill:hover,
-            .nav-island .btn-pill:hover,
-            .nav-island .btn-back:hover { transform: none; filter: none; box-shadow: none; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
-        }
-
+        
+        .ocr-zone { background: var(--input-bg); border: 2px dashed var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 30px; text-align: center; transition: all 0.3s; }
+        .ocr-zone:hover { border-color: var(--accent-main); }
+        .gallery-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; align-items: center; justify-content: center; flex-wrap: wrap; }
+        .thumb-wrapper { position: relative; width: 90px; height: 90px; flex-shrink: 0; }
+        .thumb-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; border: 2px solid var(--accent-main); }
+        .btn-remove-thumb { position: absolute; top: -10px; right: -10px; background: #ef4444; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-add-photo { width: 90px; height: 90px; flex-shrink: 0; background: var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+        .btn-ciclo { cursor: pointer; font-size: 1.2rem; color: var(--accent-secondary); transition: transform 0.2s; }
+        .btn-ciclo:hover { transform: rotate(180deg); }
     </style>
 </head>
 <body>
@@ -626,25 +140,29 @@
         <a href="./index.html" class="btn-back">
             <i class="bi bi-arrow-left"></i> <span>Menú</span>
         </a>
-        <div class="d-flex justify-content-end align-items-center">
+        <div class="d-flex gap-2 align-items-center">
             <button class="btn-pill btn-trash" onclick="borrarTodosLosDatosLuz()" title="Limpiar Campos">
                 <i class="bi bi-trash-fill"></i> <span>Limpiar</span>
             </button>
-            <button id="btn-theme-toggle" class="btn-pill btn-secondary-custom" onclick="toggleTheme()" title="Cambiar Tema">
-                <!-- Se inyecta por JS -->
+            <button id="btn-theme-toggle" class="btn-pill btn-secondary-custom" onclick="toggleTheme()" title="Cambiar Tema"></button>
+            
+            <button class="btn-pill btn-primary-custom" onclick="cargarDesdeGoogleSheetsLuz()" title="Cargar desde Google Sheets">
+                <i class="bi bi-cloud-arrow-down-fill"></i> <span>Cargar Nube</span>
             </button>
-            <button class="btn-pill btn-success-custom" onclick="guardarEstadoAppLuz()">
-                <i class="bi bi-cloud-arrow-down-fill"></i> <span>Guardar JSON</span>
+            
+            <button class="btn-pill btn-success-custom" onclick="guardarEnGoogleSheetsLuz()" title="Guardar en Google Sheets">
+                <i class="bi bi-cloud-arrow-up-fill"></i> <span>Guardar Nube</span>
             </button>
-            <button class="btn-pill btn-secondary-custom" onclick="document.getElementById('file_import_luz').click()">
-                <i class="bi bi-folder-symlink-fill"></i> <span>Importar</span>
+            
+            <button class="btn-pill btn-secondary-custom" onclick="document.getElementById('file_import_luz').click()" title="Importar JSON local">
+                <i class="bi bi-folder-symlink-fill"></i> <span class="hide-mobile">Importar</span>
             </button>
             <input type="file" id="file_import_luz" accept=".json" style="display: none;" onchange="cargarEstadoAppLuz(event)">
         </div>
     </div>
 </div>
 
-<!-- Modales Globales -->
+<!-- Modales -->
 <div class="custom-modal-overlay" id="globalConfirmModal">
     <div class="custom-modal-box">
         <div class="custom-modal-icon icon-warning"><i class="bi bi-exclamation-circle-fill"></i></div>
@@ -678,17 +196,13 @@
             <div style="font-weight: 800; color: var(--accent-main); margin-bottom: 15px; font-size: 1.1rem;">
                 <i class="bi bi-lightning-charge-fill"></i> ESCÁNER DE RECIBO (OCR)
             </div>
-            
             <div class="gallery-container" id="gallery-ui"></div>
-            
             <input type="file" id="input_subir" accept="image/*" multiple style="display:none;" onchange="manejarSeleccionFotos(event)">
-            
             <div class="d-flex justify-content-center mt-3">
                 <button class="btn-pill btn-primary-custom" onclick="document.getElementById('input_subir').click()">
-                    <i class="bi bi-images"></i> <span>Subir Fotos (Max 5)</span>
+                    <i class="bi bi-images"></i> <span>Subir Fotos</span>
                 </button>
             </div>
-
             <button id="btn-procesar-ocr" class="btn-pill btn-success-custom mt-3 w-100" style="display: none;" onclick="procesarFotosConOCR()">
                 <i class="bi bi-magic"></i> <span>Extraer Datos Automáticamente</span>
             </button>
@@ -760,17 +274,13 @@
         </div>
     </div>
 
-    <!-- Contenedor dinámico de inquilinos -->
+    <!-- Contenedor de la grilla de inquilinos -->
     <div id="inquilinos-container" style="display: none; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; align-items: start;"></div>
 </div>
 
 <script>
     const UIT_VIGENTE = 5500;
     const container = document.getElementById('inquilinos-container');
-
-    // =========================================================================
-    // LÓGICA DE MODALES PERSONALIZADOS
-    // =========================================================================
     let currentConfirmAction = null;
 
     function showConfirmModal(msg, actionCallback) {
@@ -793,7 +303,6 @@
         document.getElementById('globalAlertMsg').textContent = msg;
         const iconDiv = document.getElementById('globalAlertIcon');
         const btn = document.querySelector('#globalAlertModal .btn-modal-ok');
-        
         if (type === 'success') {
             iconDiv.className = 'custom-modal-icon icon-success';
             iconDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
@@ -810,13 +319,8 @@
         document.getElementById('globalAlertModal').classList.add('active');
     }
 
-    function closeGlobalAlert() {
-        document.getElementById('globalAlertModal').classList.remove('active');
-    }
+    function closeGlobalAlert() { document.getElementById('globalAlertModal').classList.remove('active'); }
 
-    // =========================================================================
-    // MODO OSCURO (THEME TOGGLE)
-    // =========================================================================
     function toggleTheme() {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -827,11 +331,8 @@
 
     function actualizarIconoTema(theme) {
         const btn = document.getElementById('btn-theme-toggle');
-        if (theme === 'dark') {
-            btn.innerHTML = `<i class="bi bi-sun-fill"></i> <span>Claro</span>`;
-        } else {
-            btn.innerHTML = `<i class="bi bi-moon-stars-fill"></i> <span>Oscuro</span>`;
-        }
+        if (theme === 'dark') { btn.innerHTML = `<i class="bi bi-sun-fill"></i> <span>Claro</span>`; } 
+        else { btn.innerHTML = `<i class="bi bi-moon-stars-fill"></i> <span>Oscuro</span>`; }
     }
     window.addEventListener('DOMContentLoaded', () => actualizarIconoTema(document.documentElement.getAttribute('data-theme')));
     
@@ -841,23 +342,16 @@
         return isNaN(d) ? null : d;
     }
 
-    // =========================================================================
-    // FUNCIONES PRINCIPALES Y DE INTERFAZ
-    // =========================================================================
-
     function borrarTodosLosDatosLuz() {
         showConfirmModal("¿Estás seguro de limpiar todos los campos?", () => {
             setTimeout(() => {
                 ['lec_ant_m','lec_act_m','fec_ant_m','fec_act_m','tarifa','rep_m','cargo_fijo_m','alum_m','int_m','red_ant_m','red_act_m'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
                 document.getElementById('mes_principal').value = '';
                 document.getElementById('num_medidores').value = '';
-                
                 const cb = document.getElementById('has_sin_medidor');
                 if(cb) cb.checked = false;
-
                 for(let i=2; i<=6; i++) { limpiarInquilino(i, true); }
                 limpiarInquilino(1, true);
-
                 actualizarVista();
                 calculate();
             }, 300);
@@ -871,67 +365,140 @@
         if(!skipCalc) calculate();
     }
 
-    function guardarEstadoAppLuz() {
-        exportarJSON();
-    }
+    // =========================================================================
+    // COMUNICACIÓN DIRECTA CON GOOGLE SHEETS (SIN JSON MANUAL)
+    // =========================================================================
 
-    async function descargarArchivo(datos, nombreArchivo) {
-        const jsonString = JSON.stringify(datos, null, 2);
-        
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
-            try {
-                const { Filesystem, Share } = window.Capacitor.Plugins;
-                const base64Data = btoa(unescape(encodeURIComponent(jsonString)));
-                const savedFile = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'CACHE' });
-                await Share.share({ title: nombreArchivo, url: savedFile.uri, dialogTitle: 'Guardar o Compartir JSON' });
-                return;
-            } catch (err) { console.error('Error con Capacitor Share:', err); }
-        }
+    async function guardarEnGoogleSheetsLuz() {
+        calculate();
+        const mes = String(document.getElementById('mes_principal').value || '').trim().toUpperCase();
+        if (!mes) { showAlertModal("Selecciona el MES DE FACTURACIÓN antes de guardar en la nube.", "error"); return; }
 
-        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
-        const file = new File([blob], nombreArchivo, { type: 'application/json' });
+        const jsonUnificado = construirObjetoUnificadoLuz();
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({ files: [file], title: 'Respaldo JSON de Luz', text: nombreArchivo });
-                return;
-            } catch (error) { console.error('Error compartiendo vía Web Share API:', error); }
-        }
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = nombreArchivo;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-
-    function cargarEstadoAppLuz(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const datos = JSON.parse(e.target.result);
-
-                if (datos && typeof datos === 'object' && !Array.isArray(datos) && datos.schema === 'luz_cayran_unificado' && datos.estado_app) {
-                    cargarEstadoLegacyLuz(datos.estado_app);
-                    showAlertModal("Los datos se han restaurado correctamente", "success");
-                } else if (Array.isArray(datos)) {
-                    cargarExportacionCompletaLuz(datos);
-                } else if (datos && typeof datos === 'object') {
-                    cargarEstadoLegacyLuz(datos);
-                    showAlertModal("Los datos se han restaurado correctamente", "success");
-                } else { throw new Error("Formato JSON no reconocido."); }
-                event.target.value = "";
-            } catch (error) {
-                showAlertModal("Error al leer el archivo JSON.", "error");
-                console.error(error); event.target.value = "";
+        try {
+            showAlertModal("Guardando directamente en Google Sheets...", "info");
+            let respuesta = await fetch(URL_APPS_SCRIPT_LUZ, {
+                method: 'POST',
+                body: JSON.stringify(jsonUnificado)
+            });
+            let resultado = await respuesta.json();
+            
+            if (resultado.status === "success") {
+                showAlertModal("¡Datos guardados en Google Sheets con éxito!", "success");
+            } else {
+                showAlertModal("Error en la nube: " + resultado.message, "error");
             }
-        };
-        reader.readAsText(file);
+        } catch (error) {
+            console.error(error);
+            showAlertModal("No se pudo conectar con Google Sheets.", "error");
+        }
+    }
+
+    async function cargarDesdeGoogleSheetsLuz() {
+        const mesSeleccionado = String(document.getElementById('mes_principal').value || '').trim().toUpperCase();
+        if (!mesSeleccionado) {
+            showAlertModal("Selecciona un mes en el selector antes de cargar desde la nube.", "error");
+            return;
+        }
+        
+        const urlConMes = `${URL_APPS_SCRIPT_LUZ}?mes=${mesSeleccionado}`;
+        
+        try {
+            showAlertModal("Buscando datos en Google Sheets...", "info");
+            let respuesta = await fetch(urlConMes);
+            let datosNube = await respuesta.json();
+            
+            if (datosNube.error) {
+                showAlertModal(datosNube.error, "error");
+                return;
+            }
+            
+            if (datosNube && datosNube.estado_app) {
+                cargarEstadoLegacyLuz(datosNube.estado_app);
+                showAlertModal(`¡Datos de ${mesSeleccionado} cargados desde Google Sheets!`, "success");
+            } else if (Array.isArray(datosNube)) {
+                cargarExportacionCompletaLuz(datosNube);
+                showAlertModal(`¡Datos de ${mesSeleccionado} cargados desde Google Sheets!`, "success");
+            } else if (datosNube && typeof datosNube === 'object' && datosNube.estado_app) {
+                cargarEstadoLegacyLuz(datosNube.estado_app);
+                showAlertModal(`¡Datos de ${mesSeleccionado} cargados desde Google Sheets!`, "success");
+            } else {
+                showAlertModal("El formato guardado en la nube no es válido.", "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showAlertModal("No se pudo conectar con Google Sheets.", "error");
+        }
+    }
+
+    function construirObjetoUnificadoLuz() {
+        const f1m_val = document.getElementById('fec_act_m').value;
+        const f2m_val = document.getElementById('fec_ant_m').value;
+        const d_f1m = parseDateLocal(f1m_val); const d_f2m = parseDateLocal(f2m_val);
+        const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
+
+        const numMedidoresStr = document.getElementById('num_medidores').value;
+        const numMedidores = numMedidoresStr === '' ? 0 : (parseInt(numMedidoresStr) || 0);
+        const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
+        const totalInquilinosReales = numMedidores + (hasSinMedidor ? 1 : 0);
+        const mes = document.getElementById('mes_principal').value || ''; 
+        const anio = d_f1m ? d_f1m.getFullYear() : null;
+
+        const factorLey = (2 * UIT_VIGENTE) / 1000000; const tarifa = getVal('tarifa');
+        const km = Math.max(0, getVal('lec_act_m') - getVal('lec_ant_m'));
+        const energiaPrincipal = km * tarifa;
+        const subtotalPrincipal = getVal('rep_m') + getVal('cargo_fijo_m') + energiaPrincipal + getVal('alum_m') + getVal('int_m');
+        const igvPrincipal = subtotalPrincipal * 0.18;
+        const aporteLeyPrincipal = km * factorLey;
+        const totalPrincipal = getVal('total_pagar_m');
+
+        const numero = (valor, decimales = 6) => { const n = Number(valor); if (!Number.isFinite(n)) return 0; return Number(n.toFixed(decimales)); };
+        const formatoYYYYMMDD = (fechaObj) => { if (!fechaObj || isNaN(fechaObj)) return ""; const y = fechaObj.getFullYear(); const m = String(fechaObj.getMonth() + 1).padStart(2, '0'); const d = String(fechaObj.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; };
+        const calcularFechaInicio = (fechaFinStr, diasTotales) => { const endDate = parseDateLocal(fechaFinStr); if (!endDate || !diasTotales || diasTotales < 1) return ""; const startDate = new Date(endDate.getTime() - (diasTotales - 1) * 86400000); return formatoYYYYMMDD(startDate); };
+
+        const datosExportar = [];
+        datosExportar.push({ tipo_registro: "metadata", schema: "luz_cayran", schema_version: "2.0", mes: mes, mes_cobro: mes, anio: anio, periodo: { mes: mes, anio: anio }, fecha_exportacion: new Date().toISOString(), configuracion: { num_medidores: numMedidores, inquilino_sin_medidor: hasSinMedidor, total_inquilinos: totalInquilinosReales, uit_vigente: numero(UIT_VIGENTE, 2), factor_aporte_ley: numero(factorLey, 8), igv_porcentaje: 18 } });
+        datosExportar.push({ tipo_registro: "recibo_principal", mes: mes, mes_cobro: mes, anio: anio, fecha_inicio: f2m_val || "", fecha_fin: f1m_val || "", dias_recibo: dm, lecturas: { lectura_anterior: numero(getVal('lec_ant_m')), lectura_actual: numero(getVal('lec_act_m')), fecha_lectura_anterior: f2m_val || "", fecha_lectura_actual: f1m_val || "", consumo_kwh: numero(km) }, tarifa_kwh: numero(tarifa), importes: { energia: numero(energiaPrincipal), reposicion_mantenimiento: numero(getVal('rep_m')), cargo_fijo: numero(getVal('cargo_fijo_m')), alumbrado_publico: numero(getVal('alum_m')), interes_compensatorio: numero(getVal('int_m')), subtotal_antes_igv: numero(subtotalPrincipal), igv: numero(igvPrincipal), aporte_ley_28749: numero(aporteLeyPrincipal), redondeo_anterior: numero(getVal('red_ant_m')), redondeo_actual: numero(getVal('red_act_m')), total_pagar: numero(totalPrincipal) } });
+
+        let sumaKwhMedidores = 0; let sumaKwhDistribuidos = 0; let sumaMontosInquilinos = 0;
+
+        if (hasSinMedidor) {
+            const nombreI1 = document.getElementById('titulo_i1').value || 'Inquilino sin medidor';
+            const c = window._i1_cache || { kwh: 0, ener: 0, rep: 0, cf: 0, alum: 0, int: 0, igv: 0, aporte: 0, red_ant: 0, red_act: 0, total: getVal('total_pagar_i1') };
+            const kwhI1 = numero(c.kwh, 2); const totalI1 = numero(c.total, 2);
+            const fechaFin = f1m_val; const fechaInicio = calcularFechaInicio(fechaFin, dm);
+
+            sumaKwhDistribuidos += kwhI1; sumaMontosInquilinos += totalI1;
+            datosExportar.push({ tipo_registro: "inquilino", mes: mes, mes_cobro: mes, anio: anio, nombre: nombreI1, id_interno: 1, con_medidor: false, kwh_real: kwhI1, dias_facturados: dm, monto_pagar: totalI1, fecha_inicio: fechaInicio, fecha_fin: fechaFin, metodo_calculo: "diferencia_recibo_principal_menos_inquilinos_con_medidor", lecturas: null, consumo: { kwh_real: kwhI1, dias_facturados: dm }, calculos: { energia: numero(c.ener), reposicion_mantenimiento: numero(c.rep), cargo_fijo: numero(c.cf), alumbrado_publico: numero(c.alum), interes_compensatorio: numero(c.int), subtotal_antes_igv: numero(c.ener + c.rep + c.cf + c.alum + c.int), igv: numero(c.igv), aporte_ley_28749: numero(c.aporte), redondeo_anterior: numero(c.red_ant), redondeo_actual: numero(c.red_act), total_pagar: totalI1 } });
+        }
+
+        for (let i = 2; i <= (numMedidores + 1); i++) {
+            const nombreInq = document.getElementById(`titulo_i${i}`).value || `Inquilino ${i - 1}`;
+            const lAnt = getVal(`lec_ant_i${i}`); const lAct = getVal(`lec_act_i${i}`);
+            const f1i = document.getElementById(`fec_act_i${i}`).value; const f2i = document.getElementById(`fec_ant_i${i}`).value;
+            const diLectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i + 'T00:00:00') - new Date(f2i + 'T00:00:00')) / 864e5) + 1) : 0;
+            const consumoMedidor = Math.max(0, lAct - lAnt); const consumoDiario = diLectura > 0 ? (consumoMedidor / diLectura) : 0;
+            const modo = document.getElementById(`modo_dias_i${i}`).value;
+            const diasFacturar = modo === 'recibo' ? dm : Math.max(0, parseInt(getVal(`dias_vividos_i${i}`)) || 0);
+            const kwhConsumidoReal = numero(consumoDiario * diasFacturar, 2); const totalInq = numero(getVal(`total_pagar_i${i}`), 2);
+            const fechaFin = f1m_val; const fechaInicio = calcularFechaInicio(fechaFin, diasFacturar);
+            
+            sumaKwhMedidores += kwhConsumidoReal; sumaKwhDistribuidos += kwhConsumidoReal; sumaMontosInquilinos += totalInq;
+            datosExportar.push({ tipo_registro: "inquilino", mes: mes, mes_cobro: mes, anio: anio, nombre: nombreInq, id_interno: i, con_medidor: true, kwh_real: kwhConsumidoReal, dias_facturados: diasFacturar, monto_pagar: totalInq, fecha_inicio: fechaInicio, fecha_fin: fechaFin, modo_dias: modo, lecturas: { lectura_anterior: numero(lAnt), lectura_actual: numero(lAct), fecha_lectura_anterior: f2i || "", fecha_lectura_actual: f1i || "", dias_entre_lecturas: diLectura, consumo_medidor_kwh: numero(consumoMedidor), consumo_diario_kwh: numero(consumoDiario) }, consumo: { kwh_real: kwhConsumidoReal, dias_facturados: diasFacturar, periodo_facturado_inicio: fechaInicio, periodo_facturado_fin: fechaFin }, calculos: { tarifa_kwh: numero(tarifa), energia: numero(getVal(`ener_i${i}`)), reposicion_mantenimiento: numero(getVal(`rep_i${i}`)), cargo_fijo: numero(getVal(`cf_i${i}`)), alumbrado_publico: numero(getVal(`alum_i${i}`)), interes_compensatorio: numero(getVal(`int_i${i}`)), subtotal_antes_igv: numero(getVal(`ener_i${i}`) + getVal(`rep_i${i}`) + getVal(`cf_i${i}`) + getVal(`alum_i${i}`) + getVal(`int_i${i}`)), igv: numero(getVal(`igv_i${i}`)), aporte_ley_28749: numero(getVal(`aporte_i${i}`)), redondeo_anterior: numero(getVal(`red_ant_i${i}`)), redondeo_actual: numero(getVal(`red_act_i${i}`)), total_pagar: totalInq } });
+        }
+
+        const kwhSinMedidor = hasSinMedidor && window._i1_cache ? numero(window._i1_cache.kwh, 2) : 0;
+        datosExportar.push({ tipo_registro: "resumen", mes: mes, mes_cobro: mes, anio: anio, consumo_total_recibo_kwh: numero(km, 2), consumo_inquilinos_con_medidor_kwh: numero(sumaKwhMedidores, 2), consumo_inquilino_sin_medidor_kwh: kwhSinMedidor, consumo_total_distribuido_kwh: numero(sumaKwhDistribuidos, 2), diferencia_consumo_kwh: numero(km - sumaKwhDistribuidos, 2), total_recibo_principal: numero(totalPrincipal, 2), total_distribuido_inquilinos: numero(sumaMontosInquilinos, 2), diferencia_montos: numero(totalPrincipal - sumaMontosInquilinos, 2), cantidad_inquilinos: totalInquilinosReales });
+
+        const estadoApp = {};
+        document.querySelectorAll('input, select').forEach(input => { if (input.id && input.type !== 'file' && input.type !== 'button') estadoApp[input.id] = input.type === 'checkbox' ? input.checked : input.value; });
+
+        return { schema: 'luz_cayran_unificado', schema_version: '3.0', tipo: 'luz', mes: mes, mes_cobro: mes, anio: anio, periodo: { mes: mes, anio: anio }, fecha_exportacion: new Date().toISOString(), estado_app: estadoApp, configuracion: datosExportar[0].configuracion || {}, recibo_principal: datosExportar[1] || {}, inquilinos: datosExportar.filter(r => r && r.tipo_registro === 'inquilino'), resumen: datosExportar.find(r => r && r.tipo_registro === 'resumen') || {} };
     }
 
     function cargarEstadoLegacyLuz(estado) {
+        if (!estado || typeof estado !== 'object' || Array.isArray(estado)) return;
         if (estado['num_medidores'] !== undefined) document.getElementById('num_medidores').value = estado['num_medidores'];
         if (estado['has_sin_medidor'] !== undefined) document.getElementById('has_sin_medidor').checked = estado['has_sin_medidor'];
         actualizarVista();
@@ -943,41 +510,37 @@
                 else elemento.value = estado[id];
             }
         }
-
         for (let i = 2; i <= 6; i++) { if (document.getElementById(`modo_dias_i${i}`)) toggleModoDias(i, false); }
         calculate();
     }
 
     function cargarExportacionCompletaLuz(datos) {
+        if (!Array.isArray(datos)) return;
         const metadata = datos.find(r => r && r.tipo_registro === 'metadata') || null;
         const reciboPrincipal = datos.find(r => r && r.tipo_registro === 'recibo_principal') || null;
         const inquilinos = datos.filter(r => r && r.tipo_registro === 'inquilino');
-
-        if (!reciboPrincipal || inquilinos.length === 0) throw new Error("Este JSON no contiene el recibo principal y los inquilinos necesarios.");
+        if (!reciboPrincipal) return;
 
         const conMedidor = inquilinos.filter(r => r.con_medidor !== false);
         const sinMedidor = inquilinos.find(r => r.con_medidor === false) || null;
 
         let numMedidores = metadata && metadata.configuracion ? parseInt(metadata.configuracion.num_medidores) : conMedidor.length;
-        if (!Number.isFinite(numMedidores)) numMedidores = conMedidor.length;
         numMedidores = Math.min(5, Math.max(1, numMedidores || 1));
-
         let hasSinMedidor = (metadata && metadata.configuracion && typeof metadata.configuracion.inquilino_sin_medidor === 'boolean') ? metadata.configuracion.inquilino_sin_medidor : !!sinMedidor;
 
         document.getElementById('num_medidores').value = String(numMedidores);
         document.getElementById('has_sin_medidor').checked = hasSinMedidor;
         actualizarVista();
 
-        const mesImportado = (metadata && (metadata.mes_cobro || metadata.mes || (metadata.periodo && metadata.periodo.mes))) || reciboPrincipal.mes_cobro || reciboPrincipal.mes || (inquilinos[0] && (inquilinos[0].mes_cobro || inquilinos[0].mes)) || '';
+        const mesImportado = (metadata && metadata.mes) || reciboPrincipal.mes || '';
         if (mesImportado) {
             const selectMes = document.getElementById('mes_principal');
             const mesNormalizado = String(mesImportado).trim().toUpperCase();
-            const opcion = Array.from(selectMes.options).find(opt => opt.value.toUpperCase() === mesNormalizado || opt.text.toUpperCase() === mesNormalizado);
+            const opcion = Array.from(selectMes.options).find(opt => opt.value.toUpperCase() === mesNormalizado);
             if (opcion) selectMes.value = opcion.value;
         }
 
         const lecturasM = reciboPrincipal.lecturas || {}; const importesM = reciboPrincipal.importes || {};
-
         asignarValorLuz('lec_ant_m', lecturasM.lectura_anterior); asignarValorLuz('lec_act_m', lecturasM.lectura_actual);
         asignarValorLuz('fec_ant_m', lecturasM.fecha_lectura_anterior || reciboPrincipal.fecha_inicio || '');
         asignarValorLuz('fec_act_m', lecturasM.fecha_lectura_actual || reciboPrincipal.fecha_fin || '');
@@ -986,29 +549,21 @@
         asignarValorLuz('int_m', importesM.interes_compensatorio); asignarValorLuz('red_ant_m', importesM.redondeo_anterior);
         asignarValorLuz('red_act_m', importesM.redondeo_actual);
 
-        for (let i = 2; i <= 6; i++) {
-            asignarValorLuz(`titulo_i${i}`, ''); asignarValorLuz(`lec_ant_i${i}`, ''); asignarValorLuz(`lec_act_i${i}`, '');
-            asignarValorLuz(`fec_ant_i${i}`, ''); asignarValorLuz(`fec_act_i${i}`, '');
-            asignarValorLuz(`modo_dias_i${i}`, 'recibo'); asignarValorLuz(`dias_vividos_i${i}`, '');
-        }
-        asignarValorLuz('titulo_i1', ''); if (hasSinMedidor && sinMedidor) asignarValorLuz('titulo_i1', sinMedidor.nombre || 'Inquilino sin medidor');
-
         conMedidor.forEach((inq, indice) => {
             let i = parseInt(inq.id_interno);
             if (!Number.isFinite(i) || i < 2 || i > 6) i = indice + 2;
             if (i > 6) return;
             const lecturas = inq.lecturas || {};
-            asignarValorLuz(`titulo_i${i}`, inq.nombre || `Inquilino ${i - 1}`);
+            asignarValorLuz(`titulo_i${i}`, inq.nombre || '');
             asignarValorLuz(`lec_ant_i${i}`, lecturas.lectura_anterior); asignarValorLuz(`lec_act_i${i}`, lecturas.lectura_actual);
             asignarValorLuz(`fec_ant_i${i}`, lecturas.fecha_lectura_anterior || ''); asignarValorLuz(`fec_act_i${i}`, lecturas.fecha_lectura_actual || '');
-            const modo = inq.modo_dias === 'manual' ? 'manual' : 'recibo';
-            asignarValorLuz(`modo_dias_i${i}`, modo);
-            if (inq.dias_facturados !== undefined && inq.dias_facturados !== null) asignarValorLuz(`dias_vividos_i${i}`, inq.dias_facturados);
+            asignarValorLuz(`modo_dias_i${i}`, inq.modo_dias || 'recibo');
+            if (inq.dias_facturados !== undefined) asignarValorLuz(`dias_vividos_i${i}`, inq.dias_facturados);
             toggleModoDias(i, false);
         });
 
+        if (hasSinMedidor && sinMedidor) asignarValorLuz('titulo_i1', sinMedidor.nombre || '');
         calculate();
-        showAlertModal("Los datos se han restaurado correctamente", "success");
     }
 
     function asignarValorLuz(id, valor) {
@@ -1019,7 +574,7 @@
     }
 
     // =========================================================================
-    // FUNCIONES: ROTACIÓN DE CICLO
+    // ROTACIÓN DE CICLO E INICIALIZACIÓN
     // =========================================================================
 
     function avanzarCicloPrincipal() {
@@ -1042,8 +597,6 @@
         });
     }
 
-    // =========================================================================
-
     function generarTarjetaInquilino(id, titulo, colorBorde, modoDefault) {
         return `
         <div class="panel" id="recibo_i${id}" style="border-top: 4px solid ${colorBorde}; display: none;">
@@ -1052,7 +605,7 @@
                     <i class="bi bi-person-badge"></i> CLIENTE MEDIDOR #${id - 1}
                 </div>
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <input type="text" id="titulo_i${id}" class="titulo-editable flex-grow-1" placeholder="" style="color:${colorBorde}; min-width: 200px;" oninput="sincronizarNombre(${id})">
+                    <input type="text" id="titulo_i${id}" class="titulo-editable flex-grow-1" placeholder="" style="color:${colorBorde}; min-width: 200px;">
                 </div>
                 <div class="d-flex gap-2 mt-3 flex-wrap">
                     <button class="btn-pill flex-grow-1" style="background:#25D366; color:white;" onclick="generarImagenRecibo(${id})">
@@ -1092,32 +645,28 @@
                     </div>
                 </div>
                 
-                <div style="display: none !important;">
-                    <div class="input-group-custom"><label>Cargo energía:</label><input id="ener_i${id}" class="readonly" readonly></div>
-                    <div class="input-group-custom"><label>Reposición y Mantenimiento:</label><input id="rep_i${id}" class="readonly" readonly></div>
-                    <div class="input-group-custom"><label>Cargo Fijo:</label><input id="cf_i${id}" class="readonly" readonly></div>
-                    <div class="input-group-custom"><label>Alumbrado Público:</label><input id="alum_i${id}" class="readonly" readonly></div>
-                    <div class="input-group-custom"><label>Interés compensatorio:</label><input id="int_i${id}" class="readonly" readonly></div>
-                    <div class="input-group-custom"><label>IGV (18%):</label><input id="igv_i${id}" class="readonly" readonly></div>
-                    <div class="input-group-custom"><label>Ley N° 28749:</label><input id="aporte_i${id}" class="readonly" readonly></div>
-                    <div class="input-group-custom"><label>Redondeo anterior:</label><input id="red_ant_i${id}" class="readonly" readonly></div>
-                    <div class="input-group-custom"><label>Redondeo actual:</label><input id="red_act_i${id}" class="readonly" readonly></div>
-                </div>
-
-                <div class="mt-4 p-3 rounded-4 d-flex justify-content-between align-items-center" style="display: none !important; background: var(--input-bg); border: 2px solid ${colorBorde};">
-                    <div style="font-weight: 800; color: ${colorBorde}; text-transform: uppercase;">TOTAL A PAGAR</div>
-                    <input type="text" id="total_pagar_i${id}" class="readonly" style="font-size:1.8rem; font-weight:900; border:none; background:transparent; text-align: right; color: ${colorBorde}; width: 60%; padding: 0;" readonly value="S/. 0.00">
+                <div class="pdf-hidden-box">
+                    <div class="input-group-custom"><input id="ener_i${id}" readonly></div>
+                    <div class="input-group-custom"><input id="rep_i${id}" readonly></div>
+                    <div class="input-group-custom"><input id="cf_i${id}" readonly></div>
+                    <div class="input-group-custom"><input id="alum_i${id}" readonly></div>
+                    <div class="input-group-custom"><input id="int_i${id}" readonly></div>
+                    <div class="input-group-custom"><input id="igv_i${id}" readonly></div>
+                    <div class="input-group-custom"><input id="aporte_i${id}" readonly></div>
+                    <div class="input-group-custom"><input id="red_ant_i${id}" readonly></div>
+                    <div class="input-group-custom"><input id="red_act_i${id}" readonly></div>
+                    <input type="text" id="total_pagar_i${id}" readonly value="S/. 0.00">
                 </div>
             </div>
         </div>
         `;
     }
 
-    container.innerHTML += generarTarjetaInquilino(2, "Inquilino 1", "#10b981", "recibo"); // Emerald
-    container.innerHTML += generarTarjetaInquilino(3, "Inquilino 2", "#3b82f6", "recibo"); // Blue
-    container.innerHTML += generarTarjetaInquilino(4, "Inquilino 3", "#d946ef", "recibo"); // Fuchsia
-    container.innerHTML += generarTarjetaInquilino(5, "Inquilino 4", "#f97316", "recibo"); // Orange
-    container.innerHTML += generarTarjetaInquilino(6, "Inquilino 5", "#8b5cf6", "recibo"); // Purple
+    container.innerHTML += generarTarjetaInquilino(2, "Inquilino 1", "#10b981", "recibo");
+    container.innerHTML += generarTarjetaInquilino(3, "Inquilino 2", "#3b82f6", "recibo");
+    container.innerHTML += generarTarjetaInquilino(4, "Inquilino 3", "#d946ef", "recibo");
+    container.innerHTML += generarTarjetaInquilino(5, "Inquilino 4", "#f97316", "recibo");
+    container.innerHTML += generarTarjetaInquilino(6, "Inquilino 5", "#8b5cf6", "recibo");
 
     container.innerHTML += `
         <div class="panel" id="recibo_i1" style="border-top: 4px solid #ef4444; display: none;">
@@ -1126,7 +675,7 @@
                     <i class="bi bi-person-fill-exclamation"></i> CLIENTE SIN MEDIDOR
                 </div>
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <input type="text" id="titulo_i1" class="titulo-editable flex-grow-1" placeholder="" style="color:#ef4444; border-bottom-color:#fca5a5; min-width: 200px;" oninput="sincronizarNombre(1)">
+                    <input type="text" id="titulo_i1" class="titulo-editable flex-grow-1" placeholder="" style="color:#ef4444; border-bottom-color:#fca5a5; min-width: 200px;">
                 </div>
             </div>
             <div id="body_i1" style="display: none;">
@@ -1134,20 +683,6 @@
             </div>
         </div>
     `;
-
-    function verificarDatosCompletos() {
-        const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
-        const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
-        const tar = getVal('tarifa'); const totM = getVal('total_pagar_m');
-        if (tar <= 0 || totM <= 0) return false;
-        for (let i = 2; i <= (numMedidores + 1); i++) {
-            const totInq = getVal(`total_pagar_i${i}`);
-            const lecAnt = getVal(`lec_ant_i${i}`); const lecAct = getVal(`lec_act_i${i}`);
-            if (totInq <= 0 || lecAct < lecAnt) return false;
-        }
-        if (hasSinMedidor) { const totI1 = getVal('total_pagar_i1'); if (totI1 <= 0) return false; }
-        return true;
-    }
 
     function actualizarVista() {
         const inputNumMedidoresStr = document.getElementById('num_medidores').value;
@@ -1174,13 +709,7 @@
             mainContainer.classList.remove('layout-centered');
             inqContainer.style.display = 'grid';
         }
-
         calculate();
-    }
-
-    function sincronizarNombre(id) {
-        const tituloInput = document.getElementById(`titulo_i${id}`);
-        if(tituloInput) { let nombre = tituloInput.value.trim(); if(nombre === '') nombre = `Inquilino ${id - 1}`; }
     }
 
     function toggleModoDias(i, enfocar = true) {
@@ -1208,27 +737,6 @@
     }
     
     function setVal(id, val, decimals = 2) { const el = document.getElementById(id); if(el) el.value = val.toFixed(decimals); }
-    
-    function formatearFechaLatina(stringFecha) {
-        if(!stringFecha) return '--/--/----';
-        const partes = stringFecha.split('-');
-        return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : stringFecha;
-    }
-
-    async function guardarOCompartirPDF(nombreArchivo, pdfBase64Uri) {
-        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
-            try {
-                const { Filesystem, Share } = window.Capacitor.Plugins;
-                const base64Data = pdfBase64Uri.split(',')[1] || pdfBase64Uri;
-                const savedFile = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'CACHE' });
-                await Share.share({ title: nombreArchivo, url: savedFile.uri, dialogTitle: 'Abrir o Guardar Recibo PDF' });
-                return;
-            } catch (err) { console.error('Error con Capacitor Share:', err); }
-        }
-        const link = document.createElement('a');
-        link.href = pdfBase64Uri; link.download = nombreArchivo; 
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    }
 
     function calculate() {
         const factorLey = (2 * UIT_VIGENTE) / 1000000;
@@ -1241,8 +749,7 @@
 
         const f1m_val = document.getElementById('fec_act_m').value;
         const f2m_val = document.getElementById('fec_ant_m').value;
-        const d_f1m = parseDateLocal(f1m_val);
-        const d_f2m = parseDateLocal(f2m_val);
+        const d_f1m = parseDateLocal(f1m_val); const d_f2m = parseDateLocal(f2m_val);
         const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
 
         const km = Math.max(0, getVal('lec_act_m') - getVal('lec_ant_m'));
@@ -1251,8 +758,6 @@
 
         const sm = getVal('rep_m') + getVal('cargo_fijo_m') + (km * t) + getVal('alum_m') + getVal('int_m');
         const totalPagarM = sm + (sm * 0.18) + aporteLeyPrincipal + getVal('red_ant_m') + getVal('red_act_m');
-        
-        // Agregar S/. al resultado final del recibo principal
         document.getElementById('total_pagar_m').value = 'S/. ' + totalPagarM.toFixed(2);
 
         let sumaKwhInquilinosMedidorReal = 0;
@@ -1290,8 +795,6 @@
             setVal(`aporte_i${i}`, ap_i); setVal(`red_ant_i${i}`, red_ant_i); setVal(`red_act_i${i}`, red_act_i);
 
             const total_i = sub_i + (sub_i * 0.18) + ap_i + red_ant_i + red_act_i;
-            
-            // Agregar S/. al resultado final del inquilino
             document.getElementById(`total_pagar_i${i}`).value = 'S/. ' + total_i.toFixed(2);
             sumaMontosInquilinosMedidor += total_i;
         }
@@ -1299,407 +802,31 @@
         if (hasSinMedidor) {
             const kwhDiferencia = Math.max(0, km - sumaKwhInquilinosMedidorReal);
             const en_i1 = kwhDiferencia * t;
-            
-            const rep_i1_val = (dm > 0 && n > 0) ? (getVal('rep_m') / dm / n) * dm : (getVal('rep_m') / n);
-            const cf_i1_val = (dm > 0 && n > 0) ? (getVal('cargo_fijo_m') / dm / n) * dm : (getVal('cargo_fijo_m') / n);
-            const alum_i1_val = (dm > 0 && n > 0) ? (getVal('alum_m') / dm / n) * dm : (getVal('alum_m') / n);
-            const int_i1_val = (dm > 0 && n > 0) ? (getVal('int_m') / dm / n) * dm : (getVal('int_m') / n);
-            const red_ant_i1_val = (dm > 0 && n > 0) ? (getVal('red_ant_m') / dm / n) * dm : (getVal('red_ant_m') / n);
-            const red_act_i1_val = (dm > 0 && n > 0) ? (getVal('red_act_m') / dm / n) * dm : (getVal('red_act_m') / n);
-            const ap_i1_val = kwhDiferencia * factorLey;
-
-            const sub_i1 = en_i1 + rep_i1_val + cf_i1_val + alum_i1_val + int_i1_val;
-            const igv_i1 = sub_i1 * 0.18;
-            
             const total_i1 = Math.max(0, totalPagarM - sumaMontosInquilinosMedidor);
-
-            window._i1_cache = { kwh: kwhDiferencia, ener: en_i1, rep: rep_i1_val, cf: cf_i1_val, alum: alum_i1_val, int: int_i1_val, igv: igv_i1, aporte: ap_i1_val, red_ant: red_ant_i1_val, red_act: red_act_i1_val, total: total_i1 };
-            
-            // Agregar S/. al resultado final del inquilino sin medidor
+            window._i1_cache = { kwh: kwhDiferencia, total: total_i1 };
             document.getElementById('total_pagar_i1').value = 'S/. ' + total_i1.toFixed(2);
         }
     }
 
-    function exportarJSON() {
-        calculate();
-
-        const f1m_val = document.getElementById('fec_act_m').value;
-        if (!f1m_val) { showAlertModal("Es necesario tener la fecha actual del recibo principal completada.", "error"); return; }
-
-        const f2m_val = document.getElementById('fec_ant_m').value;
-        const d_f1m = parseDateLocal(f1m_val); const d_f2m = parseDateLocal(f2m_val);
-        const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
-
-        const numMedidoresStr = document.getElementById('num_medidores').value;
-        const numMedidores = numMedidoresStr === '' ? 0 : (parseInt(numMedidoresStr) || 0);
-        const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
-        const totalInquilinosReales = numMedidores + (hasSinMedidor ? 1 : 0);
-        const n = totalInquilinosReales > 0 ? totalInquilinosReales : 1;
-
-        const mes = document.getElementById('mes_principal').value || ''; const mesCobro = mes;
-        const anio = d_f1m ? d_f1m.getFullYear() : null;
-
-        const factorLey = (2 * UIT_VIGENTE) / 1000000; const tarifa = getVal('tarifa');
-        const km = Math.max(0, getVal('lec_act_m') - getVal('lec_ant_m'));
-        const energiaPrincipal = km * tarifa;
-        const subtotalPrincipal = getVal('rep_m') + getVal('cargo_fijo_m') + energiaPrincipal + getVal('alum_m') + getVal('int_m');
-        const igvPrincipal = subtotalPrincipal * 0.18;
-        const aporteLeyPrincipal = km * factorLey;
-        const totalPrincipal = getVal('total_pagar_m');
-
-        const numero = (valor, decimales = 6) => { const n = Number(valor); if (!Number.isFinite(n)) return 0; return Number(n.toFixed(decimales)); };
-        const formatoYYYYMMDD = (fechaObj) => { if (!fechaObj || isNaN(fechaObj)) return ""; const y = fechaObj.getFullYear(); const m = String(fechaObj.getMonth() + 1).padStart(2, '0'); const d = String(fechaObj.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; };
-        const calcularFechaInicio = (fechaFinStr, diasTotales) => { const endDate = parseDateLocal(fechaFinStr); if (!endDate || !diasTotales || diasTotales < 1) return ""; const startDate = new Date(endDate.getTime() - (diasTotales - 1) * 86400000); return formatoYYYYMMDD(startDate); };
-
-        const datosExportar = [];
-        datosExportar.push({ tipo_registro: "metadata", schema: "luz_cayran", schema_version: "2.0", mes: mes, mes_cobro: mesCobro, anio: anio, periodo: { mes: mes, anio: anio }, fecha_exportacion: new Date().toISOString(), configuracion: { num_medidores: numMedidores, inquilino_sin_medidor: hasSinMedidor, total_inquilinos: totalInquilinosReales, uit_vigente: numero(UIT_VIGENTE, 2), factor_aporte_ley: numero(factorLey, 8), igv_porcentaje: 18 } });
-        datosExportar.push({ tipo_registro: "recibo_principal", mes: mes, mes_cobro: mesCobro, anio: anio, fecha_inicio: f2m_val || "", fecha_fin: f1m_val || "", dias_recibo: dm, lecturas: { lectura_anterior: numero(getVal('lec_ant_m')), lectura_actual: numero(getVal('lec_act_m')), fecha_lectura_anterior: f2m_val || "", fecha_lectura_actual: f1m_val || "", consumo_kwh: numero(km) }, tarifa_kwh: numero(tarifa), importes: { energia: numero(energiaPrincipal), reposicion_mantenimiento: numero(getVal('rep_m')), cargo_fijo: numero(getVal('cargo_fijo_m')), alumbrado_publico: numero(getVal('alum_m')), interes_compensatorio: numero(getVal('int_m')), subtotal_antes_igv: numero(subtotalPrincipal), igv: numero(igvPrincipal), aporte_ley_28749: numero(aporteLeyPrincipal), redondeo_anterior: numero(getVal('red_ant_m')), redondeo_actual: numero(getVal('red_act_m')), total_pagar: numero(totalPrincipal) } });
-
-        let sumaKwhMedidores = 0; let sumaKwhDistribuidos = 0; let sumaMontosInquilinos = 0;
-
-        if (hasSinMedidor) {
-            const nombreI1 = document.getElementById('titulo_i1').value || 'Inquilino sin medidor';
-            const c = window._i1_cache || { kwh: 0, ener: 0, rep: 0, cf: 0, alum: 0, int: 0, igv: 0, aporte: 0, red_ant: 0, red_act: 0, total: getVal('total_pagar_i1') };
-            const kwhI1 = numero(c.kwh, 2); const totalI1 = numero(c.total, 2);
-            const fechaFin = f1m_val; const fechaInicio = calcularFechaInicio(fechaFin, dm);
-
-            sumaKwhDistribuidos += kwhI1; sumaMontosInquilinos += totalI1;
-            datosExportar.push({ tipo_registro: "inquilino", mes: mes, mes_cobro: mesCobro, anio: anio, nombre: nombreI1, id_interno: 1, con_medidor: false, kwh_real: kwhI1, dias_facturados: dm, monto_pagar: totalI1, fecha_inicio: fechaInicio, fecha_fin: fechaFin, metodo_calculo: "diferencia_recibo_principal_menos_inquilinos_con_medidor", lecturas: null, consumo: { kwh_real: kwhI1, dias_facturados: dm }, calculos: { energia: numero(c.ener), reposicion_mantenimiento: numero(c.rep), cargo_fijo: numero(c.cf), alumbrado_publico: numero(c.alum), interes_compensatorio: numero(c.int), subtotal_antes_igv: numero(c.ener + c.rep + c.cf + c.alum + c.int), igv: numero(c.igv), aporte_ley_28749: numero(c.aporte), redondeo_anterior: numero(c.red_ant), redondeo_actual: numero(c.red_act), total_pagar: totalI1 } });
-        }
-
-        for (let i = 2; i <= (numMedidores + 1); i++) {
-            const nombreInq = document.getElementById(`titulo_i${i}`).value || `Inquilino ${i - 1}`;
-            const lAnt = getVal(`lec_ant_i${i}`); const lAct = getVal(`lec_act_i${i}`);
-            const f1i = document.getElementById(`fec_act_i${i}`).value; const f2i = document.getElementById(`fec_ant_i${i}`).value;
-            const diLectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i + 'T00:00:00') - new Date(f2i + 'T00:00:00')) / 864e5) + 1) : 0;
-            const consumoMedidor = Math.max(0, lAct - lAnt); const consumoDiario = diLectura > 0 ? (consumoMedidor / diLectura) : 0;
-            const modo = document.getElementById(`modo_dias_i${i}`).value;
-            const diasFacturar = modo === 'recibo' ? dm : Math.max(0, parseInt(getVal(`dias_vividos_i${i}`)) || 0);
-            const kwhConsumidoReal = numero(consumoDiario * diasFacturar, 2); const totalInq = numero(getVal(`total_pagar_i${i}`), 2);
-            const fechaFin = f1m_val; const fechaInicio = calcularFechaInicio(fechaFin, diasFacturar);
-            
-            sumaKwhMedidores += kwhConsumidoReal; sumaKwhDistribuidos += kwhConsumidoReal; sumaMontosInquilinos += totalInq;
-            datosExportar.push({ tipo_registro: "inquilino", mes: mes, mes_cobro: mesCobro, anio: anio, nombre: nombreInq, id_interno: i, con_medidor: true, kwh_real: kwhConsumidoReal, dias_facturados: diasFacturar, monto_pagar: totalInq, fecha_inicio: fechaInicio, fecha_fin: fechaFin, modo_dias: modo, lecturas: { lectura_anterior: numero(lAnt), lectura_actual: numero(lAct), fecha_lectura_anterior: f2i || "", fecha_lectura_actual: f1i || "", dias_entre_lecturas: diLectura, consumo_medidor_kwh: numero(consumoMedidor), consumo_diario_kwh: numero(consumoDiario) }, consumo: { kwh_real: kwhConsumidoReal, dias_facturados: diasFacturar, periodo_facturado_inicio: fechaInicio, periodo_facturado_fin: fechaFin }, calculos: { tarifa_kwh: numero(tarifa), energia: numero(getVal(`ener_i${i}`)), reposicion_mantenimiento: numero(getVal(`rep_i${i}`)), cargo_fijo: numero(getVal(`cf_i${i}`)), alumbrado_publico: numero(getVal(`alum_i${i}`)), interes_compensatorio: numero(getVal(`int_i${i}`)), subtotal_antes_igv: numero(getVal(`ener_i${i}`) + getVal(`rep_i${i}`) + getVal(`cf_i${i}`) + getVal(`alum_i${i}`) + getVal(`int_i${i}`)), igv: numero(getVal(`igv_i${i}`)), aporte_ley_28749: numero(getVal(`aporte_i${i}`)), redondeo_anterior: numero(getVal(`red_ant_i${i}`)), redondeo_actual: numero(getVal(`red_act_i${i}`)), total_pagar: totalInq } });
-        }
-
-        const kwhSinMedidor = hasSinMedidor && window._i1_cache ? numero(window._i1_cache.kwh, 2) : 0;
-        datosExportar.push({ tipo_registro: "resumen", mes: mes, mes_cobro: mesCobro, anio: anio, consumo_total_recibo_kwh: numero(km, 2), consumo_inquilinos_con_medidor_kwh: numero(sumaKwhMedidores, 2), consumo_inquilino_sin_medidor_kwh: kwhSinMedidor, consumo_total_distribuido_kwh: numero(sumaKwhDistribuidos, 2), diferencia_consumo_kwh: numero(km - sumaKwhDistribuidos, 2), total_recibo_principal: numero(totalPrincipal, 2), total_distribuido_inquilinos: numero(sumaMontosInquilinos, 2), diferencia_montos: numero(totalPrincipal - sumaMontosInquilinos, 2), cantidad_inquilinos: totalInquilinosReales });
-
-        const estadoApp = {};
-        document.querySelectorAll('input, select').forEach(input => { if (input.id && input.type !== 'file' && input.type !== 'button') estadoApp[input.id] = input.type === 'checkbox' ? input.checked : input.value; });
-
-        const jsonUnificado = { schema: 'luz_cayran_unificado', schema_version: '3.0', tipo: 'luz', mes: mes, mes_cobro: mesCobro, anio: anio, periodo: { mes: mes, anio: anio }, fecha_exportacion: datosExportar[0].fecha_exportacion || new Date().toISOString(), estado_app: estadoApp, configuracion: datosExportar[0].configuracion || {}, recibo_principal: datosExportar[1] || {}, inquilinos: datosExportar.filter(r => r && r.tipo_registro === 'inquilino'), resumen: datosExportar.find(r => r && r.tipo_registro === 'resumen') || {} };
-        const mesMayuscula = mes ? mes.toUpperCase() : 'SIN_MES'; const anioTexto = anio || '2026';
-        descargarArchivo(jsonUnificado, `DATA LUZ ${mesMayuscula} - ${anioTexto}.json`);
+    function cargarEstadoAppLuz(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const datos = JSON.parse(e.target.result);
+                if (datos && datos.estado_app) { cargarEstadoLegacyLuz(datos.estado_app); }
+                event.target.value = "";
+            } catch (err) { showAlertModal("Error al leer el archivo JSON.", "error"); }
+        };
+        reader.readAsText(file);
     }
 
-    async function capturarYCompartir(elementId, nombreArchivo, title, text) {
-        const tempCont = document.getElementById('pdf-template-container');
-        try {
-            const canvas = await html2canvas(document.getElementById(elementId), { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-            const base64Uri = canvas.toDataURL('image/png');
-            
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
-                try {
-                    const { Filesystem, Share } = window.Capacitor.Plugins;
-                    const base64Data = base64Uri.split(',')[1];
-                    const savedFile = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'CACHE' });
-                    await Share.share({ title: title, text: text, url: savedFile.uri, dialogTitle: 'Compartir Imagen' });
-                    tempCont.innerHTML = ''; return; 
-                } catch (err) { console.error('Error con Capacitor Share:', err); }
-            }
-
-            canvas.toBlob(async (blob) => {
-                if (!blob) { tempCont.innerHTML = ''; return; }
-                let compartidoNativo = false;
-                if (navigator.share) {
-                    const file = new File([blob], nombreArchivo, { type: 'image/png' });
-                    if (typeof navigator.canShare !== 'function' || navigator.canShare({ files: [file] })) {
-                        try { await navigator.share({ files: [file], title: title, text: text }); compartidoNativo = true; } 
-                        catch (e) { if (e.name === 'AbortError' || e.message.includes('Share canceled')) compartidoNativo = true; }
-                    }
-                }
-                if (!compartidoNativo) {
-                    alert("La imagen se descargará para que la puedas enviar manualmente.");
-                    const link = document.createElement('a'); link.href = base64Uri; link.download = nombreArchivo;
-                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                }
-                tempCont.innerHTML = ''; 
-            }, 'image/png');
-        } catch (err) { console.error("Error capturando imagen", err); tempCont.innerHTML = ''; alert("Hubo un error al generar la imagen."); }
-    }
-
-    async function generarImagenRecibo(id) {
-        const tempCont = document.getElementById('pdf-template-container');
-        const mes = document.getElementById('mes_principal').value;
-        const nombreInq = document.getElementById(`titulo_i${id}`).value || `Inquilino ${id === 1 ? 'Sin Medidor' : id - 1}`;
-        const total_pagar = getVal(`total_pagar_i${id}`).toFixed(2);
-        
-        let diasFacturadosTexto = '';
-        let f1m_val = document.getElementById('fec_act_m').value; let f2m_val = document.getElementById('fec_ant_m').value;
-        let d_f1m = parseDateLocal(f1m_val); let d_f2m = parseDateLocal(f2m_val);
-        let dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
-
-        if(id === 1) {
-            diasFacturadosTexto = `<b>DIAS FACTURADOS:</b> ${dm}<br>`;
-            const c = window._i1_cache || {kwh:0, total: total_pagar};
-            tempCont.innerHTML = `
-                <div class="modo-recibo" id="recibo-captura">
-                    <div class="header-pdf" style="border-bottom-color:#ef4444;">
-                        <div><b style="color:#ef4444; font-size:1.6rem">RECIBO DE LUZ</b><br>MES: ${mes}</div>
-                        <div class="total-box-pdf" style="background:#ef4444;"><small>TOTAL A PAGAR</small><br><b style="font-size:1.5rem">S/. ${total_pagar}</b></div>
-                    </div>
-                    <div style="margin-bottom:15px"><b>NOMBRE:</b> ${nombreInq}<br><b>CONSUMO POR DIFERENCIA:</b> ${c.kwh.toFixed(2)} kWh<br>${diasFacturadosTexto}</div>
-                    <table class="tabla-pdf">
-                        <thead><tr><th>DETALLE DE IMPORTES</th><th style="text-align:right">S/.</th></tr></thead>
-                        <tbody>
-                            <tr><td>Monto calculado por diferencia</td><td style="text-align:right">${total_pagar}</td></tr>
-                        </tbody>
-                    </table>
-                </div>`;
-        } else {
-            const diasFct = document.getElementById(`dias_vividos_i${id}`).value;
-            diasFacturadosTexto = `<b>DIAS FACTURADOS:</b> ${diasFct}<br>`;
-            let color = '#3b82f6'; if (id === 2) color = '#10b981'; if (id === 4) color = '#d946ef'; if (id === 5) color = '#f97316'; if (id === 6) color = '#8b5cf6';
-            const l_ant = getVal(`lec_ant_i${id}`); const l_act = getVal(`lec_act_i${id}`);
-            tempCont.innerHTML = `
-                <div class="modo-recibo" id="recibo-captura">
-                    <div class="header-pdf" style="border-bottom-color:${color};">
-                        <div><b style="color:${color}; font-size:1.6rem">RECIBO DE LUZ</b><br>MES: ${mes}</div>
-                        <div class="total-box-pdf" style="background:${color};"><small>TOTAL A PAGAR</small><br><b style="font-size:1.5rem">S/. ${total_pagar}</b></div>
-                    </div>
-                    <div style="margin-bottom:15px"><b>NOMBRE:</b> ${nombreInq}<br><b>LECTURAS:</b> ${l_ant} (ANTERIOR); ${l_act} (ACTUAL)<br>${diasFacturadosTexto}</div>
-                    <table class="tabla-pdf">
-                        <thead><tr><th>DETALLE DE IMPORTES</th><th style="text-align:right">S/.</th></tr></thead>
-                        <tbody>
-                            <tr><td>Cargo por energía</td><td style="text-align:right">${document.getElementById(`ener_i${id}`).value}</td></tr>
-                            <tr><td>Reposición y Mantenimiento</td><td style="text-align:right">${document.getElementById(`rep_i${id}`).value}</td></tr>
-                            <tr><td>Cargo Fijo</td><td style="text-align:right">${document.getElementById(`cf_i${id}`).value}</td></tr>
-                            <tr><td>Alumbrado Público</td><td style="text-align:right">${document.getElementById(`alum_i${id}`).value}</td></tr>
-                            <tr><td>Interés compensatorio</td><td style="text-align:right">${document.getElementById(`int_i${id}`).value}</td></tr>
-                            <tr><td>IGV (18%)</td><td style="text-align:right">${document.getElementById(`igv_i${id}`).value}</td></tr>
-                            <tr><td>Aporte de Ley N° 28749</td><td style="text-align:right">${document.getElementById(`aporte_i${id}`).value}</td></tr>
-                            <tr><td>Redondeo Anterior</td><td style="text-align:right">${document.getElementById(`red_ant_i${id}`).value}</td></tr>
-                            <tr><td>Redondeo Actual</td><td style="text-align:right">${document.getElementById(`red_act_i${id}`).value}</td></tr>
-                        </tbody>
-                    </table>
-                </div>`;
-        }
-
-        const nombreArchivo = `RECIBO LUZ ${nombreInq.toUpperCase()} - ${mes}.png`;
-        await capturarYCompartir('recibo-captura', nombreArchivo, `Recibo de Luz - ${mes}`, `Hola, adjunto el recibo de luz correspondiente al mes de ${mes}.`);
-    }
-
-    async function generarImagenCalculos(id) {
-        const tempCont = document.getElementById('pdf-template-container');
-        const nombreInq = document.getElementById(`titulo_i${id}`).value || `Inquilino ${id === 1 ? 'Sin Medidor' : id - 1}`;
-        const mes = document.getElementById('mes_principal').value;
-        const total_pagar = getVal(`total_pagar_i${id}`).toFixed(2);
-
-        let colorFondo = '#3b82f6'; let colorTitulo = '#dbeafe'; let colorTextoTitulo = '#1e3a8a';
-        if (id === 2) { colorFondo = '#10b981'; colorTitulo = '#d1fae5'; colorTextoTitulo = '#064e3b'; }
-        if (id === 4) { colorFondo = '#d946ef'; colorTitulo = '#fae8ff'; colorTextoTitulo = '#701a75'; }
-        if (id === 5) { colorFondo = '#f97316'; colorTitulo = '#ffedd5'; colorTextoTitulo = '#7c2d12'; }
-        if (id === 6) { colorFondo = '#8b5cf6'; colorTitulo = '#ede9fe'; colorTextoTitulo = '#4c1d95'; }
-
-        const l_ant = getVal(`lec_ant_i${id}`); const l_act = getVal(`lec_act_i${id}`);
-        const f1i = document.getElementById(`fec_act_i${id}`).value; const f2i = document.getElementById(`fec_ant_i${id}`).value;
-        const di_lectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
-        const f1m_val = document.getElementById('fec_act_m').value; const f2m_val = document.getElementById('fec_ant_m').value;
-        const d_f1m = parseDateLocal(f1m_val); const d_f2m = parseDateLocal(f2m_val);
-        const dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
-        const modo = document.getElementById(`modo_dias_i${id}`).value;
-        const dias_facturar = (modo === 'recibo') ? dm : getVal(`dias_vividos_i${id}`);
-        const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
-        const n_inq_activos = (parseInt(document.getElementById('num_medidores').value) || 0) + (hasSinMedidor ? 1 : 0);
-        const n = n_inq_activos > 0 ? n_inq_activos : 1; 
-
-        const tarifa = getVal('tarifa'); const factorLey = (2 * UIT_VIGENTE) / 1000000;
-        const consumo_diario = di_lectura > 0 ? (parseFloat((l_act - l_ant).toFixed(2)) / di_lectura) : 0;
-        const main_rep = getVal('rep_m'); const main_cf = getVal('cargo_fijo_m');
-        const main_alum = getVal('alum_m'); const main_int = getVal('int_m');
-        const main_red_ant = getVal('red_ant_m'); const main_red_act = getVal('red_act_m');
-        const fmtF1 = formatearFechaLatina(f1i); const fmtF2 = formatearFechaLatina(f2i);
-        const desc_paso4 = (modo === 'manual') ? `Se divide entre ${dm} días, luego entre los ${n} inquilinos actuales, y se multiplica por sus ${dias_facturar} días a cobrar.` : `Los montos fijos del recibo se dividen en partes iguales entre las ${n} divisiones ingresadas.`;
-        const texto_op_fijo = (modo === 'manual') ? `÷ ${dm}d ÷ ${n}inq × ${dias_facturar}d` : `÷ ${n}`;
-        
-        const ener_val = document.getElementById(`ener_i${id}`).value; const rep_val = document.getElementById(`rep_i${id}`).value;
-        const cf_val = document.getElementById(`cf_i${id}`).value; const alum_val = document.getElementById(`alum_i${id}`).value;
-        const int_val = document.getElementById(`int_i${id}`).value; const red_ant_val = document.getElementById(`red_ant_i${id}`).value;
-        const red_act_val = document.getElementById(`red_act_i${id}`).value; const aporte_val = document.getElementById(`aporte_i${id}`).value;
-        const igv_val = document.getElementById(`igv_i${id}`).value;
-        const sub_sin_igv = (parseFloat(ener_val || 0) + parseFloat(rep_val || 0) + parseFloat(cf_val || 0) + parseFloat(alum_val || 0) + parseFloat(int_val || 0)).toFixed(2);
-
-        tempCont.innerHTML = `
-            <div class="pdf-calculos" id="calculos-captura">
-                <div class="main-header" style="background: ${colorFondo};"><h2>CÁLCULOS MATEMÁTICOS</h2><p>Inquilino: ${nombreInq.toUpperCase()} | Mes: ${mes}</p></div>
-                <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 1: TIEMPO</div><div class="pregunta">¿Cuántos días pasaron entre el control anterior y el actual del medidor?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: (Fecha Actual - Fecha Anterior) + 1 día</div><div class="linea-operacion">Operación: (${fmtF1} - ${fmtF2}) + 1 = <b>${di_lectura} días.</b></div></div></div>
-                <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 2: CONSUMO DIARIO</div><div class="pregunta">¿Cuánto consumió el inquilino en promedio por cada día?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: (Lectura Actual - Lectura Anterior) ÷ Número de días</div><div class="linea-operacion">Operación: (${l_act} - ${l_ant}) ÷ ${di_lectura} días = <b>${consumo_diario.toFixed(4)} kWh/día.</b></div></div></div>
-                <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 3: CARGO ENERGÍA</div><div class="pregunta">¿A cuánto dinero equivale ese consumo en el recibo completo?</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Consumo Diario × Días a Cobrar × Tarifa</div><div class="linea-operacion">Operación: ${consumo_diario.toFixed(4)} × ${dias_facturar} d. × S/. ${tarifa.toFixed(4)} = <b>S/. ${ener_val} soles.</b></div></div></div>
-                <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 4: SERVICIOS COMPARTIDOS</div><div class="pregunta">${desc_paso4}</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Montos fijos del Recibo ${texto_op_fijo}</div><div class="lista-valores"><div class="fila-valor"><div class="celda-label">• Reposición y Mant.:</div><div class="celda-operacion">S/. ${main_rep.toFixed(2)} ${texto_op_fijo} = S/. ${rep_val}</div></div><div class="fila-valor"><div class="celda-label">• Cargo Fijo:</div><div class="celda-operacion">S/. ${main_cf.toFixed(2)} ${texto_op_fijo} = S/. ${cf_val}</div></div><div class="fila-valor"><div class="celda-label">• Alumbrado Público:</div><div class="celda-operacion">S/. ${main_alum.toFixed(2)} ${texto_op_fijo} = S/. ${alum_val}</div></div><div class="fila-valor"><div class="celda-label">• Interés Compensat.:</div><div class="celda-operacion">S/. ${main_int.toFixed(2)} ${texto_op_fijo} = S/. ${int_val}</div></div><div class="fila-valor"><div class="celda-label">• Redondeo Anterior:</div><div class="celda-operacion">S/. ${main_red_ant.toFixed(2)} ${texto_op_fijo} = S/. ${red_ant_val}</div></div><div class="fila-valor"><div class="celda-label">• Redondeo Actual:</div><div class="celda-operacion">S/. ${main_red_act.toFixed(2)} ${texto_op_fijo} = S/. ${red_act_val}</div></div></div></div></div>
-                <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 5: APORTE DE LEY</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: Factor (${factorLey.toFixed(6)}) × Consumo Diario × Días a Cobrar</div><div class="linea-operacion">Operación: ${factorLey.toFixed(6)} × ${consumo_diario.toFixed(4)} × ${dias_facturar} = <b>S/. ${aporte_val} soles.</b></div></div></div>
-                <div class="bloque-paso"><div class="paso-titulo" style="background:${colorTitulo} !important; color:${colorTextoTitulo} !important;">PASO 6: IGV (18%)</div><div class="desarrollo" style="border-left-color:${colorFondo};"><div class="formula-box">Fórmula: 18% × (Energía + Reposición + Cargo Fijo + Alumbrado + Interés)</div><div class="linea-operacion">Operación: S/. ${sub_sin_igv} × 0.18 = <b>S/. ${igv_val} soles.</b></div></div></div>
-                <div class="bloque-paso bloque-total" style="border-color:${colorFondo} !important;"><div class="paso-titulo" style="background:#fef08a !important; color:#854d0e !important;">PASO 7: CUENTA FINAL</div><div class="desarrollo" style="background:#fafafa !important; border-left-color:#f59e0b !important;"><div class="pregunta">Suma total de conceptos calculados:</div><div class="linea-operacion" style="border-top-color:${colorFondo} !important; font-size:1.1rem; color:${colorFondo} !important;">TOTAL A PAGAR POR EL INQUILINO: S/. ${total_pagar} soles.</div></div></div>
-            </div>`;
-
-        const nombreArchivoCalc = `CALCULOS LUZ ${mes} - ${nombreInq}.pdf`;
-        html2pdf().set({ margin: [10, 10], filename: nombreArchivoCalc, html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(document.getElementById('calculos-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
-            tempCont.innerHTML = ''; await guardarOCompartirPDF(nombreArchivoCalc, pdfBase64);
-        });
-    }
-
-    function descargarResumenPDF() {
-        const tempCont = document.getElementById('pdf-template-container');
-        const mes = document.getElementById('mes_principal').value;
-        const numMedidores = parseInt(document.getElementById('num_medidores').value) || 0;
-        const hasSinMedidor = document.getElementById('has_sin_medidor').checked;
-        
-        let f1m_val = document.getElementById('fec_act_m').value; let f2m_val = document.getElementById('fec_ant_m').value;
-        let d_f1m = parseDateLocal(f1m_val); let d_f2m = parseDateLocal(f2m_val);
-        let dm = (d_f1m && d_f2m) ? Math.max(1, Math.floor((d_f1m - d_f2m) / 864e5) + 1) : 0;
-
-        let filasTabla = '';
-
-        if (hasSinMedidor) {
-            const nombreI1 = document.getElementById('titulo_i1').value || 'PROPIETARIO';
-            const totalI1 = getVal('total_pagar_i1').toFixed(2);
-            filasTabla += `<tr><td><b>${nombreI1.toUpperCase()}</b></td><td style="text-align:center"></td><td style="text-align:center">${dm} días</td><td style="text-align:right"><b>S/. ${totalI1}</b></td></tr>`;
-        }
-
-        for (let i = 2; i <= (numMedidores + 1); i++) {
-            const nombreInq = document.getElementById(`titulo_i${i}`).value || `INQUILINO ${i-1}`;
-            const lAnt = getVal(`lec_ant_i${i}`); const lAct = getVal(`lec_act_i${i}`);
-            const f1i = document.getElementById(`fec_act_i${i}`).value; const f2i = document.getElementById(`fec_ant_i${i}`).value;
-            const di_lectura = (f1i && f2i) ? Math.max(1, Math.floor((new Date(f1i+'T00:00:00') - new Date(f2i+'T00:00:00')) / 864e5) + 1) : 0;
-            const ki = Math.max(0, lAct - lAnt); const kd = di_lectura > 0 ? (ki / di_lectura) : 0;
-            const modo = document.getElementById(`modo_dias_i${i}`).value;
-            let dias_facturar = modo === 'recibo' ? dm : getVal(`dias_vividos_i${i}`);
-            const kwhConsumidoReal = (kd * dias_facturar).toFixed(2);
-            const totalInq = getVal(`total_pagar_i${i}`).toFixed(2);
-            filasTabla += `<tr><td><b>${nombreInq.toUpperCase()}</b></td><td style="text-align:center">${kwhConsumidoReal} kWh</td><td style="text-align:center">${dias_facturar} días</td><td style="text-align:right"><b>S/. ${totalInq}</b></td></tr>`;
-        }
-
-        const valTotalM = getVal('total_pagar_m').toFixed(2);
-        tempCont.innerHTML = `
-            <div class="modo-recibo" id="resumen-captura">
-                <div class="header-pdf" style="border-bottom-color:#8b5cf6; padding-bottom: 15px; margin-bottom: 15px;">
-                    <div><b style="color:#8b5cf6; font-size:1.6rem">RESUMEN DE CONSUMO DE LUZ</b><br>MES: ${mes}</div>
-                    <div class="total-box-pdf" style="background:#8b5cf6;"><small>TOTAL GENERAL</small><br><b style="font-size:1.5rem">S/. ${valTotalM}</b></div>
-                </div>
-                <table class="tabla-pdf" style="margin-top: 0;">
-                    <thead>
-                        <tr>
-                            <th style="padding: 12px 10px;">INQUILINO</th>
-                            <th style="text-align:center; padding: 12px 10px;">CONSUMO<br>REAL</th>
-                            <th style="text-align:center; padding: 12px 10px;">DÍAS<br>FACTURADOS</th>
-                            <th style="text-align:right; padding: 12px 10px;">MONTO A<br>PAGAR</th>
-                        </tr>
-                    </thead>
-                    <tbody>${filasTabla}</tbody>
-                </table>
-            </div>`;
-
-        const nombreArchivoResumen = `RESUMEN DE LUZ - ${mes}.pdf`;
-        html2pdf().set({ margin: [10, 10], filename: nombreArchivoResumen, html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(document.getElementById('resumen-captura')).outputPdf('datauristring').then(async function(pdfBase64) {
-            tempCont.innerHTML = ''; await guardarOCompartirPDF(nombreArchivoResumen, pdfBase64);
-        });
-    }
-
-    // Inicialización limpia sin autoguardados
     window.addEventListener('load', () => {
         toggleModoDias(2, false); toggleModoDias(3, false); toggleModoDias(4, false); toggleModoDias(5, false); toggleModoDias(6, false); 
-        actualizarVista(); 
-        calculate();
+        actualizarVista(); calculate();
     });
     document.addEventListener('wheel', function(event) { if (document.activeElement.type === 'number') event.preventDefault(); }, { passive: false });
-
-    let arrayFotos = []; const MAX_FOTOS = 5;
-
-    function manejarSeleccionFotos(event) {
-        const files = Array.from(event.target.files);
-        for (let file of files) {
-            if (arrayFotos.length < MAX_FOTOS) { arrayFotos.push(file); } else { showAlertModal("Has alcanzado el límite máximo de 5 fotos.", "error"); break; }
-        }
-        dibujarGaleria(); event.target.value = ''; 
-    }
-
-    function removerFoto(index) { arrayFotos.splice(index, 1); dibujarGaleria(); }
-
-    function dibujarGaleria() {
-        const galleryUI = document.getElementById('gallery-ui'); const btnProcesar = document.getElementById('btn-procesar-ocr');
-        galleryUI.innerHTML = ''; 
-        arrayFotos.forEach((file, index) => {
-            const url = URL.createObjectURL(file);
-            const thumbWrap = document.createElement('div'); thumbWrap.className = 'thumb-wrapper';
-            const img = document.createElement('img'); img.src = url;
-            const delBtn = document.createElement('div'); delBtn.className = 'btn-remove-thumb'; delBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
-            delBtn.onclick = () => removerFoto(index);
-            thumbWrap.appendChild(img); thumbWrap.appendChild(delBtn); galleryUI.appendChild(thumbWrap);
-        });
-        if (arrayFotos.length < MAX_FOTOS) {
-            const addBtn = document.createElement('div'); addBtn.className = 'btn-add-photo'; addBtn.innerHTML = '<i class="bi bi-plus"></i>';
-            addBtn.onclick = () => document.getElementById('input_subir').click(); galleryUI.appendChild(addBtn);
-        }
-        btnProcesar.style.display = arrayFotos.length > 0 ? 'inline-flex' : 'none';
-    }
-
-    dibujarGaleria();
-
-    async function procesarFotosConOCR() {
-        if (arrayFotos.length === 0) return;
-        const statusLabel = document.getElementById('ocr_status');
-        statusLabel.style.display = 'block'; statusLabel.innerHTML = '<i class="bi bi-hourglass-split"></i> Iniciando motor de lectura OCR...';
-
-        try {
-            const worker = await Tesseract.createWorker('spa');
-            let combinedText = "";
-            for (let i = 0; i < arrayFotos.length; i++) {
-                statusLabel.innerHTML = `<i class="bi bi-search"></i> Analizando imagen ${i + 1} de ${arrayFotos.length}...`;
-                const ret = await worker.recognize(arrayFotos[i]);
-                combinedText += " " + ret.data.text.toLowerCase();
-            }
-            
-            statusLabel.innerHTML = '<i class="bi bi-gear-fill"></i> Extrayendo valores al formulario...';
-            const text = combinedText;
-
-            const buscarNumero = (regex, texto) => { const coincidencia = texto.match(regex); if (coincidencia) { const limpio = coincidencia[1].replace(/\s+/g, '').replace(',', '.'); return parseFloat(limpio); } return null; };
-            const buscarFecha = (regex, texto) => { const coincidencia = texto.match(regex); if (coincidencia) { const limpio = coincidencia[1].replace(/\s+/g, ''); const partes = limpio.split(/[-/]/); if (partes.length === 3) { return partes[0].length === 4 ? `${partes[0]}-${partes[1].padStart(2,'0')}-${partes[2].padStart(2,'0')}` : `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`; } } return null; };
-
-            const v_rep = buscarNumero(/reposic.*?mant[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text); const v_fijo = buscarNumero(/cargo\s*fijo[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-            const v_alum = buscarNumero(/alumbrado[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text); const v_int = buscarNumero(/inter[eé]s[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-            const v_red_ant = buscarNumero(/redondeo\s*mes\s*anterior[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text); const v_red_act = buscarNumero(/redondeo\s*mes\s*actual[^0-9]*?(-?\d+\s*[.,]\s*\d{2})/i, text);
-            const v_tarifa = buscarNumero(/precio\s*de\s*s\/?\s*[^0-9]*?(-?\d+\s*[.,]\s*\d+)/i, text); 
-            
-            const f_act = buscarFecha(/lectura\s*actual[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text); const f_ant = buscarFecha(/lectura\s*anterior[\s\S]{0,30}?(\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4})/i, text);
-
-            const textWithoutDates = text.replace(/\d{2}\s*[-/]\s*\d{2}\s*[-/]\s*\d{4}/g, '');
-            const v_lec_act = buscarNumero(/lectura\s*actual[^0-9]*?(\d+)/i, textWithoutDates); const v_lec_ant = buscarNumero(/lectura\s*anterior[^0-9]*?(\d+)/i, textWithoutDates);
-
-            document.getElementById('rep_m').value = v_rep !== null ? v_rep : 0; document.getElementById('cargo_fijo_m').value = v_fijo !== null ? v_fijo : 0;
-            document.getElementById('alum_m').value = v_alum !== null ? v_alum : 0; document.getElementById('int_m').value = v_int !== null ? v_int : 0;
-            document.getElementById('red_ant_m').value = v_red_ant !== null ? v_red_ant : 0; document.getElementById('red_act_m').value = v_red_act !== null ? v_red_act : 0;
-            document.getElementById('tarifa').value = v_tarifa !== null ? v_tarifa : 0; document.getElementById('lec_act_m').value = v_lec_act !== null ? v_lec_act : 0;
-            document.getElementById('lec_ant_m').value = v_lec_ant !== null ? v_lec_ant : 0;
-
-            if (f_act !== null) document.getElementById('fec_act_m').value = f_act;
-            if (f_ant !== null) document.getElementById('fec_ant_m').value = f_ant;
-
-            calculate();
-            statusLabel.style.background = 'rgba(16, 185, 129, 0.1)'; statusLabel.style.color = '#10b981';
-            statusLabel.innerHTML = '<i class="bi bi-check-circle-fill"></i> ¡Lectura Exitosa! Revisa los datos en el formulario.';
-            
-            setTimeout(() => { statusLabel.style.display = 'none'; statusLabel.style.background = 'rgba(139, 92, 246, 0.1)'; statusLabel.style.color = 'var(--accent-main)'; }, 5000);
-            await worker.terminate();
-
-        } catch (error) {
-            console.error("Error en OCR:", error);
-            statusLabel.style.background = 'rgba(239, 68, 68, 0.1)'; statusLabel.style.color = '#ef4444';
-            statusLabel.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Error al procesar las imágenes.';
-            setTimeout(() => { statusLabel.style.display = 'none'; }, 4000);
-        }
-    }
 </script>
 </body>
 </html>
