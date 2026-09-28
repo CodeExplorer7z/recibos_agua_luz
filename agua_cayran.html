@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v13_nube.html -->
+<!-- Nombre del archivo: agua_cayran_v14_corregido.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -977,7 +977,7 @@
         
         for(let i = 1; i <= nMetered; i++) {
             html += `
-            <div class="col-xl-4 col-lg-6 col-md-6 col-12">
+            <div class="col-xl-4 col-lg-6 col-md-6 col-12 mb-3">
                 <div class="receipt-container" id="pdf_area_${i}">
                     <div id="pdf_content_wrapper_${i}" class="d-flex flex-column h-100">
                         
@@ -1006,7 +1006,7 @@
                                     <label class="small-label d-flex justify-content-between align-items-center" style="min-height: 32px;">
                                         <span>Lectura Actual</span>
                                         <span class="btn-ciclo" onclick="avanzarCicloInquilinoAgua(${i})" title="Pasar datos actuales a anteriores">
-                                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 0 20.49 15"></path></svg>
                                         </span>
                                     </label>
                                     <input type="number" id="i${i}_curr_r" class="form-control input-editable" oninput="calc()">
@@ -1058,12 +1058,13 @@
                         </div>
                     </div>
                 </div>
+            </div>
             `;
         }
 
         if (hasNoMeter) {
             html += `
-            <div class="col-xl-4 col-lg-6 col-md-6 col-12">
+            <div class="col-xl-4 col-lg-6 col-md-6 col-12 mb-3">
                 <div class="receipt-container" id="pdf_area_nometer" style="border: 2px solid var(--card-border); border-top: 5px solid var(--text-muted); height: auto !important;">
                     <div id="pdf_content_wrapper_nometer" class="d-flex flex-column">
                         
@@ -1097,6 +1098,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             `;
         }
 
@@ -1282,7 +1284,7 @@
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;"><div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 3: CARGO AGUA Y ALCANTARILLADO</div><h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿A cuánto dinero equivale ese consumo en el recibo completo?</h3><div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;"><div style="font-size: 14px; color: #0f172a;"><strong>Agua:</strong> ${cCons} m³ x S/. ${tAgua.toFixed(4)} = <strong style="color: #0fa968;">S/. ${cWater}</strong><br><div style="margin-top: 5px;"><strong>Alcantarillado:</strong> ${cCons} m³ x S/. ${tDesague.toFixed(4)} = <strong style="color: #0fa968;">S/. ${cSewer}</strong></div></div></div></div>
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;"><div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 4: SERVICIOS COMPARTIDOS</div><h3 style="margin: 0 0 15px 0; font-size: 16px; color: #1f2937; font-weight: 700;">¿Cómo se dividen los gastos fijos no dependientes del volumen?</h3><div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;"><div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px 15px; border-radius: 6px; margin-bottom: 12px; font-style: italic; color: #64748b; font-size: 13px;">Fórmula: (Monto Total ÷ ${mainDays} días) ÷ ${totalTenants} inquilinos × ${billedDays} días cobrados.</div><div style="font-size: 14px; color: #0f172a; line-height: 1.6;">• <strong>Cargo Fijo:</strong> S/. ${vFixed.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cFixed}</strong><br>• <strong>Mora:</strong> S/. ${vMora.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cMora}</strong><br>• <strong>Redondeo Ant.:</strong> S/. ${vRedAnt.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cRedAnt}</strong><br>• <strong>Redondeo Act.:</strong> S/. ${vRedAct.toFixed(2)} ÷ ${mainDays}d ÷ ${totalTenants}inq x ${billedDays}d = <strong>S/.${cRedAct}</strong></div></div></div>
                 <div style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02); page-break-inside: avoid;"><div style="display: inline-block; background-color: #d1fae5; color: #047857; font-weight: 700; font-size: 12px; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;">PASO 5: IGV (18%)</div><div style="border-left: 3px solid #10b981; padding-left: 15px; margin-bottom: 5px;"><div style="font-size: 14px; color: #0f172a;"><strong>Operación:</strong> 18% x (S/. ${cWater} + S/. ${cSewer} + S/.${cFixed}) = <strong style="color: #0fa968;">S/. ${cIgv}</strong></div></div></div>
-                <div style="page-break-inside: avoid; background-color: #064e3b; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"><p style="margin: 0 0 15px 0; color: #a7f3d0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose Final de Conceptos</p><table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #d1fae5; border-bottom: 1px dashed #047857; padding-bottom: 15px;"><tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr><tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr><tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr></table><h3 style="margin: 0; font-size: 24px; font-weight: bold; text-align: center; color: #10b981;">TOTAL A PAGAR: S/. ${total}</h3></div>
+                <div style="page-break-inside: avoid; background-color: #064e3b; border-radius: 8px; padding: 20px; color: white; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"><p style="margin: 0 0 15px 0; color: #a7f3d0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Desglose Final de Conceptos</p><table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 14px; margin-bottom: 15px; color: #d1fae5; border-bottom: 1px dashed #047857; padding-bottom: 15px;"><tr><td style="text-align: left; padding: 2px 0;">Agua:</td><td style="text-align: right; padding: 2px 0;">S/. ${cWater}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Alcantarillado:</td><td style="text-align: right; padding: 2px 0;">S/. ${cSewer}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Cargo Fijo:</td><td style="text-align: right; padding: 2px 0;">S/. ${cFixed}</td></tr><tr><td style="text-align: left; padding: 2px 0;">IGV (18%):</td><td style="text-align: right; padding: 2px 0;">S/. ${cIgv}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Mora:</td><td style="text-align: right; padding: 2px 0;">S/. ${cMora}</td></tr><tr><td style="text-align: left; padding: 2px 0;">Redondeo Anterior:</td><td style="text-align: right; padding: 2px 0;">S/. ${cRedAnt}</td></tr><tr><td style="text-align: left; padding: 2px 0; padding-bottom: 10px;">Redondeo Actual:</td><td style="text-align: right; padding: 2px 0; padding-bottom: 10px;">S/. ${cRedAct}</td></tr></table><h3 style="margin: 0; font-size: 24px; font-weight: bold; text-align: center; color: #10b981;">TOTAL A PAGAR: S/. ${total}</h3></div>
             </div>`;
         }
 
