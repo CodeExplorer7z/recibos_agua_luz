@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_nube_directa.html -->
+<!-- Nombre del archivo: agua_cayran_nube_segura.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,7 +15,7 @@
         const savedTheme = localStorage.getItem('themeAgua') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
         document.documentElement.setAttribute('data-theme', savedTheme);
         
-        // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT DE AGUA
+        // URL DE TU GOOGLE APPS SCRIPT DE AGUA
         const URL_APPS_SCRIPT_AGUA = "https://script.google.com/macros/s/AKfycbyCYnwsiRUg1GalEKjWv9CPliKLeH0JXW3bh-YGM47SbdI2yOLPvpHH6e626aRfR8hc/exec";
     </script>
 
@@ -26,7 +26,6 @@
             --text-main: #334155; --text-muted: #64748b; --input-bg: #ffffff;
             --input-text: #1e293b;
         }
-
         [data-theme="dark"] {
             --blue-dark: #1e293b; --blue-light: #38bdf8; --bg-body: #0f172a;
             --bg-surface: #1e293b; --bg-subtle: #334155; --card-border: #334155;
@@ -34,8 +33,7 @@
             --input-text: #f8fafc;
         }
         
-        body { background-color: var(--bg-body); font-family: 'Inter', sans-serif; overflow-x: hidden; padding-top: env(safe-area-inset-top); padding-bottom: max(20px, env(safe-area-inset-bottom)); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
-        
+        body { background-color: var(--bg-body); font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; padding-top: env(safe-area-inset-top); padding-bottom: max(20px, env(safe-area-inset-bottom)); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
         .nav-back-bar-container { position: sticky; top: 0; z-index: 1000; background: color-mix(in srgb, var(--bg-surface) 88%, transparent); backdrop-filter: blur(12px) saturate(150%); border-bottom: 1px solid var(--card-border); padding: max(8px, env(safe-area-inset-top)) clamp(12px, 2.6vw, 28px) 8px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
         .nav-back-bar { max-width: 1500px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .btn-top-action { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; padding: 8px 14px; transition: all 0.2s; white-space: nowrap; border: none; cursor: pointer; }
@@ -91,6 +89,7 @@
         .custom-modal-actions { display: flex; gap: 12px; justify-content: center; }
         .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; flex: 1; font-size: 1rem; }
         .btn-modal-cancel { background: var(--bg-subtle); color: var(--text-main); border: 1px solid var(--card-border); }
+        .btn-modal-cancel:hover { filter: brightness(0.9); }
         .btn-modal-confirm { background: #fb7185; color: white; }
         .btn-modal-ok { background: #10b981; color: white; width: 100%; }
 
@@ -121,9 +120,24 @@
                 <i class="bi bi-cloud-arrow-down-fill"></i> <span class="hide-mobile">Cargar Nube</span>
             </button>
             
-            <button class="btn-top-action btn-save-json shadow-sm" onclick="guardarEnGoogleSheetsAgua()" title="Guardar en Google Sheets">
+            <!-- EL BOTÓN AHORA ABRE LA VENTANA DE CONTRASEÑA -->
+            <button class="btn-top-action btn-save-json shadow-sm" onclick="pedirClaveYGuardarAgua()" title="Guardar en Google Sheets">
                 <i class="bi bi-cloud-arrow-up-fill"></i> <span class="hide-mobile">Guardar Nube</span>
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- VENTANA EMERGENTE PARA PEDIR LA CONTRASEÑA -->
+<div class="custom-modal-overlay" id="passwordModal">
+    <div class="custom-modal-box">
+        <div class="custom-modal-icon icon-info"><i class="bi bi-shield-lock-fill"></i></div>
+        <div class="custom-modal-title">Clave de Seguridad</div>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: -15px; margin-bottom: 15px;">Ingresa la contraseña para guardar en Google Sheets:</p>
+        <input type="password" id="input_token_agua" class="form-control input-editable text-center fw-bold mb-3" placeholder="••••••••" style="font-size: 1.2rem; letter-spacing: 2px;">
+        <div class="custom-modal-actions">
+            <button class="btn-modal btn-modal-cancel" onclick="cerrarModalClave()">Cancelar</button>
+            <button class="btn-modal btn-save-json" onclick="confirmarGuardadoAgua()">Guardar</button>
         </div>
     </div>
 </div>
@@ -237,7 +251,7 @@
 
                         <div class="col-12 mt-4">
                             <label class="small-label text-center d-block text-uppercase fw-bold text-success mb-2">Total Recibo Principal</label>
-                            <input type="text" id="v_total_main" class="form-control input-total-main text-center" value="S/. 0.00" readonly>
+                            <input type="text" id="v_total_main" class="form-control input-total-main text-center" value="S/. 0.00" readonly style="outline: none; text-overflow: ellipsis;">
                         </div>
                         <div class="col-12 mt-3">
                             <button class="btn w-100 fw-bold shadow-sm p-3" style="background-color: var(--blue-dark); color: white; border-radius: 8px; font-size: 1.05rem;" onclick="exportResumenPDF()"><i class="bi bi-file-earmark-pdf-fill me-2"></i> GENERAR RESUMEN</button>
@@ -293,9 +307,7 @@
         document.getElementById('globalAlertModal').classList.add('active');
     }
 
-    function closeGlobalAlert() {
-        document.getElementById('globalAlertModal').classList.remove('active');
-    }
+    function closeGlobalAlert() { document.getElementById('globalAlertModal').classList.remove('active'); }
 
     function borrarTodosLosDatos() {
         showConfirmModal("¿Deseas limpiar todos los campos del formulario?", () => {
@@ -307,12 +319,9 @@
                 });
                 document.getElementById('m_mes').value = '';
                 document.getElementById('n_tenants_meter').value = '';
-                
                 const cb = document.getElementById('has_nometer');
                 if(cb) cb.checked = false;
-
-                render();
-                calc();
+                render(); calc();
             }, 300);
         });
     }
@@ -327,18 +336,13 @@
 
     function actualizarIconoTema(theme) {
         const btn = document.getElementById('btn-theme-toggle');
-        if (theme === 'dark') {
-            btn.innerHTML = `<i class="bi bi-sun-fill"></i> <span class="hide-mobile">Claro</span>`;
-        } else {
-            btn.innerHTML = `<i class="bi bi-moon-stars-fill"></i> <span class="hide-mobile">Oscuro</span>`;
-        }
+        if (theme === 'dark') { btn.innerHTML = `<i class="bi bi-sun-fill"></i> <span class="hide-mobile">Claro</span>`; } 
+        else { btn.innerHTML = `<i class="bi bi-moon-stars-fill"></i> <span class="hide-mobile">Oscuro</span>`; }
     }
     window.addEventListener('DOMContentLoaded', () => actualizarIconoTema(document.documentElement.getAttribute('data-theme')));
 
     document.addEventListener('wheel', function(event) {
-        if (document.activeElement.type === 'number') {
-            event.preventDefault();
-        }
+        if (document.activeElement.type === 'number') { event.preventDefault(); }
     }, { passive: false });
 
     function toggleMode(id, fromUser = false) {
@@ -349,10 +353,7 @@
             input.style.setProperty('background-color', '#fef9c3', 'important');
             input.style.setProperty('border-color', '#eab308', 'important');
             input.style.setProperty('color', '#1e293b', 'important');
-            if (fromUser) {
-                input.value = ''; 
-                input.focus();
-            }
+            if (fromUser) { input.value = ''; input.focus(); }
         } else {
             input.disabled = true;
             input.style.setProperty('background-color', 'var(--input-bg)', 'important');
@@ -367,34 +368,19 @@
             try {
                 const { Filesystem, Share } = window.Capacitor.Plugins;
                 const base64Data = pdfBase64Uri.split(',')[1] || pdfBase64Uri;
-                const savedFile = await Filesystem.writeFile({
-                    path: nombreArchivo,
-                    data: base64Data,
-                    directory: 'CACHE'
-                });
-                await Share.share({
-                    title: nombreArchivo,
-                    url: savedFile.uri,
-                    dialogTitle: 'Abrir o Guardar Documento PDF'
-                });
+                const savedFile = await Filesystem.writeFile({ path: nombreArchivo, data: base64Data, directory: 'CACHE' });
+                await Share.share({ title: nombreArchivo, url: savedFile.uri, dialogTitle: 'Abrir o Guardar Documento PDF' });
                 return;
-            } catch (err) {
-                console.error('Error con Capacitor Share:', err);
-            }
+            } catch (err) { console.error('Error con Capacitor Share:', err); }
         }
-        const link = document.createElement('a');
-        link.href = pdfBase64Uri;
-        link.download = nombreArchivo;
-        link.click();
+        const link = document.createElement('a'); link.href = pdfBase64Uri; link.download = nombreArchivo; link.click();
     }
 
     function avanzarCicloPrincipalAgua() {
         showConfirmModal("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores?", () => {
-            const lecAct = document.getElementById('m_curr_r');
-            const lecAnt = document.getElementById('m_prev_r');
+            const lecAct = document.getElementById('m_curr_r'); const lecAnt = document.getElementById('m_prev_r');
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
-            const fecAct = document.getElementById('m_curr_d');
-            const fecAnt = document.getElementById('m_prev_d');
+            const fecAct = document.getElementById('m_curr_d'); const fecAnt = document.getElementById('m_prev_d');
             if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calc();
         });
@@ -403,67 +389,22 @@
     function avanzarCicloInquilinoAgua(id) {
         const nombreInq = document.getElementById(`i${id}_name`)?.value || `Inquilino #${id}`;
         showConfirmModal(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores?`, () => {
-            const lecAct = document.getElementById(`i${id}_curr_r`);
-            const lecAnt = document.getElementById(`i${id}_prev_r`);
+            const lecAct = document.getElementById(`i${id}_curr_r`); const lecAnt = document.getElementById(`i${id}_prev_r`);
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
-            const fecAct = document.getElementById(`i${id}_curr_d`);
-            const fecAnt = document.getElementById(`i${id}_prev_d`);
+            const fecAct = document.getElementById(`i${id}_curr_d`); const fecAnt = document.getElementById(`i${id}_prev_d`);
             if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calc();
         });
     }
 
-    function numeroAgua(valor, decimales = 6) {
-        const n = Number(valor);
-        if (!Number.isFinite(n)) return 0;
-        return Number(n.toFixed(decimales));
-    }
-
+    function numeroAgua(valor, decimales = 6) { const n = Number(valor); return Number.isFinite(n) ? Number(n.toFixed(decimales)) : 0; }
     function valorNumeroAgua(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
     function textoNumeroAgua(id) { return parseFloat(document.getElementById(id)?.textContent) || 0; }
-
-    function fechaAguaLocal(fechaStr) {
-        if (!fechaStr) return null;
-        const d = new Date(fechaStr + 'T00:00:00');
-        return isNaN(d) ? null : d;
-    }
-
-    function diasInclusivosAgua(inicio, fin) {
-        const a = fechaAguaLocal(inicio);
-        const b = fechaAguaLocal(fin);
-        if (!a || !b) return 0;
-        const d = Math.floor((b - a) / 864e5) + 1;
-        return d > 0 ? d : 0;
-    }
-
-    function formatoYYYYMMDDagua(fechaObj) {
-        if (!fechaObj || isNaN(fechaObj)) return '';
-        const y = fechaObj.getFullYear();
-        const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
-        const d = String(fechaObj.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }
-
-    function calcularInicioFacturadoAgua(fechaFinStr, diasFacturados) {
-        const endDate = fechaAguaLocal(fechaFinStr);
-        const dias = Number(diasFacturados) || 0;
-        if (!endDate || dias < 1) return '';
-        return formatoYYYYMMDDagua(new Date(endDate.getTime() - (dias - 1) * 86400000));
-    }
-
-    function capturarEstadoAppAgua() {
-        const estado = {};
-        document.querySelectorAll('input, select').forEach(input => {
-            if (input.id && input.type !== 'file' && input.type !== 'button') {
-                estado[input.id] = input.type === 'checkbox' ? input.checked : input.value;
-            }
-        });
-        return estado;
-    }
-
-    // =========================================================================
-    // COMUNICACIÓN DIRECTA CON GOOGLE SHEETS DE AGUA
-    // =========================================================================
+    function fechaAguaLocal(fechaStr) { if (!fechaStr) return null; const d = new Date(fechaStr + 'T00:00:00'); return isNaN(d) ? null : d; }
+    function diasInclusivosAgua(inicio, fin) { const a = fechaAguaLocal(inicio); const b = fechaAguaLocal(fin); if (!a || !b) return 0; const d = Math.floor((b - a) / 864e5) + 1; return d > 0 ? d : 0; }
+    function formatoYYYYMMDDagua(fechaObj) { if (!fechaObj || isNaN(fechaObj)) return ''; const y = fechaObj.getFullYear(); const m = String(fechaObj.getMonth() + 1).padStart(2, '0'); const d = String(fechaObj.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
+    function calcularInicioFacturadoAgua(fechaFinStr, diasFacturados) { const endDate = fechaAguaLocal(fechaFinStr); const dias = Number(diasFacturados) || 0; if (!endDate || dias < 1) return ''; return formatoYYYYMMDDagua(new Date(endDate.getTime() - (dias - 1) * 86400000)); }
+    function capturarEstadoAppAgua() { const estado = {}; document.querySelectorAll('input, select').forEach(input => { if (input.id && input.type !== 'file' && input.type !== 'button') { estado[input.id] = input.type === 'checkbox' ? input.checked : input.value; } }); return estado; }
 
     function construirObjetoUnificadoAgua() {
         const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
@@ -549,15 +490,31 @@
         };
     }
 
-    async function guardarEnGoogleSheetsAgua() {
+    // Modal para solicitar la clave de forma interactiva
+    function pedirClaveYGuardarAgua() {
         calc();
         const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
         if (!mes) { showAlertModal('Selecciona el MES DE FACTURACIÓN antes de guardar en la nube.', 'error'); return; }
+        
+        document.getElementById('input_token_agua').value = '';
+        document.getElementById('passwordModal').classList.add('active');
+        setTimeout(() => document.getElementById('input_token_agua').focus(), 150);
+    }
+
+    function cerrarModalClave() {
+        document.getElementById('passwordModal').classList.remove('active');
+    }
+
+    async function confirmarGuardadoAgua() {
+        const token = document.getElementById('input_token_agua').value.trim();
+        if (!token) {
+            alert('Debes ingresar la contraseña.');
+            return;
+        }
+        cerrarModalClave();
 
         const jsonUnificado = construirObjetoUnificadoAgua();
-        
-        // Clave de seguridad idéntica a la configurada en Apps Script
-        jsonUnificado.token = "47384747";
+        jsonUnificado.token = token;
 
         try {
             showAlertModal("Guardando directamente en Google Sheets...", "info");
@@ -568,13 +525,13 @@
             let resultado = await respuesta.json();
             
             if (resultado.status === "success") {
-                showAlertModal("¡Datos guardados en Google Sheets con éxito!", "success");
+                showAlertModal("¡Datos de Agua guardados con éxito!", "success");
             } else {
-                showAlertModal("Error de seguridad o en la nube: " + resultado.message, "error");
+                showAlertModal(resultado.message || "Error al guardar en la nube", "error");
             }
         } catch (error) {
             console.error(error);
-            showAlertModal("No se pudo conectar con Google Sheets.", "error");
+            showAlertModal("No se pudo conectar con Google Sheets. Verifica la conexión.", "error");
         }
     }
     
