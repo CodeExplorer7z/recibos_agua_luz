@@ -1,4 +1,4 @@
-<!-- Nombre del archivo: agua_cayran_v14_corregido.html -->
+<!-- Nombre del archivo: agua_cayran_nube_directa.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,276 +12,94 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <script>
-        // Inicializar tema sin parpadeos
         const savedTheme = localStorage.getItem('themeAgua') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
         document.documentElement.setAttribute('data-theme', savedTheme);
         
-        // URL DE TU GOOGLE APPS SCRIPT
+        // URL DE TU GOOGLE APPS SCRIPT DE AGUA
         const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyCYnwsiRUg1GalEKjWv9CPliKLeH0JXW3bh-YGM47SbdI2yOLPvpHH6e626aRfR8hc/exec";
     </script>
 
     <style>
         :root { 
-            --blue-dark: #0f172a; 
-            --blue-light: #0ea5e9; 
-            --bg-body: #f8fafc;
-            --bg-surface: #ffffff;
-            --bg-subtle: #f1f5f9;
-            --card-border: #e2e8f0;
-            --text-main: #334155;
-            --text-muted: #64748b;
-            --input-bg: #ffffff;
+            --blue-dark: #0f172a; --blue-light: #0ea5e9; --bg-body: #f8fafc;
+            --bg-surface: #ffffff; --bg-subtle: #f1f5f9; --card-border: #e2e8f0;
+            --text-main: #334155; --text-muted: #64748b; --input-bg: #ffffff;
             --input-text: #1e293b;
         }
-
         [data-theme="dark"] {
-            --blue-dark: #1e293b;
-            --blue-light: #38bdf8;
-            --bg-body: #0f172a;
-            --bg-surface: #1e293b;
-            --bg-subtle: #334155;
-            --card-border: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: #0f172a;
+            --blue-dark: #1e293b; --blue-light: #38bdf8; --bg-body: #0f172a;
+            --bg-surface: #1e293b; --bg-subtle: #334155; --card-border: #334155;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --input-bg: #0f172a;
             --input-text: #f8fafc;
         }
         
-        body { 
-            background-color: var(--bg-body); 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            overflow-x: hidden; 
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: max(20px, env(safe-area-inset-bottom)); 
-            color: var(--text-main);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        
-        /* Navbar Fija Optimizada Edge-to-Edge */
-        .nav-back-bar-container {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
-            backdrop-filter: blur(12px) saturate(150%);
-            -webkit-backdrop-filter: blur(12px) saturate(150%);
-            border-bottom: 1px solid var(--card-border);
-            padding: max(8px, env(safe-area-inset-top)) clamp(12px, 2.6vw, 28px) 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-        .nav-back-bar { 
-            max-width: 1500px; 
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-top-action {
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px; 
-            border-radius: 10px; 
-            font-weight: 700; 
-            font-size: 0.88rem; 
-            padding: 8px 14px;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-        
-        .btn-back { 
-            background: var(--bg-subtle); 
-            color: var(--text-main) !important; 
-            text-decoration: none; 
-            border: 1px solid var(--card-border);
-        }
+        body { background-color: var(--bg-body); font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; padding-top: env(safe-area-inset-top); padding-bottom: max(20px, env(safe-area-inset-bottom)); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
+        .nav-back-bar-container { position: sticky; top: 0; z-index: 1000; background: color-mix(in srgb, var(--bg-surface) 88%, transparent); backdrop-filter: blur(12px) saturate(150%); border-bottom: 1px solid var(--card-border); padding: max(8px, env(safe-area-inset-top)) clamp(12px, 2.6vw, 28px) 8px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .nav-back-bar { max-width: 1500px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .btn-top-action { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; padding: 8px 14px; transition: all 0.2s; white-space: nowrap; border: none; cursor: pointer; }
+        .btn-back { background: var(--bg-subtle); color: var(--text-main) !important; text-decoration: none; border: 1px solid var(--card-border); }
         .btn-back:hover { background: var(--card-border); filter: brightness(0.95); }
-
-        .btn-trash {
-            background-color: var(--bg-subtle) !important;
-            color: #fb7185 !important;
-            border: 1px solid var(--card-border) !important;
-        }
+        .btn-trash { background-color: var(--bg-subtle) !important; color: #fb7185 !important; border: 1px solid var(--card-border) !important; }
         .btn-trash:hover { background-color: rgba(251, 113, 133, 0.1) !important; }
-
-        .btn-import {
-            background-color: var(--bg-subtle) !important;
-            color: var(--text-main) !important;
-            border: 1px solid var(--card-border) !important;
-        }
+        .btn-import { background-color: var(--bg-subtle) !important; color: var(--text-main) !important; border: 1px solid var(--card-border) !important; }
         .btn-import:hover { filter: brightness(0.9); }
-
-        .btn-save-json {
-            background-color: #10b981 !important;
-            color: white !important;
-            border: none !important;
-        }
+        .btn-save-json { background-color: #10b981 !important; color: white !important; }
         .btn-save-json:hover { background-color: #059669 !important; }
-        
-        .btn-cloud {
-            background-color: var(--blue-light) !important;
-            color: white !important;
-            border: none !important;
-        }
+        .btn-cloud { background-color: var(--blue-light) !important; color: white !important; }
         .btn-cloud:hover { filter: brightness(0.9); }
 
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
-        
-        input[type="date"].input-editable {
-            padding-left: 6px !important;
-            padding-right: 6px !important;
-            font-size: 14px !important;
-            letter-spacing: -0.5px;
-        }
+        input[type="date"].input-editable { padding-left: 6px !important; padding-right: 6px !important; font-size: 14px !important; letter-spacing: -0.5px; }
 
         .main-card { border: 1px solid var(--card-border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border-radius: 12px; background: var(--bg-surface); overflow: hidden; transition: background-color 0.3s; }
         .card-header-custom { background: var(--blue-dark); color: white; padding: 16px 20px; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: background-color 0.3s; }
-        
         .input-editable { background-color: var(--input-bg) !important; border: 1px solid var(--card-border) !important; font-size: 15px !important; border-radius: 8px; color: var(--input-text) !important; padding: 10px 14px; transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s; }
         .input-editable:focus { border-color: var(--blue-light) !important; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.15) !important; outline: none; }
         .input-editable:disabled { opacity: 0.6; }
-        
-        .input-total-main { background-color: rgba(34, 197, 94, 0.1) !important; border: 1px solid #22c55e !important; font-weight: 800; color: #22c55e !important; font-size: 1.4rem !important; border-radius: 8px; padding: 12px !important; }
-        
+        .input-total-main { background-color: rgba(34, 197, 94, 0.1) !important; border: 1px solid #22c55e !important; font-weight: 800; color: #22c55e !important; font-size: 1.4rem !important; border-radius: 8px; padding: 12px !important; width: 100%; }
         .section-divider { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700; margin: 20px 0 10px 0; border-bottom: 1px solid var(--card-border); padding-bottom: 6px; display: flex; align-items: center; gap: 6px; }
         
-        .receipt-container { 
-            background: var(--bg-surface); 
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            height: 100%; 
-            width: 100%; 
-            box-sizing: border-box; 
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-        
+        .receipt-container { background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--card-border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); height: 100%; width: 100%; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; transition: background-color 0.3s, border-color 0.3s; }
         .tenant-header { background: var(--bg-subtle); padding: 16px 20px; border-bottom: 1px solid var(--card-border); transition: background-color 0.3s; }
         .tenant-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        
-        .tenant-client-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        
-        .tenant-name-input { 
-            border: none !important;
-            background-color: transparent !important;
-            font-weight: 800; 
-            font-size: 1.3rem; 
-            padding: 0; 
-            border-radius: 0; 
-            color: var(--text-main); 
-            width: 100%; 
-            box-shadow: none !important;
-            text-transform: uppercase;
-        }
+        .tenant-client-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .tenant-name-input { border: none !important; background-color: transparent !important; font-weight: 800; font-size: 1.3rem; padding: 0; border-radius: 0; color: var(--text-main); width: 100%; box-shadow: none !important; text-transform: uppercase; }
         .tenant-name-input:focus { outline: none; color: var(--blue-light); }
         
-        .btn-action-mobile {
-            border-radius: 8px !important;
-            padding: 12px !important;
-            font-weight: 600 !important;
-            font-size: 0.95rem !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        .btn-action-mobile:active { transform: scale(0.97); }
-        .btn-whatsapp-style { background-color: #22c55e !important; color: white !important; border: none !important; }
+        .btn-action-mobile { border-radius: 8px !important; padding: 12px !important; font-weight: 600 !important; font-size: 0.95rem !important; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s; border: none; cursor: pointer; }
+        .btn-whatsapp-style { background-color: #22c55e !important; color: white !important; }
         .btn-whatsapp-style:hover { background-color: #16a34a !important; }
         .btn-calc-style { background-color: var(--bg-surface) !important; color: var(--text-main) !important; border: 1px solid var(--card-border) !important; }
         .btn-calc-style:hover { background-color: var(--bg-subtle) !important; }
-
         .small-label { font-size: 0.85rem; font-weight: 600; display: block; color: var(--text-main); margin-bottom: 6px; }
         
         .pdf-only-section, .hidden-data { position: absolute; left: -9999px; top: 0; visibility: hidden; height: 0; overflow: hidden; }
         #pdf-template-container { position: absolute; left: -9999px; top: 0; width: 750px; }
 
-        .btn-ciclo {
-            background-color: var(--bg-subtle) !important;
-            color: var(--blue-light) !important;
-            border-radius: 6px;
-            width: 32px;
-            height: 32px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid var(--card-border);
-        }
+        .btn-ciclo { background-color: var(--bg-subtle) !important; color: var(--blue-light) !important; border-radius: 6px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: 1px solid var(--card-border); }
         .btn-ciclo:hover { filter: brightness(0.9); }
-        .btn-ciclo:active { transform: scale(0.9); }
         .btn-ciclo svg { width: 16px; height: 16px; }
 
-        .custom-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999; opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
+        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
         .custom-modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        .custom-modal-box {
-            background: var(--bg-surface); border-radius: 16px;
-            padding: 28px 24px; width: 90%; max-width: 360px;
-            text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-            transform: scale(0.95) translateY(10px);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid var(--card-border);
-        }
+        .custom-modal-box { background: var(--bg-surface); border-radius: 16px; padding: 28px 24px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); transform: scale(0.95) translateY(10px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--card-border); }
         .custom-modal-overlay.active .custom-modal-box { transform: scale(1) translateY(0); }
-        
         .custom-modal-icon { font-size: 3.5rem; margin-bottom: 15px; line-height: 1; }
-        .icon-warning { color: #fb7185; }
-        .icon-success { color: #10b981; }
-        .icon-info { color: var(--blue-light); }
-        
+        .icon-warning { color: #fb7185; } .icon-success { color: #10b981; } .icon-info { color: var(--blue-light); }
         .custom-modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 24px; line-height: 1.4; }
-        
         .custom-modal-actions { display: flex; gap: 12px; justify-content: center; }
-        .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; flex: 1; transition: all 0.2s; font-size: 1rem; }
+        .btn-modal { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; flex: 1; font-size: 1rem; }
         .btn-modal-cancel { background: var(--bg-subtle); color: var(--text-main); border: 1px solid var(--card-border); }
-        .btn-modal-cancel:hover { filter: brightness(0.9); }
-        .btn-modal-cancel:active { transform: scale(0.95); }
         .btn-modal-confirm { background: #fb7185; color: white; }
-        .btn-modal-confirm:hover { background: #e11d48; }
-        .btn-modal-confirm:active { transform: scale(0.95); }
-        .btn-modal-ok { background: #10b981; color: white; width: 100%; flex: none; }
-        .btn-modal-ok:hover { background: #059669; }
-        .btn-modal-ok:active { transform: scale(0.95); }
+        .btn-modal-ok { background: #10b981; color: white; width: 100%; }
 
-        @media (max-width: 991px) { 
-            .container-fluid { padding: 10px; } 
-            .action-buttons-container { width: 100% !important; margin-top: 15px; flex-direction: column; }
-            .btn-action-mobile { width: 100% !important; }
-            #tenants_grid > div { margin-bottom: 20px; }
-        }
-
+        @media (max-width: 991px) { .container-fluid { padding: 10px; } .action-buttons-container { width: 100% !important; margin-top: 15px; flex-direction: column; } .btn-action-mobile { width: 100% !important; } #tenants_grid > div { margin-bottom: 20px; } }
         @media (max-width: 640px) {
             .hide-mobile { display: none !important; }
             .nav-back-bar-container { padding: max(6px, env(safe-area-inset-top)) 10px 6px; }
-            .nav-back-bar { gap: 6px; }
-            .nav-back-bar .d-flex { gap: 6px !important; }
-            .btn-back, .btn-top-action {
-                width: 40px; min-width: 40px; height: 40px; padding: 0 !important;
-                justify-content: center; border-radius: 10px !important;
-            }
+            .nav-back-bar { gap: 6px; } .nav-back-bar .d-flex { gap: 6px !important; }
+            .btn-back, .btn-top-action { width: 40px; min-width: 40px; height: 40px; padding: 0 !important; justify-content: center; border-radius: 10px !important; }
             .btn-back i, .btn-top-action i { font-size: 1.1rem; margin: 0; }
         }
     </style>
@@ -297,24 +115,15 @@
             <button class="btn-top-action btn-trash shadow-sm" onclick="borrarTodosLosDatos()" title="Limpiar Campos">
                 <i class="bi bi-trash-fill"></i> <span class="hide-mobile">Limpiar</span>
             </button>
-            <button id="btn-theme-toggle" class="btn-top-action btn-import shadow-sm" onclick="toggleTheme()" title="Cambiar Tema">
-                <!-- Se inyecta por JS -->
-            </button>
+            <button id="btn-theme-toggle" class="btn-top-action btn-import shadow-sm" onclick="toggleTheme()" title="Cambiar Tema"></button>
             
-            <!-- Botón Cargar de Google Sheets -->
             <button class="btn-top-action btn-cloud shadow-sm" onclick="cargarDesdeGoogleSheets()" title="Cargar desde Google Sheets">
                 <i class="bi bi-cloud-arrow-down-fill"></i> <span class="hide-mobile">Cargar Nube</span>
             </button>
             
-            <!-- Botón Guardar en Google Sheets -->
-            <button class="btn-top-action btn-save-json shadow-sm" onclick="guardarEstadoApp()" title="Guardar en Google Sheets">
+            <button class="btn-top-action btn-save-json shadow-sm" onclick="guardarEnGoogleSheetsAgua()" title="Guardar en Google Sheets">
                 <i class="bi bi-cloud-arrow-up-fill"></i> <span class="hide-mobile">Guardar Nube</span>
             </button>
-            
-            <button class="btn-top-action btn-import shadow-sm" onclick="document.getElementById('file_import').click()" title="Importar JSON local">
-                <i class="bi bi-folder-symlink-fill"></i> <span class="hide-mobile">Importar</span>
-            </button>
-            <input type="file" id="file_import" accept=".json" style="display: none;" onchange="cargarEstadoApp(event)">
         </div>
     </div>
 </div>
@@ -381,7 +190,7 @@
                             <label class="small-label d-flex justify-content-between align-items-center" style="min-height: 32px;">
                                 <span>Lectura Act.</span>
                                 <span class="btn-ciclo" onclick="avanzarCicloPrincipalAgua()" title="Pasar datos actuales a anteriores y limpiar">
-                                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 0 20.49 15"></path></svg>
                                 </span>
                             </label>
                             <input type="number" id="m_curr_r" class="form-control input-editable" oninput="calc()">
@@ -428,7 +237,7 @@
 
                         <div class="col-12 mt-4">
                             <label class="small-label text-center d-block text-uppercase fw-bold text-success mb-2">Total Recibo Principal</label>
-                            <input type="text" id="v_total_main" class="form-control input-total-main text-center" value="S/. 0.00" readonly>
+                            <input type="text" id="v_total_main" class="form-control input-total-main text-center" value="S/. 0.00" readonly style="outline: none; text-overflow: ellipsis;">
                         </div>
                         <div class="col-12 mt-3">
                             <button class="btn w-100 fw-bold shadow-sm p-3" style="background-color: var(--blue-dark); color: white; border-radius: 8px; font-size: 1.05rem;" onclick="exportResumenPDF()"><i class="bi bi-file-earmark-pdf-fill me-2"></i> GENERAR RESUMEN</button>
@@ -498,10 +307,8 @@
                 });
                 document.getElementById('m_mes').value = '';
                 document.getElementById('n_tenants_meter').value = '';
-                
                 const cb = document.getElementById('has_nometer');
                 if(cb) cb.checked = false;
-
                 render();
                 calc();
             }, 300);
@@ -540,10 +347,7 @@
             input.style.setProperty('background-color', '#fef9c3', 'important');
             input.style.setProperty('border-color', '#eab308', 'important');
             input.style.setProperty('color', '#1e293b', 'important');
-            if (fromUser) {
-                input.value = ''; 
-                input.focus();
-            }
+            if (fromUser) { input.value = ''; input.focus(); }
         } else {
             input.disabled = true;
             input.style.setProperty('background-color', 'var(--input-bg)', 'important');
@@ -559,33 +363,21 @@
                 const { Filesystem, Share } = window.Capacitor.Plugins;
                 const base64Data = pdfBase64Uri.split(',')[1] || pdfBase64Uri;
                 const savedFile = await Filesystem.writeFile({
-                    path: nombreArchivo,
-                    data: base64Data,
-                    directory: 'CACHE'
+                    path: nombreArchivo, data: base64Data, directory: 'CACHE'
                 });
-                await Share.share({
-                    title: nombreArchivo,
-                    url: savedFile.uri,
-                    dialogTitle: 'Abrir o Guardar Documento PDF'
-                });
+                await Share.share({ title: nombreArchivo, url: savedFile.uri, dialogTitle: 'Abrir o Guardar Documento PDF' });
                 return;
-            } catch (err) {
-                console.error('Error con Capacitor Share:', err);
-            }
+            } catch (err) { console.error('Error con Capacitor Share:', err); }
         }
         const link = document.createElement('a');
-        link.href = pdfBase64Uri;
-        link.download = nombreArchivo;
-        link.click();
+        link.href = pdfBase64Uri; link.download = nombreArchivo; link.click();
     }
 
     function avanzarCicloPrincipalAgua() {
         showConfirmModal("¿Deseas pasar la lectura y fecha actual del RECIBO PRINCIPAL a los campos anteriores?", () => {
-            const lecAct = document.getElementById('m_curr_r');
-            const lecAnt = document.getElementById('m_prev_r');
+            const lecAct = document.getElementById('m_curr_r'); const lecAnt = document.getElementById('m_prev_r');
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
-            const fecAct = document.getElementById('m_curr_d');
-            const fecAnt = document.getElementById('m_prev_d');
+            const fecAct = document.getElementById('m_curr_d'); const fecAnt = document.getElementById('m_prev_d');
             if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calc();
         });
@@ -594,22 +386,15 @@
     function avanzarCicloInquilinoAgua(id) {
         const nombreInq = document.getElementById(`i${id}_name`)?.value || `Inquilino #${id}`;
         showConfirmModal(`¿Deseas pasar la lectura y fecha actual de "${nombreInq.toUpperCase()}" a los campos anteriores?`, () => {
-            const lecAct = document.getElementById(`i${id}_curr_r`);
-            const lecAnt = document.getElementById(`i${id}_prev_r`);
+            const lecAct = document.getElementById(`i${id}_curr_r`); const lecAnt = document.getElementById(`i${id}_prev_r`);
             if(lecAct && lecAnt) { lecAnt.value = lecAct.value; lecAct.value = ''; }
-            const fecAct = document.getElementById(`i${id}_curr_d`);
-            const fecAnt = document.getElementById(`i${id}_prev_d`);
+            const fecAct = document.getElementById(`i${id}_curr_d`); const fecAnt = document.getElementById(`i${id}_prev_d`);
             if(fecAct && fecAnt) { fecAnt.value = fecAct.value; fecAct.value = ''; }
             calc();
         });
     }
 
-    function numeroAgua(valor, decimales = 6) {
-        const n = Number(valor);
-        if (!Number.isFinite(n)) return 0;
-        return Number(n.toFixed(decimales));
-    }
-
+    function numeroAgua(valor, decimales = 6) { const n = Number(valor); return Number.isFinite(n) ? Number(n.toFixed(decimales)) : 0; }
     function valorNumeroAgua(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
     function textoNumeroAgua(id) { return parseFloat(document.getElementById(id)?.textContent) || 0; }
 
@@ -620,8 +405,7 @@
     }
 
     function diasInclusivosAgua(inicio, fin) {
-        const a = fechaAguaLocal(inicio);
-        const b = fechaAguaLocal(fin);
+        const a = fechaAguaLocal(inicio); const b = fechaAguaLocal(fin);
         if (!a || !b) return 0;
         const d = Math.floor((b - a) / 864e5) + 1;
         return d > 0 ? d : 0;
@@ -652,20 +436,96 @@
         return estado;
     }
 
-    async function descargarJSONAgua(datos, nombreArchivo) {
-        const jsonString = JSON.stringify(datos, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = nombreArchivo;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    // =========================================================================
+    // COMUNICACIÓN DIRECTA CON GOOGLE SHEETS (SIN JSON MANUAL)
+    // =========================================================================
+
+    function construirObjetoUnificadoAgua() {
+        const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
+        const mPrevD = document.getElementById('m_prev_d').value;
+        const mCurrD = document.getElementById('m_curr_d').value;
+        const fechaActualObj = fechaAguaLocal(mCurrD);
+        const anio = fechaActualObj ? fechaActualObj.getFullYear() : null;
+        const nMeteredInput = document.getElementById('n_tenants_meter').value;
+        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
+        const hasNoMeter = document.getElementById('has_nometer').checked;
+        const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
+
+        const mPrevR = valorNumeroAgua('m_prev_r'); const mCurrR = valorNumeroAgua('m_curr_r');
+        const consumoTotal = Math.max(0, mCurrR - mPrevR);
+        const diasRecibo = diasInclusivosAgua(mPrevD, mCurrD);
+
+        const vWater = valorNumeroAgua('v_water'); const vSewer = valorNumeroAgua('v_sewer');
+        const vFixed = valorNumeroAgua('v_fixed'); const vMora = valorNumeroAgua('v_mora');
+        const vRedAnt = valorNumeroAgua('v_red_ant'); const vRedAct = valorNumeroAgua('v_red_act');
+        const igvPrincipal = 0.18 * (vWater + vSewer + vFixed);
+        const totalPrincipal = vWater + vSewer + vFixed + igvPrincipal + vMora + vRedAnt + vRedAct;
+        const tarifaAguaM3 = consumoTotal > 0 ? vWater / consumoTotal : 0;
+        const tarifaAlcantarilladoM3 = consumoTotal > 0 ? vSewer / consumoTotal : 0;
+
+        const inquilinos = []; let sumaConsumo = 0; let sumaMontos = 0;
+
+        for (let i = 1; i <= nMetered; i++) {
+            const nombre = document.getElementById(`i${i}_name`)?.value || `Inquilino #${i}`;
+            const iPrevR = valorNumeroAgua(`i${i}_prev_r`); const iCurrR = valorNumeroAgua(`i${i}_curr_r`);
+            const iPrevD = document.getElementById(`i${i}_prev_d`)?.value || ''; const iCurrD = document.getElementById(`i${i}_curr_d`)?.value || '';
+            const diasLectura = diasInclusivosAgua(iPrevD, iCurrD);
+            const consumoMedidor = Math.max(0, iCurrR - iPrevR); const consumoDiario = diasLectura > 0 ? consumoMedidor / diasLectura : 0;
+            const modo = document.getElementById(`i${i}_calc_mode`)?.value || 'auto';
+            const diasFacturados = modo === 'manual' ? Math.max(0, parseFloat(document.getElementById(`i${i}_manual_days`)?.value) || 0) : diasRecibo;
+
+            const consumoM3 = numeroAgua(textoNumeroAgua(`i${i}_res_cons`), 2);
+            const total = numeroAgua(textoNumeroAgua(`i${i}_pdf_total_val`), 2);
+            const fechaInicio = calcularInicioFacturadoAgua(mCurrD, diasFacturados);
+
+            sumaConsumo += consumoM3; sumaMontos += total;
+
+            inquilinos.push({
+                tipo_registro: 'inquilino', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, nombre: nombre, id_interno: i, con_medidor: true,
+                consumo_m3: consumoM3, dias_facturados: diasFacturados, monto_pagar: total, fecha_inicio: fechaInicio, fecha_fin: mCurrD, modo_calculo: modo,
+                lecturas: { lectura_anterior: numeroAgua(iPrevR), lectura_actual: numeroAgua(iCurrR), fecha_lectura_anterior: iPrevD, fecha_lectura_actual: iCurrD, dias_entre_lecturas: diasLectura, consumo_medidor_m3: numeroAgua(consumoMedidor), consumo_diario_m3: numeroAgua(consumoDiario) },
+                consumo: { m3_real: consumoM3, dias_facturados: diasFacturados, periodo_facturado_inicio: fechaInicio, periodo_facturado_fin: mCurrD },
+                calculos: { tarifa_agua_m3: numeroAgua(tarifaAguaM3), tarifa_alcantarillado_m3: numeroAgua(tarifaAlcantarilladoM3), agua: numeroAgua(textoNumeroAgua(`i${i}_val_water`)), alcantarillado: numeroAgua(textoNumeroAgua(`i${i}_val_sewer`)), cargo_fijo: numeroAgua(textoNumeroAgua(`i${i}_val_fixed`)), igv: numeroAgua(textoNumeroAgua(`i${i}_val_igv`)), mora: numeroAgua(textoNumeroAgua(`i${i}_val_mora`)), redondeo_anterior: numeroAgua(textoNumeroAgua(`i${i}_val_red_ant`)), redondeo_actual: numeroAgua(textoNumeroAgua(`i${i}_val_red_act`)), total_pagar: total }
+            });
+        }
+
+        if (hasNoMeter && document.getElementById('inometer_name')) {
+            const nombre = document.getElementById('inometer_name').value || 'Inquilino Sin Medidor';
+            const diasFacturados = diasRecibo; const consumoM3 = numeroAgua(textoNumeroAgua('inometer_res_cons'), 2);
+            const total = numeroAgua(textoNumeroAgua('inometer_pdf_total_val'), 2);
+            const fechaInicio = calcularInicioFacturadoAgua(mCurrD, diasFacturados);
+
+            sumaConsumo += consumoM3; sumaMontos += total;
+
+            inquilinos.push({
+                tipo_registro: 'inquilino', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, nombre: nombre, id_interno: 'nometer', con_medidor: false,
+                consumo_m3: consumoM3, dias_facturados: diasFacturados, monto_pagar: total, fecha_inicio: fechaInicio, fecha_fin: mCurrD, metodo_calculo: 'diferencia_recibo_principal_menos_inquilinos_con_medidor', lecturas: null,
+                consumo: { m3_real: consumoM3, dias_facturados: diasFacturados, periodo_facturado_inicio: fechaInicio, periodo_facturado_fin: mCurrD },
+                calculos: { tarifa_agua_m3: numeroAgua(tarifaAguaM3), tarifa_alcantarillado_m3: numeroAgua(tarifaAlcantarilladoM3), agua: numeroAgua(textoNumeroAgua('inometer_val_water')), alcantarillado: numeroAgua(textoNumeroAgua('inometer_val_sewer')), cargo_fijo: numeroAgua(textoNumeroAgua('inometer_val_fixed')), igv: numeroAgua(textoNumeroAgua('inometer_val_igv')), mora: numeroAgua(textoNumeroAgua('inometer_val_mora')), redondeo_anterior: numeroAgua(textoNumeroAgua('inometer_val_red_ant')), redondeo_actual: numeroAgua(textoNumeroAgua('inometer_val_red_act')), total_pagar: total }
+            });
+        }
+
+        return {
+            schema: 'agua_cayran_unificado', schema_version: '3.0', tipo: 'agua', mes: mes, mes_cobro: mes, anio: anio, periodo: { mes: mes, anio: anio }, fecha_exportacion: new Date().toISOString(),
+            estado_app: capturarEstadoAppAgua(),
+            configuracion: { num_medidores: nMetered, inquilino_sin_medidor: hasNoMeter, total_inquilinos: totalTenants, igv_porcentaje: 18 },
+            recibo_principal: { tipo_registro: 'recibo_principal', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, fecha_inicio: mPrevD, fecha_fin: mCurrD, dias_recibo: diasRecibo, lecturas: { lectura_anterior: numeroAgua(mPrevR), lectura_actual: numeroAgua(mCurrR), fecha_lectura_anterior: mPrevD, fecha_lectura_actual: mCurrD, consumo_m3: numeroAgua(consumoTotal) }, tarifas: { agua_por_m3: numeroAgua(tarifaAguaM3), alcantarillado_por_m3: numeroAgua(tarifaAlcantarilladoM3) }, importes: { agua: numeroAgua(vWater), alcantarillado: numeroAgua(vSewer), cargo_fijo: numeroAgua(vFixed), igv: numeroAgua(igvPrincipal), mora: numeroAgua(vMora), redondeo_anterior: numeroAgua(vRedAnt), redondeo_actual: numeroAgua(vRedAct), total_pagar: numeroAgua(totalPrincipal, 2) } },
+            inquilinos: inquilinos,
+            resumen: { tipo_registro: 'resumen', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, consumo_total_recibo_m3: numeroAgua(consumoTotal, 2), consumo_total_distribuido_m3: numeroAgua(sumaConsumo, 2), diferencia_consumo_m3: numeroAgua(consumoTotal - sumaConsumo, 2), total_recibo_principal: numeroAgua(totalPrincipal, 2), total_distribuido_inquilinos: numeroAgua(sumaMontos, 2), diferencia_montos: numeroAgua(totalPrincipal - sumaMontos, 2), cantidad_inquilinos: totalTenants }
+        };
     }
-    
-    // Función para guardar en NUBE (Google Sheets)
-    async function guardarEnNubeYLocal(jsonUnificado, nombreArchivo) {
+
+    async function guardarEnGoogleSheetsAgua() {
+        calc();
+        const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
+        const mCurrD = document.getElementById('m_curr_d').value;
+        if (!mes) { showAlertModal('Selecciona el MES DE FACTURACIÓN antes de guardar en la nube.', 'error'); return; }
+        if (!mCurrD) { showAlertModal('Es necesario ingresar la Fecha Actual del recibo principal.', 'error'); return; }
+
+        const jsonUnificado = construirObjetoUnificadoAgua();
+
         try {
-            showAlertModal("Guardando en Google Sheets...", "info");
+            showAlertModal("Guardando directamente en Google Sheets...", "info");
             let respuesta = await fetch(URL_APPS_SCRIPT, {
                 method: 'POST',
                 body: JSON.stringify(jsonUnificado)
@@ -673,7 +533,7 @@
             let resultado = await respuesta.json();
             
             if (resultado.status === "success") {
-                showAlertModal("¡Datos guardados y sincronizados en Google Sheets con éxito!", "success");
+                showAlertModal("¡Datos guardados en Google Sheets con éxito!", "success");
             } else {
                 showAlertModal("Error en la nube: " + resultado.message, "error");
             }
@@ -683,7 +543,6 @@
         }
     }
     
-    // Función para Cargar desde Google Sheets
     async function cargarDesdeGoogleSheets() {
         const mesSeleccionado = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
         if (!mesSeleccionado) {
@@ -715,98 +574,8 @@
         }
     }
 
-    function guardarEstadoApp() {
-        calc();
-        const mes = String(document.getElementById('m_mes').value || '').trim().toUpperCase();
-        const mPrevD = document.getElementById('m_prev_d').value;
-        const mCurrD = document.getElementById('m_curr_d').value;
-        if (!mes) { showAlertModal('Selecciona el MES antes de guardar.', 'error'); return; }
-        if (!mCurrD) { showAlertModal('Es necesario ingresar la Fecha Actual del recibo principal.', 'error'); return; }
-
-        const fechaActualObj = fechaAguaLocal(mCurrD);
-        const anio = fechaActualObj ? fechaActualObj.getFullYear() : null;
-        const nMeteredInput = document.getElementById('n_tenants_meter').value;
-        const nMetered = nMeteredInput === '' ? 0 : (parseInt(nMeteredInput) || 0);
-        const hasNoMeter = document.getElementById('has_nometer').checked;
-        const totalTenants = nMetered + (hasNoMeter ? 1 : 0);
-
-        const mPrevR = valorNumeroAgua('m_prev_r');
-        const mCurrR = valorNumeroAgua('m_curr_r');
-        const consumoTotal = Math.max(0, mCurrR - mPrevR);
-        const diasRecibo = diasInclusivosAgua(mPrevD, mCurrD);
-
-        const vWater = valorNumeroAgua('v_water');
-        const vSewer = valorNumeroAgua('v_sewer');
-        const vFixed = valorNumeroAgua('v_fixed');
-        const vMora = valorNumeroAgua('v_mora');
-        const vRedAnt = valorNumeroAgua('v_red_ant');
-        const vRedAct = valorNumeroAgua('v_red_act');
-        const igvPrincipal = 0.18 * (vWater + vSewer + vFixed);
-        const totalPrincipal = vWater + vSewer + vFixed + igvPrincipal + vMora + vRedAnt + vRedAct;
-        const tarifaAguaM3 = consumoTotal > 0 ? vWater / consumoTotal : 0;
-        const tarifaAlcantarilladoM3 = consumoTotal > 0 ? vSewer / consumoTotal : 0;
-
-        const inquilinos = [];
-        let sumaConsumo = 0; let sumaMontos = 0;
-
-        for (let i = 1; i <= nMetered; i++) {
-            const nombre = document.getElementById(`i${i}_name`)?.value || `Inquilino #${i}`;
-            const iPrevR = valorNumeroAgua(`i${i}_prev_r`);
-            const iCurrR = valorNumeroAgua(`i${i}_curr_r`);
-            const iPrevD = document.getElementById(`i${i}_prev_d`)?.value || '';
-            const iCurrD = document.getElementById(`i${i}_curr_d`)?.value || '';
-            const diasLectura = diasInclusivosAgua(iPrevD, iCurrD);
-            const consumoMedidor = Math.max(0, iCurrR - iPrevR);
-            const consumoDiario = diasLectura > 0 ? consumoMedidor / diasLectura : 0;
-            const modo = document.getElementById(`i${i}_calc_mode`)?.value || 'auto';
-            const diasFacturados = modo === 'manual' ? Math.max(0, parseFloat(document.getElementById(`i${i}_manual_days`)?.value) || 0) : diasRecibo;
-
-            const consumoM3 = numeroAgua(textoNumeroAgua(`i${i}_res_cons`), 2);
-            const total = numeroAgua(textoNumeroAgua(`i${i}_pdf_total_val`), 2);
-            const fechaInicio = calcularInicioFacturadoAgua(mCurrD, diasFacturados);
-
-            sumaConsumo += consumoM3; sumaMontos += total;
-
-            inquilinos.push({
-                tipo_registro: 'inquilino', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, nombre: nombre, id_interno: i, con_medidor: true,
-                consumo_m3: consumoM3, dias_facturados: diasFacturados, monto_pagar: total, fecha_inicio: fechaInicio, fecha_fin: mCurrD, modo_calculo: modo,
-                lecturas: { lectura_anterior: numeroAgua(iPrevR), lectura_actual: numeroAgua(iCurrR), fecha_lectura_anterior: iPrevD, fecha_lectura_actual: iCurrD, dias_entre_lecturas: diasLectura, consumo_medidor_m3: numeroAgua(consumoMedidor), consumo_diario_m3: numeroAgua(consumoDiario) },
-                consumo: { m3_real: consumoM3, dias_facturados: diasFacturados, periodo_facturado_inicio: fechaInicio, periodo_facturado_fin: mCurrD },
-                calculos: { tarifa_agua_m3: numeroAgua(tarifaAguaM3), tarifa_alcantarillado_m3: numeroAgua(tarifaAlcantarilladoM3), agua: numeroAgua(textoNumeroAgua(`i${i}_val_water`)), alcantarillado: numeroAgua(textoNumeroAgua(`i${i}_val_sewer`)), cargo_fijo: numeroAgua(textoNumeroAgua(`i${i}_val_fixed`)), igv: numeroAgua(textoNumeroAgua(`i${i}_val_igv`)), mora: numeroAgua(textoNumeroAgua(`i${i}_val_mora`)), redondeo_anterior: numeroAgua(textoNumeroAgua(`i${i}_val_red_ant`)), redondeo_actual: numeroAgua(textoNumeroAgua(`i${i}_val_red_act`)), total_pagar: total }
-            });
-        }
-
-        if (hasNoMeter && document.getElementById('inometer_name')) {
-            const nombre = document.getElementById('inometer_name').value || 'Inquilino Sin Medidor';
-            const diasFacturados = diasRecibo;
-            const consumoM3 = numeroAgua(textoNumeroAgua('inometer_res_cons'), 2);
-            const total = numeroAgua(textoNumeroAgua('inometer_pdf_total_val'), 2);
-            const fechaInicio = calcularInicioFacturadoAgua(mCurrD, diasFacturados);
-
-            sumaConsumo += consumoM3; sumaMontos += total;
-
-            inquilinos.push({
-                tipo_registro: 'inquilino', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, nombre: nombre, id_interno: 'nometer', con_medidor: false,
-                consumo_m3: consumoM3, dias_facturados: diasFacturados, monto_pagar: total, fecha_inicio: fechaInicio, fecha_fin: mCurrD, metodo_calculo: 'diferencia_recibo_principal_menos_inquilinos_con_medidor', lecturas: null,
-                consumo: { m3_real: consumoM3, dias_facturados: diasFacturados, periodo_facturado_inicio: fechaInicio, periodo_facturado_fin: mCurrD },
-                calculos: { tarifa_agua_m3: numeroAgua(tarifaAguaM3), tarifa_alcantarillado_m3: numeroAgua(tarifaAlcantarilladoM3), agua: numeroAgua(textoNumeroAgua('inometer_val_water')), alcantarillado: numeroAgua(textoNumeroAgua('inometer_val_sewer')), cargo_fijo: numeroAgua(textoNumeroAgua('inometer_val_fixed')), igv: numeroAgua(textoNumeroAgua('inometer_val_igv')), mora: numeroAgua(textoNumeroAgua('inometer_val_mora')), redondeo_anterior: numeroAgua(textoNumeroAgua('inometer_val_red_ant')), redondeo_actual: numeroAgua(textoNumeroAgua('inometer_val_red_act')), total_pagar: total }
-            });
-        }
-
-        const jsonUnificado = {
-            schema: 'agua_cayran_unificado', schema_version: '3.0', tipo: 'agua', mes: mes, mes_cobro: mes, anio: anio, periodo: { mes: mes, anio: anio }, fecha_exportacion: new Date().toISOString(),
-            estado_app: capturarEstadoAppAgua(),
-            configuracion: { num_medidores: nMetered, inquilino_sin_medidor: hasNoMeter, total_inquilinos: totalTenants, igv_porcentaje: 18 },
-            recibo_principal: { tipo_registro: 'recibo_principal', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, fecha_inicio: mPrevD, fecha_fin: mCurrD, dias_recibo: diasRecibo, lecturas: { lectura_anterior: numeroAgua(mPrevR), lectura_actual: numeroAgua(mCurrR), fecha_lectura_anterior: mPrevD, fecha_lectura_actual: mCurrD, consumo_m3: numeroAgua(consumoTotal) }, tarifas: { agua_por_m3: numeroAgua(tarifaAguaM3), alcantarillado_por_m3: numeroAgua(tarifaAlcantarilladoM3) }, importes: { agua: numeroAgua(vWater), alcantarillado: numeroAgua(vSewer), cargo_fijo: numeroAgua(vFixed), igv: numeroAgua(igvPrincipal), mora: numeroAgua(vMora), redondeo_anterior: numeroAgua(vRedAnt), redondeo_actual: numeroAgua(vRedAct), total_pagar: numeroAgua(totalPrincipal, 2) } },
-            inquilinos: inquilinos,
-            resumen: { tipo_registro: 'resumen', tipo_servicio: 'agua', mes: mes, mes_cobro: mes, anio: anio, consumo_total_recibo_m3: numeroAgua(consumoTotal, 2), consumo_total_distribuido_m3: numeroAgua(sumaConsumo, 2), diferencia_consumo_m3: numeroAgua(consumoTotal - sumaConsumo, 2), total_recibo_principal: numeroAgua(totalPrincipal, 2), total_distribuido_inquilinos: numeroAgua(sumaMontos, 2), diferencia_montos: numeroAgua(totalPrincipal - sumaMontos, 2), cantidad_inquilinos: totalTenants }
-        };
-
-        guardarEnNubeYLocal(jsonUnificado, `DATA AGUA ${mes} - ${anio || 'SIN_ANIO'}.json`);
-    }
-
     function cargarEstadoLegacyAgua(estado) {
-        if (!estado || typeof estado !== 'object' || Array.isArray(estado)) throw new Error('Estado de Agua Cayrán no válido.');
+        if (!estado || typeof estado !== 'object' || Array.isArray(estado)) return;
         if (estado.n_tenants_meter !== undefined) document.getElementById('n_tenants_meter').value = estado.n_tenants_meter;
         if (estado.has_nometer !== undefined) document.getElementById('has_nometer').checked = Boolean(estado.has_nometer);
         render();
@@ -819,28 +588,6 @@
         const nMetered = parseInt(document.getElementById('n_tenants_meter').value) || 0;
         for (let i = 1; i <= nMetered; i++) if (document.getElementById(`i${i}_calc_mode`)) toggleMode(i, false);
         calc();
-    }
-
-    function cargarEstadoApp(event) {
-        const input = event.target; const file = input.files && input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const datos = JSON.parse(e.target.result);
-                if (datos && typeof datos === 'object' && !Array.isArray(datos) && datos.schema === 'agua_cayran_unificado' && datos.estado_app) {
-                    cargarEstadoLegacyAgua(datos.estado_app);
-                    showAlertModal('Has restaurado los datos de agua correctamente', 'success');
-                } else if (datos && typeof datos === 'object' && !Array.isArray(datos)) {
-                    cargarEstadoLegacyAgua(datos);
-                    showAlertModal('Has restaurado los datos de agua correctamente', 'success');
-                } else { throw new Error('Formato JSON no reconocido.'); }
-            } catch (error) { 
-                console.error(error); 
-                showAlertModal('Error al importar: ' + (error && error.message ? error.message : error), 'error'); 
-            } finally { input.value = ''; }
-        };
-        reader.readAsText(file);
     }
 
     function calc() {
@@ -1295,7 +1042,6 @@
         try { const pdfBase64 = await html2pdf().set(opt).from(document.getElementById('calculos-captura')).outputPdf('datauristring'); await guardarOCompartirPDF(exportFileName, pdfBase64); } finally { tempCont.innerHTML = ''; }
     }
 
-    // Inicialización limpia sin autoguardados locales en segundo plano
     window.onload = function() {
         render();
         calc();
