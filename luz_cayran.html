@@ -375,6 +375,9 @@
         if (!mes) { showAlertModal("Selecciona el MES DE FACTURACIÓN antes de guardar en la nube.", "error"); return; }
 
         const jsonUnificado = construirObjetoUnificadoLuz();
+        
+        // --- AGREGA ESTA LÍNEA CON TU CONTRASEÑA ---
+        jsonUnificado.token = "47384747";
 
         try {
             showAlertModal("Guardando directamente en Google Sheets...", "info");
@@ -387,7 +390,7 @@
             if (resultado.status === "success") {
                 showAlertModal("¡Datos guardados en Google Sheets con éxito!", "success");
             } else {
-                showAlertModal("Error en la nube: " + resultado.message, "error");
+                showAlertModal("Error de seguridad o en la nube: " + resultado.message, "error");
             }
         } catch (error) {
             console.error(error);
